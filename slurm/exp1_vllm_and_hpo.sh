@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=exp1-hpo
 #SBATCH --partition=alldlc2_gpu-h200
-#SBATCH --gpus=2
+#SBATCH --gpus=1
 #SBATCH --time=06:00:00
 #SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp1_%j.log
 #SBATCH --requeue
@@ -42,9 +42,9 @@ echo "GPUs:      $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null
 echo "Results:   $RESULTS_DIR"
 echo "=============================================="
 
-# Start vLLM server on GPU 0 in background
-echo "Starting vLLM server on GPU 0..."
-CUDA_VISIBLE_DEVICES=0 vllm serve "$MODEL_DIR" \
+# Start vLLM server in background (shares GPU with training)
+echo "Starting vLLM server..."
+vllm serve "$MODEL_DIR" \
     --host 127.0.0.1 --port $VLLM_PORT \
     --tensor-parallel-size 1 \
     --dtype bfloat16 \
@@ -71,10 +71,9 @@ if ! curl -s "http://127.0.0.1:${VLLM_PORT}/health" > /dev/null 2>&1; then
     exit 1
 fi
 
-# Run HPO on GPU 1
+# Run HPO (shares GPU with vLLM — they alternate, not concurrent)
 export OPENAI_API_BASE="http://127.0.0.1:${VLLM_PORT}/v1"
 export OPENAI_API_KEY="dummy"
-export CUDA_VISIBLE_DEVICES=1
 
 echo ""
 echo "Starting HPO with llm_greedy backend..."
