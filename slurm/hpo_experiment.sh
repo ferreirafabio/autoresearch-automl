@@ -1,13 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=ar-automl-hpo
-#SBATCH --partition=alldlc2
-#SBATCH --gres=gpu:1
-#SBATCH --mem=64G
-#SBATCH --cpus-per-task=4
+#SBATCH --partition=alldlc2_gpu-h200
+#SBATCH --gpus=1
 #SBATCH --time=12:00:00
 #SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/hpo_%j.log
+#SBATCH --requeue
 
-source /work/dlclarge1/ferreira-autoresearch-automl/venvs/ar-automl/bin/activate
+set -euo pipefail
+
+source /work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl/.venv/bin/activate
 cd /work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl
 
 # Point to self-hosted LLM (vLLM server running on another node)

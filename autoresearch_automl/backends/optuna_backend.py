@@ -124,6 +124,52 @@ class OptunaBackend(HPOBackend):
         except ValueError:
             return []
 
+    def replay(self, history: list[tuple[dict, float, dict]]) -> None:
+        """Replay completed trials into the Optuna study via add_trial()."""
+        # If using RDB storage with existing trials, skip replay
+        if self._storage and self._study and len(self._study.trials) > 0:
+            logger.info("Optuna study already has %d trials from storage, skipping replay", len(self._study.trials))
+            return
+
+        distributions = self._build_distributions()
+        for config, budget, results in history:
+            values = [results.get(obj, float("inf")) for obj in self._objectives]
+            if any(v == float("inf") for v in values):
+                state = optuna.trial.TrialState.FAIL
+                trial_values = None
+            else:
+                state = optuna.trial.TrialState.COMPLETE
+                trial_values = values if len(values) > 1 else [values[0]]
+
+            frozen = optuna.trial.create_trial(
+                params=config,
+                distributions=distributions,
+                values=trial_values,
+                state=state,
+            )
+            self._study.add_trial(frozen)
+        logger.info("Replayed %d trials into Optuna study", len(history))
+
+    def _build_distributions(self) -> dict:
+        """Build Optuna distribution objects from the optuna mapping."""
+        distributions = {}
+        for hp_name, mapping in self._optuna_mapping.items():
+            method = mapping["method"]
+            kw = mapping["kwargs"]
+            if method == "suggest_float":
+                distributions[hp_name] = optuna.distributions.FloatDistribution(
+                    low=kw["low"], high=kw["high"], log=kw.get("log", False),
+                )
+            elif method == "suggest_int":
+                distributions[hp_name] = optuna.distributions.IntDistribution(
+                    low=kw["low"], high=kw["high"], log=kw.get("log", False),
+                )
+            elif method == "suggest_categorical":
+                distributions[hp_name] = optuna.distributions.CategoricalDistribution(
+                    choices=kw["choices"],
+                )
+        return distributions
+
     @property
     def study(self) -> optuna.Study | None:
         """Expose the Optuna study for advanced usage (plotting, etc.)."""

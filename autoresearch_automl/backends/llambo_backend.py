@@ -127,6 +127,43 @@ class LLAMBOBackend(HPOBackend):
         except ValueError:
             return []
 
+    def replay(self, history: list[tuple[dict, float, dict]]) -> None:
+        """Replay completed trials into the LLAMBO/Optuna study."""
+        distributions = {}
+        for hp_name, mapping in self._optuna_mapping.items():
+            method = mapping["method"]
+            kw = mapping["kwargs"]
+            if method == "suggest_float":
+                distributions[hp_name] = optuna.distributions.FloatDistribution(
+                    low=kw["low"], high=kw["high"], log=kw.get("log", False),
+                )
+            elif method == "suggest_int":
+                distributions[hp_name] = optuna.distributions.IntDistribution(
+                    low=kw["low"], high=kw["high"], log=kw.get("log", False),
+                )
+            elif method == "suggest_categorical":
+                distributions[hp_name] = optuna.distributions.CategoricalDistribution(
+                    choices=kw["choices"],
+                )
+
+        for config, budget, results in history:
+            val = results.get(self._objectives[0], float("inf"))
+            if val == float("inf"):
+                state = optuna.trial.TrialState.FAIL
+                trial_values = None
+            else:
+                state = optuna.trial.TrialState.COMPLETE
+                trial_values = [val]
+
+            frozen = optuna.trial.create_trial(
+                params=config,
+                distributions=distributions,
+                values=trial_values,
+                state=state,
+            )
+            self._study.add_trial(frozen)
+        logger.info("Replayed %d trials into LLAMBO study", len(history))
+
     @property
     def study(self) -> optuna.Study | None:
         return self._study

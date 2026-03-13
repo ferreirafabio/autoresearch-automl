@@ -60,6 +60,19 @@ class HPOBackend(ABC):
         For multi-objective: Pareto front.
         """
 
+    def replay(self, history: list[tuple[dict[str, Any], float, dict[str, float]]]) -> None:
+        """Replay completed trials to reconstruct optimizer state after preemption.
+
+        Default implementation calls tell() for each trial in order.
+        Backends with native checkpointing or ask-before-tell requirements
+        should override this method.
+
+        Args:
+            history: List of (config, budget, results) tuples in chronological order.
+        """
+        for config, budget, results in history:
+            self.tell(config, budget, results)
+
     @property
     @abstractmethod
     def name(self) -> str:

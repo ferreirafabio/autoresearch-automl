@@ -99,6 +99,22 @@ class SMACBackend(HPOBackend):
         self._facade.tell(self._pending_info, value)
         self._results.append((config, budget, results))
 
+    def replay(self, history: list[tuple[dict, float, dict]]) -> None:
+        """Replay trials into SMAC's runhistory."""
+        from smac import TrialInfo, TrialValue
+        from ConfigSpace import Configuration
+
+        for config_dict, budget, results in history:
+            try:
+                config = Configuration(self._space, values=config_dict)
+                cost = [results.get(o, float("inf")) for o in self._objectives]
+                info = TrialInfo(config=config, seed=0, budget=budget if self._multi_fidelity else None)
+                value = TrialValue(cost=cost)
+                self._facade.runhistory.add(info, value)
+            except Exception as e:
+                logger.warning("Failed to replay trial into SMAC: %s", e)
+        logger.info("Replayed %d trials into SMAC runhistory", len(history))
+
     def incumbents(self) -> list[dict[str, Any]]:
         if self._facade is None:
             return []

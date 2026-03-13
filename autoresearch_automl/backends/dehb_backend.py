@@ -81,6 +81,19 @@ class DEHBBackend(HPOBackend):
         self._dehb.tell(self._pending_job, result)
         self._results.append((config, budget, results))
 
+    def replay(self, history: list[tuple[dict, float, dict]]) -> None:
+        """Replay trials into DEHB by doing ask-then-tell with historical results."""
+        for config_dict, budget, results in history:
+            try:
+                job_info = self._dehb.ask()
+                cost = results.get(self._objectives[0], float("inf"))
+                result = {"fitness": cost, "cost": budget}
+                self._dehb.tell(job_info, result)
+            except Exception as e:
+                logger.warning("Failed to replay trial into DEHB: %s", e)
+        self._results.extend(history)
+        logger.info("Replayed %d trials into DEHB", len(history))
+
     def incumbents(self) -> list[dict[str, Any]]:
         if self._dehb is None:
             return []

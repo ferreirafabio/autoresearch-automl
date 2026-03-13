@@ -58,6 +58,8 @@ def main(verbose: bool):
 @click.option("--config-file", type=click.Path(exists=True), default=None, help="YAML config file")
 @click.option("--gpu", type=int, default=None, help="GPU device index")
 @click.option("--storage", default=None, help="Optuna storage URL for parallel execution")
+@click.option("--llm-model", default=None, help="LLM model name for LLM-based backends (e.g. Qwen/Qwen3.5-9B)")
+@click.option("--resume/--no-resume", default=True, help="Auto-resume from existing trials.jsonl (default: on)")
 def run(
     backend: str,
     trials: int,
@@ -70,6 +72,8 @@ def run(
     config_file: str | None,
     gpu: int | None,
     storage: str | None,
+    llm_model: str | None,
+    resume: bool,
 ):
     """Run HPO optimization loop."""
     # Load config file if provided
@@ -81,11 +85,14 @@ def run(
         budget_min = file_cfg.get("budget_min", budget_min)
         budget_max = file_cfg.get("budget_max", budget_max)
         seed = file_cfg.get("seed", seed)
+        llm_model = file_cfg.get("llm_model", llm_model)
 
     # Build backend
     backend_kwargs = {}
     if backend == "optuna" and storage:
         backend_kwargs["storage"] = storage
+    if llm_model and backend in ("llm_greedy", "llambo"):
+        backend_kwargs["model"] = llm_model
     hpo_backend = _load_backend(backend, **backend_kwargs)
 
     train_py_path = Path(train_py)
@@ -102,6 +109,8 @@ def run(
         results_dir=Path(results_dir),
         gpu_device=gpu,
         hybrid_mode=hybrid_mode,
+        llm_model=llm_model,
+        resume=resume,
     )
 
     runner = Runner(run_config)
@@ -116,12 +125,17 @@ def run(
 @click.option("--seed", "-s", default=0, help="Random seed")
 @click.option("--train-py", default="autoresearch/train.py", help="Path to train.py")
 @click.option("--results-dir", default="results", help="Results output directory")
-def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir: str):
+@click.option("--llm-model", default=None, help="LLM model name for LLM-based backends (e.g. Qwen/Qwen3.5-9B)")
+@click.option("--resume/--no-resume", default=True, help="Auto-resume from existing trials.jsonl (default: on)")
+def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir: str, llm_model: str | None, resume: bool):
     """Run a benchmark scenario."""
     from autoresearch_automl.benchmarks.scenarios import get_scenario
 
     sc = get_scenario(scenario)
-    hpo_backend = _load_backend(method)
+    backend_kwargs = {}
+    if llm_model and method in ("llm_greedy", "llambo"):
+        backend_kwargs["model"] = llm_model
+    hpo_backend = _load_backend(method, **backend_kwargs)
 
     train_py_path = Path(train_py)
     if not train_py_path.exists():
@@ -138,6 +152,8 @@ def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir:
         results_dir=Path(results_dir) / sc.name / method / f"seed_{seed}",
         hybrid_mode=sc.hybrid_mode,
         structural_interval=sc.structural_interval,
+        llm_model=llm_model,
+        resume=resume,
     )
 
     runner = Runner(run_config)

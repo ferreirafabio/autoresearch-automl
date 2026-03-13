@@ -91,6 +91,13 @@ class BOHBBackend(HPOBackend):
             logger.debug("BOHB new_result failed: %s", e)
         self._results.append((config, budget, results))
 
+    def replay(self, history: list[tuple[dict, float, dict]]) -> None:
+        """Replay trials into BOHB, restoring sampler state and budget index."""
+        for config, budget, results in history:
+            self.tell(config, budget, results)
+        self._budget_idx = len(history)
+        logger.info("Replayed %d trials into BOHB, budget_idx=%d", len(history), self._budget_idx)
+
     def incumbents(self) -> list[dict[str, Any]]:
         if not self._results:
             return []

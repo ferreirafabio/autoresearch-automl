@@ -35,6 +35,10 @@ class RunConfig:
     hybrid_mode: str | None = None  # "A", "B", "C", or None
     structural_interval: int = 20  # trials between structural mutations (Mode B)
     warmstart_configs: int = 5  # number of warm-start configs (Mode C)
+    # LLM model for hybrid modules (warmstart, structural mutator)
+    llm_model: str | None = None
+    # Auto-resume from existing trials.jsonl
+    resume: bool = True
 
 
 class Runner:
@@ -73,13 +77,18 @@ class Runner:
             seed=cfg.seed,
         )
 
-        # Optional: warm-start with LLM configs (Mode C)
-        if cfg.hybrid_mode == "C":
+        # Resume from checkpoint if enabled
+        start_trial_id = 0
+        if cfg.resume:
+            start_trial_id = self._resume_from_checkpoint()
+
+        # Optional: warm-start with LLM configs (Mode C) — skip if resuming
+        if cfg.hybrid_mode == "C" and start_trial_id == 0:
             self._warmstart(space, cfg.backend)
 
         # Main loop
         start_time = time.time()
-        for trial_id in range(cfg.n_trials):
+        for trial_id in range(start_trial_id, cfg.n_trials):
             logger.info("=== Trial %d/%d ===", trial_id + 1, cfg.n_trials)
 
             # Mode B: structural mutation at intervals
@@ -142,11 +151,35 @@ class Runner:
         logger.info("Run complete: %s", summary)
         return summary
 
+    def _resume_from_checkpoint(self) -> int:
+        """Replay completed trials into backend, return the next trial_id.
+
+        Returns 0 if no checkpoint found.
+        """
+        state = self.results_db.resume_state()
+        if state["n_completed"] == 0:
+            return 0
+
+        history = self.results_db.replay_history()
+        self.config.backend.replay(history)
+        self.best_val_bpb = state["best_val_bpb"]
+        self.generation = state["max_generation"]
+
+        next_id = state["next_trial_id"]
+        logger.info(
+            "Resumed: %d completed trials, best_val_bpb=%.4f, generation=%d, resuming from trial %d",
+            state["n_completed"], self.best_val_bpb, self.generation, next_id,
+        )
+        return next_id
+
     def _warmstart(self, space, backend: HPOBackend) -> None:
         """Warm-start HPO with LLM-generated initial configs."""
         from autoresearch_automl.hybrid.warmstart import WarmStartOracle
 
-        oracle = WarmStartOracle()
+        ws_kwargs = {}
+        if self.config.llm_model:
+            ws_kwargs["model"] = self.config.llm_model
+        oracle = WarmStartOracle(**ws_kwargs)
         configs = oracle.generate_initial_configs(
             space, n_configs=self.config.warmstart_configs, budget=self.config.budget_max,
         )
@@ -170,7 +203,10 @@ class Runner:
         """Apply a structural mutation via LLM."""
         from autoresearch_automl.hybrid.structural_mutator import StructuralMutator
 
-        mutator = StructuralMutator()
+        mut_kwargs = {}
+        if self.config.llm_model:
+            mut_kwargs["model"] = self.config.llm_model
+        mutator = StructuralMutator(**mut_kwargs)
         mutation = mutator.propose_mutation(
             train_py_path=self.config.train_py_path,
             best_val_bpb=self.best_val_bpb,
