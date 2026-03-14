@@ -57,7 +57,7 @@ def plot_exp1(results_dir: Path, output_path: Path):
         )
 
     ax.set_xlabel("Trial", fontsize=12)
-    ax.set_ylabel("Best val_bpb", fontsize=12)
+    ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
     ax.set_title("Exp1: LLM Model Size for HP Suggestions", fontsize=13)
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     ax.legend(fontsize=11)
@@ -105,7 +105,7 @@ def plot_exp2(results_dir: Path, output_path: Path):
         ax.fill_between(x, mean - std, mean + std, color=style["color"], alpha=0.15)
 
     ax.set_xlabel("Trial", fontsize=12)
-    ax.set_ylabel("Best val_bpb", fontsize=12)
+    ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
     ax.set_title("Exp2: TPE vs LLAMBO", fontsize=13)
     ax.set_ylim(0.98, 1.15)
     ax.set_xlim(0, 100)
