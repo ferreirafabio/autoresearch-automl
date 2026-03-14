@@ -47,7 +47,19 @@ class ResultsDB:
     def add(self, record: TrialRecord) -> None:
         """Append a trial record."""
         with open(self.db_path, "a") as f:
-            f.write(json.dumps(asdict(record)) + "\n")
+            f.write(json.dumps(asdict(record), default=self._json_default) + "\n")
+
+    @staticmethod
+    def _json_default(obj: object) -> object:
+        """Handle numpy types for JSON serialization."""
+        import numpy as np
+        if isinstance(obj, (np.integer,)):
+            return int(obj)
+        if isinstance(obj, (np.floating,)):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
     def load_all(self) -> list[TrialRecord]:
         """Load all trial records."""

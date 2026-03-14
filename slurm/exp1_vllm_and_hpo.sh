@@ -32,6 +32,10 @@ fi
 source "${PROJECT_DIR}/.venv/bin/activate"
 cd "$PROJECT_DIR"
 
+# Bypass cluster HTTP proxy for localhost connections
+export no_proxy="127.0.0.1,localhost"
+export NO_PROXY="127.0.0.1,localhost"
+
 echo "=============================================="
 echo "Experiment 1: LLM Model Size Comparison"
 echo "=============================================="
@@ -42,19 +46,32 @@ echo "GPUs:      $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null
 echo "Results:   $RESULTS_DIR"
 echo "=============================================="
 
+# Set vLLM GPU memory fraction based on model size
+# H200 = 140GB; training needs ~50-85GB depending on config
+case "$MODEL_NAME" in
+    *0.8B*)  VLLM_MEM=0.10 ;;  # ~14GB for 0.8B model + KV cache
+    *9B*)    VLLM_MEM=0.20 ;;  # ~28GB for 9B model + KV cache
+    *35B*)   VLLM_MEM=0.55 ;;  # ~77GB for 35B MoE model + KV cache
+    *)       VLLM_MEM=0.30 ;;
+esac
+echo "vLLM GPU memory utilization: ${VLLM_MEM}"
+
 # Start vLLM server in background (shares GPU with training)
 echo "Starting vLLM server..."
 vllm serve "$MODEL_DIR" \
     --host 127.0.0.1 --port $VLLM_PORT \
     --tensor-parallel-size 1 \
     --dtype bfloat16 \
-    --max-model-len 4096 &
+    --max-model-len 4096 \
+    --gpu-memory-utilization $VLLM_MEM \
+    --enforce-eager &
 VLLM_PID=$!
 
-# Wait for vLLM to be ready
+# Wait for vLLM to be ready (use --noproxy to bypass Squid, check HTTP 200)
 echo "Waiting for vLLM server to start..."
-for i in $(seq 1 120); do
-    if curl -s "http://127.0.0.1:${VLLM_PORT}/health" > /dev/null 2>&1; then
+for i in $(seq 1 300); do
+    STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
+    if [ "$STATUS" = "200" ]; then
         echo "vLLM server ready after ${i}s"
         break
     fi
@@ -65,14 +82,15 @@ for i in $(seq 1 120); do
     sleep 1
 done
 
-if ! curl -s "http://127.0.0.1:${VLLM_PORT}/health" > /dev/null 2>&1; then
-    echo "vLLM server failed to start within 120s"
+STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
+if [ "$STATUS" != "200" ]; then
+    echo "vLLM server failed to start within 300s (status: $STATUS)"
     kill $VLLM_PID 2>/dev/null
     exit 1
 fi
 
 # Run HPO (shares GPU with vLLM — they alternate, not concurrent)
-export OPENAI_API_BASE="http://127.0.0.1:${VLLM_PORT}/v1"
+export OPENAI_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1"
 export OPENAI_API_KEY="dummy"
 
 echo ""
@@ -82,7 +100,7 @@ python -m autoresearch_automl.cli run \
     --trials $TRIALS \
     --budget-max 300 \
     --seed 0 \
-    --llm-model "$MODEL_NAME" \
+    --llm-model "$MODEL_DIR" \
     --results-dir "$RESULTS_DIR" \
     --resume
 

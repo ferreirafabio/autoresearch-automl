@@ -113,6 +113,15 @@ class ConfigInjector:
     @staticmethod
     def _format_value(value: object) -> str:
         """Format a Python value for source code insertion."""
+        import numpy as np
+        # Convert numpy types to native Python first
+        if isinstance(value, np.integer):
+            value = int(value)
+        elif isinstance(value, np.floating):
+            value = float(value)
+        elif isinstance(value, (np.str_, np.bytes_)):
+            value = str(value)
+
         if isinstance(value, bool):
             return "True" if value else "False"
         if isinstance(value, int):

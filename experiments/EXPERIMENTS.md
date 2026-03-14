@@ -26,9 +26,9 @@ Default hyperparameters from train.py (DEPTH=8, ASPECT_RATIO=64, MATRIX_LR=0.04,
 
 | Run | LLM Model | Params | VRAM (bf16) | Backend | Trials | Status |
 |-----|-----------|--------|-------------|---------|--------|--------|
-| 1a | Qwen3.5-0.8B | 0.8B dense | ~2GB | llm_greedy | 30 | pending |
-| 1b | Qwen3.5-9B | 9B dense | ~18GB | llm_greedy | 30 | pending |
-| 1c | Qwen3.5-35B-A3B | 35B MoE (3B active) | ~70GB | llm_greedy | 30 | pending |
+| 1a | Qwen3.5-0.8B | 0.8B dense | ~2GB | llm_greedy | 30 | running |
+| 1b | Qwen3.5-9B | 9B dense | ~18GB | llm_greedy | 30 | running |
+| ~~1c~~ | ~~Qwen3.5-35B-A3B~~ | ~~35B MoE~~ | ~~~70GB~~ | ~~llm_greedy~~ | ~~30~~ | dropped (too large for single GPU with training) |
 
 ### Results
 

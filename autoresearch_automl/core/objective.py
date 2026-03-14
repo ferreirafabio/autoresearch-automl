@@ -43,8 +43,9 @@ class ObjectiveFunction:
         extra_env: dict[str, str] | None = None,
     ):
         self.train_py_path = train_py_path
-        # Default: uv run train.py (as per Karpathy's setup)
-        self.run_command = run_command or ["uv", "run", str(train_py_path)]
+        # Default: python train.py (using active venv)
+        # Use just the filename since cwd is set to train_py_path.parent
+        self.run_command = run_command or ["python", train_py_path.name]
         self.default_budget = default_budget
         self.gpu_device = gpu_device
         self.extra_env = extra_env or {}
@@ -86,6 +87,10 @@ class ObjectiveFunction:
             if proc.returncode != 0:
                 result.error = f"train.py exited with code {proc.returncode}"
                 logger.warning("train.py failed: %s", result.error)
+                if proc.stderr:
+                    # Log last 20 lines of stderr for debugging
+                    stderr_tail = "\n".join(proc.stderr.strip().splitlines()[-20:])
+                    logger.warning("train.py stderr:\n%s", stderr_tail)
                 return result
 
             result.success = True

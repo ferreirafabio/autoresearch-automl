@@ -97,6 +97,7 @@ class Runner:
 
             # Suggest
             hp_config, budget = cfg.backend.suggest()
+            hp_config = self._to_native_types(hp_config)
 
             # Run experiment
             exp_config = ExperimentConfig(
@@ -109,8 +110,11 @@ class Runner:
             )
             outcome = self.runner.run(exp_config)
 
-            # Tell backend
-            cfg.backend.tell(hp_config, budget, outcome.objectives)
+            # Tell backend — include error info so backends can learn from failures
+            tell_objectives = dict(outcome.objectives)
+            if not outcome.result.success and outcome.result.error:
+                tell_objectives["_error"] = outcome.result.error
+            cfg.backend.tell(hp_config, budget, tell_objectives)
 
             # Record
             record = TrialRecord(
@@ -198,6 +202,18 @@ class Runner:
 
             if outcome.result.val_bpb is not None and outcome.result.val_bpb < self.best_val_bpb:
                 self.best_val_bpb = outcome.result.val_bpb
+
+    @staticmethod
+    def _to_native_types(config: dict) -> dict:
+        """Convert numpy types to native Python types."""
+        import numpy as np
+        return {
+            k: int(v) if isinstance(v, np.integer)
+            else float(v) if isinstance(v, np.floating)
+            else str(v) if isinstance(v, (np.str_, np.bytes_))
+            else v
+            for k, v in config.items()
+        }
 
     def _structural_mutation(self) -> None:
         """Apply a structural mutation via LLM."""

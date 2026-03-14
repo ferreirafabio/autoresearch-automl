@@ -15,16 +15,19 @@ logger = logging.getLogger(__name__)
 SUGGEST_PROMPT = """\
 You are optimizing hyperparameters for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
 The goal is to minimize val_bpb (validation bits-per-byte).
+Training runs on a single GPU with limited VRAM — configs with very high DEPTH, large HEAD_DIM,
+or large DEVICE_BATCH_SIZE may cause OOM (out of memory) crashes.
 
 Current search space with bounds:
 {space_description}
 
-Previous evaluations (config → val_bpb):
+Previous evaluations (config → result):
 {history}
 
 {incumbent_info}
 
-Suggest the next configuration to try. Respond with a JSON object mapping HP names to values.
+Suggest the next configuration to try. Learn from both successful runs AND failures (OOM crashes
+mean the model was too large for the GPU). Respond with a JSON object mapping HP names to values.
 Only include HPs from the search space. Be creative but principled — consider what you know
 about transformer training dynamics.
 
@@ -103,10 +106,10 @@ class LLMGreedyBackend(HPOBackend):
         except Exception as e:
             logger.warning("LLM suggestion failed (%s), falling back to random", e)
             sample = self._space.sample_configuration()
-            return dict(sample), self._max_budget
+            return self._to_native_types(dict(sample)), self._max_budget
 
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
-        self._results.append((config, budget, results))
+        self._results.append((config, budget, dict(results)))
 
     def incumbents(self) -> list[dict[str, Any]]:
         if not self._results:
@@ -126,9 +129,32 @@ class LLMGreedyBackend(HPOBackend):
             return ""
         lines = []
         for config, _budget, results in self._results[-20:]:  # last 20 to fit context
-            obj_val = results.get(self._objectives[0], "?")
-            lines.append(f"  {json.dumps(config)} → val_bpb={obj_val}")
+            native_config = self._to_native_types(config)
+            obj_val = results.get(self._objectives[0])
+            error = results.get("_error")
+            if obj_val is not None:
+                lines.append(f"  {json.dumps(native_config)} → val_bpb={obj_val}")
+            elif error:
+                lines.append(f"  {json.dumps(native_config)} → CRASHED ({error})")
+            else:
+                lines.append(f"  {json.dumps(native_config)} → FAILED")
         return "\n".join(lines)
+
+    @staticmethod
+    def _to_native_types(config: dict) -> dict:
+        """Convert numpy types to native Python for JSON compatibility."""
+        import numpy as np
+        native = {}
+        for k, v in config.items():
+            if isinstance(v, np.integer):
+                native[k] = int(v)
+            elif isinstance(v, np.floating):
+                native[k] = float(v)
+            elif isinstance(v, (np.str_, np.bytes_)):
+                native[k] = str(v)
+            else:
+                native[k] = v
+        return native
 
     def _clamp_to_space(self, config: dict) -> dict:
         """Ensure LLM-suggested values fall within ConfigSpace bounds."""
