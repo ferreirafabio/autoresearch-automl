@@ -21,7 +21,7 @@ MODEL_NAME="Qwen3.5-0.8B"
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
-TRIALS=250
+TRIALS=9999
 VLLM_PORT=8000
 
 if [ ! -d "$MODEL_DIR" ]; then

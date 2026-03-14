@@ -21,7 +21,7 @@ BACKEND="${1:?Usage: sbatch exp2_classical.sh <backend> <seed>}"
 SEED="${2:?Usage: sbatch exp2_classical.sh <backend> <seed>}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
-TRIALS=250
+TRIALS=9999
 
 source "${PROJECT_DIR}/.venv/bin/activate"
 cd "$PROJECT_DIR"
