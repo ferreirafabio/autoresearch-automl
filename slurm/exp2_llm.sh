@@ -50,15 +50,14 @@ echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
 
-# Start vLLM server in background (0.8B needs ~10% of H200)
+# Start vLLM server in background (0.8B model, 30% GPU for KV cache)
 echo "Starting vLLM server..."
 vllm serve "$MODEL_DIR" \
     --host 127.0.0.1 --port $VLLM_PORT \
     --tensor-parallel-size 1 \
     --dtype bfloat16 \
-    --max-model-len 4096 \
-    --gpu-memory-utilization 0.10 \
-    --enforce-eager &
+    --max-model-len 32768 \
+    --gpu-memory-utilization 0.50 &
 VLLM_PID=$!
 
 # Wait for vLLM to be ready
