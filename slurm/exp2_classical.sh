@@ -2,7 +2,7 @@
 #SBATCH --job-name=exp2-classical
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
@@ -21,7 +21,7 @@ BACKEND="${1:?Usage: sbatch exp2_classical.sh <backend> <seed>}"
 SEED="${2:?Usage: sbatch exp2_classical.sh <backend> <seed>}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
-TRIALS=100
+TRIALS=250
 
 source "${PROJECT_DIR}/.venv/bin/activate"
 cd "$PROJECT_DIR"

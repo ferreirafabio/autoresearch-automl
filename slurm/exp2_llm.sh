@@ -2,7 +2,7 @@
 #SBATCH --job-name=exp2-llm
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
@@ -21,7 +21,7 @@ MODEL_NAME="Qwen3.5-0.8B"
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
-TRIALS=100
+TRIALS=250
 VLLM_PORT=8000
 
 if [ ! -d "$MODEL_DIR" ]; then
