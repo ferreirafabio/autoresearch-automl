@@ -10,84 +10,38 @@ So the interesting comparison becomes TPE vs LLAMBO. TPE builds a density model 
 
 I am most excited about what this means for new problem domains (code generation, RL, multimodal) where we do not have decades of tuning intuition yet. At the same time, the open question is whether the compute overhead of running an LLM inside the optimizer is worth it, or whether you are better off just running more TPE trials in the same wall-clock time.
 
-## What we benchmark
+## Setup
 
-7 HPO backends on Karpathy's autoresearch training task (single GPU, 5 min budget per trial, minimize val_bpb):
+We run TPE and LLAMBO on Karpathy's autoresearch training task: single GPU, 5 min budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py via AST parsing. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. We deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
 
-| Backend | Family | Uses LLM? |
-|---------|--------|-----------|
-| Random | Baseline | No |
-| Optuna TPE | Bayesian (density estimation) | No |
-| SMAC | Bayesian (random forest surrogate) | No |
-| DEHB | Evolutionary + multi-fidelity | No |
-| BOHB | Bayesian + multi-fidelity | No |
-| LLM Greedy | LLM reasoning (Karpathy's approach) | Yes |
-| LLAMBO | LLM as BO surrogate model | Yes |
+LLAMBO uses a self-hosted Qwen3.5-0.8B via vLLM, running on the same GPU as training (10% GPU memory for the LLM, rest for training). No API keys, no proprietary models, fully reproducible.
 
-All LLM-based methods use the same self-hosted open source model (Qwen3.5-0.8B via vLLM) so results are reproducible without API access or cost.
+When a trial OOMs or crashes, we feed that information back to both TPE and LLAMBO so they learn which regions of the search space are infeasible.
 
 ## Experiments
 
 ### Experiment 1: Does LLM size matter for HP suggestions?
 
-We compare Qwen3.5-0.8B vs Qwen3.5-9B as the LLM backend for LLM Greedy. Same search space, same trial budget. Early results: the 0.8B model performs comparably or better than 9B (1.06 vs 1.13 val_bpb after 10 trials). A smaller model leaves more GPU memory for training and costs less to serve.
+We compare Qwen3.5-0.8B vs Qwen3.5-9B as the LLM backend. Same search space, same trial budget. Early results: the 0.8B model performs comparably or better than 9B (1.06 vs 1.13 val_bpb after 10 trials). A smaller model leaves more GPU memory for training and costs less to serve.
 
-### Experiment 2: Classical AutoML vs LLM-assisted HPO
+### Experiment 2: TPE vs LLAMBO
 
-All 7 backends, 100 trials each, 3 seeds. The central question: does an LLM surrogate (LLAMBO) outperform purely statistical methods (TPE, SMAC) that have no understanding of what the hyperparameters mean?
+100 trials each, 3 seeds. Does an LLM surrogate outperform a purely statistical method that has no understanding of what the hyperparameters mean?
 
-## Key design decisions
-
-**Automated search space.** The 14 hyperparameters and their ranges are extracted automatically from train.py via AST parsing. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. We deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
-
-**Self-hosted LLM.** Everything runs on a single H200. vLLM serves Qwen3.5-0.8B in the background (10% GPU memory), training uses the rest. No API keys, no proprietary models, fully reproducible.
-
-**Failure feedback.** When a trial OOMs or crashes, that is signal. We feed crash information back to all backends so they learn which regions of the search space are infeasible.
-
-## Architecture
-
-```
-CLI (click)
- |
- v
-Runner (ask/tell loop)
- |
- +-- Backend.suggest()  -->  ConfigInjector (AST-based)  -->  train.py
- |                                                              |
- +-- Backend.tell()    <--  ObjectiveFunction (parse metrics) <-+
- |
- +-- ResultsDB (JSONL, resume/checkpoint)
-```
-
-All backends implement the same `HPOBackend` interface (`configure`, `suggest`, `tell`). Adding a new optimizer is just implementing those three methods.
-
-## Setup
+## Usage
 
 ```bash
 uv venv --python 3.12
 source .venv/bin/activate
 uv pip install -e ".[dev,all]"
-```
 
-For LLM-based backends, download a model and start vLLM:
-```bash
-huggingface-cli download Qwen/Qwen3.5-0.8B --local-dir models/Qwen3.5-0.8B
-vllm serve models/Qwen3.5-0.8B --host 127.0.0.1 --port 8000 --dtype bfloat16
-```
-
-## Usage
-
-```bash
-# Run HPO with a specific backend
+# TPE
 python -m autoresearch_automl.cli run --backend optuna --trials 100 --seed 0
 
-# LLM-based backend (requires vLLM running)
+# LLAMBO (requires vLLM running)
 export OPENAI_BASE_URL=http://127.0.0.1:8000/v1
 export OPENAI_API_KEY=dummy
 python -m autoresearch_automl.cli run --backend llambo --trials 100 --llm-model Qwen3.5-0.8B
-
-# Analyze results
-python -m autoresearch_automl.cli analyze --results-dir results/ --output-dir plots/
 ```
 
 ## Related work
