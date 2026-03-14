@@ -6,27 +6,11 @@ As an AutoML person, the naturally arising next step is to put the LLM where it 
 
 So the interesting comparison becomes TPE vs LLAMBO. TPE builds a density model from trial history but has no idea what a learning rate means. LLAMBO uses the same BO framework but with a surrogate that understands transformer training dynamics. If LLAMBO matches TPE with fewer trials, that is evidence that LLMs can substitute for human domain expertise in HPO.
 
-A second question I want to answer: does LLM size even matter for HP suggestions? If a 0.8B model suggests configs just as well as a 9B model, that changes the cost calculus entirely.
-
-I am most excited about what this means for new problem domains (code generation, RL, multimodal) where we do not have decades of tuning intuition yet. At the same time, the open question is whether the compute overhead of running an LLM inside the optimizer is worth it, or whether you are better off just running more TPE trials in the same wall-clock time.
-
 ## Setup
 
 I run TPE and LLAMBO on Karpathy's autoresearch training task: single GPU, 5 min budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py via AST parsing. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. I deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
 
-LLAMBO uses a self-hosted Qwen3.5-0.8B via vLLM, running on the same GPU as training (10% GPU memory for the LLM, rest for training). No API keys, no proprietary models, fully reproducible.
-
-When a trial OOMs or crashes, I feed that information back to both TPE and LLAMBO so they learn which regions of the search space are infeasible.
-
-## Experiments
-
-### Experiment 1: Does LLM size matter for HP suggestions?
-
-I compare Qwen3.5-0.8B vs Qwen3.5-9B as the LLM backend. Same search space, same trial budget. Early results: the 0.8B model performs comparably or better than 9B (1.06 vs 1.13 val_bpb after 10 trials). A smaller model leaves more GPU memory for training and costs less to serve.
-
-### Experiment 2: TPE vs LLAMBO
-
-100 trials each, 3 seeds. Does an LLM surrogate outperform a purely statistical method that has no understanding of what the hyperparameters mean?
+LLAMBO uses self-hosted open source LLMs (Qwen3.5 via vLLM), running on the same GPU as training. I also compare different LLM sizes to check whether a larger model actually produces better suggestions. No API keys, no proprietary models, fully reproducible.
 
 ## Usage
 
