@@ -15,6 +15,20 @@ I run [Optuna](https://github.com/optuna/optuna) TPE and [LLAMBO via OptunaHub](
 
 LLAMBO uses self-hosted open source LLMs (Qwen3.5 via vLLM), running on the same GPU as training. I also compare different LLM sizes to check whether a larger model actually produces better suggestions. No API keys, no proprietary models, fully reproducible.
 
+## Early results
+
+### LLM model size (Exp1, in progress)
+
+0.8B finds a good config immediately and stays competitive. 9B starts worse but catches up after ~13 trials. Both converge to similar val_bpb around 1.02. Bigger is not better here.
+
+![Exp1: LLM model size comparison](assets/exp1_model_size.png)
+
+### TPE vs LLAMBO (Exp2, in progress)
+
+TPE is running (3 seeds, 100 trials each). LLAMBO jobs just started. Plot will update as data comes in.
+
+![Exp2: TPE vs LLAMBO](assets/exp2_tpe_vs_llambo.png)
+
 ## Usage
 
 ```bash
