@@ -98,8 +98,8 @@ class ObjectiveFunction:
 
         except subprocess.TimeoutExpired as e:
             result.wall_time_seconds = time.time() - start_time
-            result.stdout = e.stdout or ""
-            result.stderr = e.stderr or ""
+            result.stdout = (e.stdout or b"").decode("utf-8", errors="replace") if isinstance(e.stdout, bytes) else (e.stdout or "")
+            result.stderr = (e.stderr or b"").decode("utf-8", errors="replace") if isinstance(e.stderr, bytes) else (e.stderr or "")
             result.error = f"Timeout after {budget}s"
             # Still try to parse partial output
             self._parse_metrics(result)
