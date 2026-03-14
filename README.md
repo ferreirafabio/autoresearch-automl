@@ -1,10 +1,8 @@
 # autoresearch-automl
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) is a neat idea: let an LLM agent tweak training code, run short experiments, keep what works. But at its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [tested this](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) and found that Optuna TPE with just 8 expert-picked hyperparameters already beats the LLM agent on nanochat. So the LLM reasoning is not the bottleneck. Picking the right hyperparameters is.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code, run short experiments, and keep what works. At its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) that Optuna TPE with 8 expert-picked hyperparameters already beats the LLM agent. Picking the right HPs matters more than LLM reasoning.
 
-As an AutoML person, the naturally arising next step is to put the LLM where it can actually help: inside the optimizer. That is exactly what [LLAMBO](https://arxiv.org/abs/2402.09359) does. Instead of prompting an LLM to suggest configs (Karpathy's approach), LLAMBO uses the LLM as the surrogate model in Bayesian optimization. The LLM knows from pretraining that high learning rates with large batch sizes are unstable, or that very deep transformers on short budgets undertrain. It brings that knowledge into the BO loop directly.
-
-So the interesting comparison becomes TPE vs LLAMBO. TPE builds a density model from trial history but has no idea what a learning rate means. LLAMBO uses the same BO framework but with a surrogate that understands transformer training dynamics. If LLAMBO matches TPE with fewer trials, that is evidence that LLMs can substitute for human domain expertise in HPO.
+As an AutoML person, the natural next step is to put the LLM _inside_ the optimizer. [LLAMBO](https://arxiv.org/abs/2402.09359) does this: it replaces TPE's statistical surrogate with an LLM that has pretrained knowledge about training dynamics (learning rate schedules, batch size stability, depth vs compute tradeoffs). Same BO framework, but the surrogate actually understands what the hyperparameters mean. If LLAMBO matches TPE with fewer trials, LLMs can substitute for human domain expertise in HPO.
 
 ## Setup
 
