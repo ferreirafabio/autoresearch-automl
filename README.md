@@ -1,4 +1,4 @@
-# autoresearch-llambo
+# autoresearch-automl
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) is a neat idea: let an LLM agent tweak training code, run short experiments, keep what works. But at its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [tested this](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) and found that Optuna TPE with just 8 expert-picked hyperparameters already beats the LLM agent on nanochat. So the LLM reasoning is not the bottleneck. Picking the right hyperparameters is.
 
