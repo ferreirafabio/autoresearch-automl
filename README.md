@@ -4,7 +4,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 
 We know from [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) that using an LLM as a surrogate in Bayesian optimization can outperform GP-based BO in low-trial regimes, because the LLM brings pretrained knowledge about training dynamics (learning rate schedules, batch size stability, depth vs compute tradeoffs).
 
-![LLAMBO end-to-end performance (Figure 8 from Ye et al., 2024)](assets/llambo_fig8.png)
+![LLAMBO candidate sampling quality (Figure 6 from Ye et al., 2024)](assets/llambo_fig6.png)
 
 As an AutoML enthusiast, it felt natural to fill this void and apply LLAMBO to Karpathy's autoresearch problem.
 
