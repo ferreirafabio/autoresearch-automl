@@ -119,7 +119,7 @@ def plot_exp2(results_dir: Path, output_path: Path):
 
 
 def plot_progress(results_dir: Path, output_path: Path):
-    """Karpathy-style progress plot: scatter + running best staircase, one subplot per backend."""
+    """Progress plot: scatter + running best staircase, one subplot per backend."""
     fig, axes = plt.subplots(1, 2, figsize=(16, 6), sharey=True)
 
     backends = [
@@ -195,7 +195,7 @@ def plot_progress(results_dir: Path, output_path: Path):
         for ax in axes:
             ax.set_ylim(ymin - margin, ymax + margin)
 
-    fig.suptitle("Autoresearch Progress (seed 0)", fontsize=14, y=1.02)
+    fig.suptitle("Autoresearch LLAMBO Progress", fontsize=14, y=1.02)
     fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)

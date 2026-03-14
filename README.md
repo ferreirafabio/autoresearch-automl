@@ -29,9 +29,9 @@ LLAMBO converges faster in the first ~20 trials. TPE catches up given enough bud
 
 ![LLM model size comparison](assets/exp1_model_size.png)
 
-### Progress (Karpathy-style)
+### Autoresearch LLAMBO Progress
 
-Same format as [Karpathy's progress plot](https://github.com/karpathy/autoresearch/blob/master/progress.png). Grey dots are discarded trials, colored dots are new bests, staircase is the running best.
+Grey dots are discarded trials, colored dots are new bests, staircase is the running best.
 
 ![Progress plot](assets/exp2_progress.png)
 
