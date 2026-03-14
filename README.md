@@ -1,6 +1,6 @@
 # autoresearch-automl
 
-When I saw Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) post, my immediate thought was: how would classical HPO/AutoML do on the same problem? Ravid Shwartz-Ziv [had the same idea](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) and showed that Optuna TPE with 8 expert-picked hyperparameters beats the LLM agent. Domain knowledge in HP selection matters more than LLM reasoning.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) is a neat idea: let an LLM agent tweak training code, run short experiments, keep what works. But at its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [tested this](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) and found that Optuna TPE with just 8 expert-picked hyperparameters already beats the LLM agent on nanochat. So the LLM reasoning is not the bottleneck. Picking the right hyperparameters is.
 
 Therefore, I ask two questions:
 
