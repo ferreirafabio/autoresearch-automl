@@ -2,7 +2,7 @@
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code, run short experiments, and keep what works. At its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) that Optuna TPE with 8 expert-picked hyperparameters already beats the LLM agent. Picking the right HPs matters more than LLM reasoning.
 
-As an AutoML person, the natural next step is to put the LLM _inside_ the optimizer. [LLAMBO](https://arxiv.org/abs/2402.09359) does this: it replaces TPE's statistical surrogate with an LLM that has pretrained knowledge about training dynamics (learning rate schedules, batch size stability, depth vs compute tradeoffs). Same BO framework, but the surrogate actually understands what the hyperparameters mean. If LLAMBO matches TPE with fewer trials, LLMs can substitute for human domain expertise in HPO.
+As an AutoML enthusiast, the natural next step is to put the LLM _inside_ the optimizer. [LLAMBO](https://arxiv.org/abs/2402.09359) does this: it replaces TPE's statistical surrogate with an LLM that has pretrained knowledge about training dynamics (learning rate schedules, batch size stability, depth vs compute tradeoffs). Same BO framework, but the surrogate actually understands what the hyperparameters mean. If LLAMBO matches TPE with fewer trials, LLMs can substitute for human domain expertise in HPO.
 
 ## Setup
 
