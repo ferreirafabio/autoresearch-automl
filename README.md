@@ -1,20 +1,14 @@
 # autoresearch-automl
 
-Can an LLM replace human domain expertise inside a hyperparameter optimizer?
+When I saw Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) post, my immediate thought was: how would classical HPO/AutoML do on the same problem? Ravid Shwartz-Ziv [had the same idea](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) and showed that Optuna TPE with 8 expert-picked hyperparameters beats the LLM agent. Domain knowledge in HP selection matters more than LLM reasoning.
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent modify training code, run 5 minute experiments, keep what works, and repeat. At its core, the agent is doing hyperparameter search, just without a defined search space and wrapped in a lot of tokens.
+But that raises a more interesting question. What if we put the LLM _inside_ the optimizer, where its knowledge about ML training dynamics actually helps?
 
-[Shwartz-Ziv (2025)](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) showed that Optuna TPE with 8 expert-selected hyperparameters beats the LLM agent approach on nanochat. His takeaway: domain knowledge in HP selection matters more than LLM reasoning. But his comparison is binary (agent vs TPE) and the search space was hand-curated by a human expert.
+That is what [LLAMBO](https://arxiv.org/abs/2402.09359) does. Instead of prompting an LLM to suggest configs (Karpathy's approach), LLAMBO uses the LLM as the surrogate model in Bayesian optimization. The LLM knows from pretraining that high learning rates with large batch sizes are unstable, or that very deep transformers on short budgets undertrain. It brings that knowledge into the BO loop directly.
 
-We take this further and ask: **what if the LLM provides the domain knowledge _inside_ the optimizer?**
+TPE builds a density model from trial history but has no idea what a learning rate means. LLAMBO uses the same BO framework but with a surrogate that understands transformer training dynamics. If LLAMBO matches TPE with fewer trials, that is evidence that LLMs can substitute for human domain expertise in HPO.
 
-## The idea
-
-Karpathy's approach (which we call LLM Greedy) prompts an LLM with the full trial history and asks "what should I try next?". There is no acquisition function, no surrogate model. The LLM just reasons in natural language.
-
-[LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.09359) is more principled. It replaces the statistical surrogate in Bayesian optimization with an LLM. The LLM has been pretrained on millions of ML papers and knows that high learning rates with large batch sizes tend to be unstable, or that very deep models on limited budgets undertrain. It brings domain knowledge into the BO loop directly, rather than treating the LLM as a black-box suggestion engine.
-
-This is the comparison that matters: TPE builds a density model from trial history but has no idea what a learning rate means. LLAMBO uses the same BO framework but with an LLM surrogate that understands transformer training dynamics. If LLAMBO matches TPE with fewer trials, that is evidence that LLMs can substitute for human domain expertise in HPO. This matters most for new problem domains where that expertise does not exist yet.
+I am most excited about what this means for new problem domains (code generation, RL, multimodal) where we do not have decades of tuning intuition yet. At the same time, the open question is whether the compute overhead of running an LLM inside the optimizer is worth it, or whether you are better off just running more TPE trials in the same wall-clock time.
 
 ## What we benchmark
 
@@ -36,7 +30,7 @@ All LLM-based methods use the same self-hosted open source model (Qwen3.5-0.8B v
 
 ### Experiment 1: Does LLM size matter for HP suggestions?
 
-We compare Qwen3.5-0.8B vs Qwen3.5-9B as the LLM backend for LLM Greedy. Same search space, same trial budget. Early results: the 0.8B model performs comparably or better than 9B (1.06 vs 1.13 val_bpb after 10 trials). This is relevant because a smaller model leaves more GPU memory for training and costs less to serve.
+We compare Qwen3.5-0.8B vs Qwen3.5-9B as the LLM backend for LLM Greedy. Same search space, same trial budget. Early results: the 0.8B model performs comparably or better than 9B (1.06 vs 1.13 val_bpb after 10 trials). A smaller model leaves more GPU memory for training and costs less to serve.
 
 ### Experiment 2: Classical AutoML vs LLM-assisted HPO
 
@@ -44,7 +38,7 @@ All 7 backends, 100 trials each, 3 seeds. The central question: does an LLM surr
 
 ## Key design decisions
 
-**Automated search space.** The 14 hyperparameters and their ranges are extracted automatically from train.py via AST parsing. No manual HP curation. Shwartz-Ziv showed that expert-picked HPs matter. We deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
+**Automated search space.** The 14 hyperparameters and their ranges are extracted automatically from train.py via AST parsing. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. We deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
 
 **Self-hosted LLM.** Everything runs on a single H200. vLLM serves Qwen3.5-0.8B in the background (10% GPU memory), training uses the rest. No API keys, no proprietary models, fully reproducible.
 
@@ -99,5 +93,5 @@ python -m autoresearch_automl.cli analyze --results-dir results/ --output-dir pl
 ## Related work
 
 - [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) for the training task and the idea of LLM-driven experimentation
-- [Shwartz-Ziv (2025)](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) for showing that expert HP selection beats blind LLM search
+- [Ravid Shwartz-Ziv](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) for showing that expert HP selection beats blind LLM search
 - [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.09359) for using LLMs as surrogate models in Bayesian optimization
