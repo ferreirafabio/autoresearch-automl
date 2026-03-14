@@ -11,7 +11,13 @@ def load_trials(jsonl_path: Path) -> list[dict]:
     trials = []
     with open(jsonl_path) as f:
         for line in f:
-            trials.append(json.loads(line))
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                trials.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
     return trials
 
 

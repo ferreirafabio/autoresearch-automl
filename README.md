@@ -14,6 +14,21 @@ As an AutoML enthusiast, it felt natural to fill this void and apply LLAMBO to K
 I run [Optuna](https://github.com/optuna/optuna) TPE and [LLAMBO via OptunaHub](https://hub.optuna.org/samplers/llambo/) on Karpathy's autoresearch training task: single GPU, 5 min budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py by parsing the source code for ALL_CAPS variable assignments. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. I deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
 
 LLAMBO uses self-hosted open source LLMs (Qwen3.5 via vLLM), running on the same GPU as training. I also compare different LLM sizes to check whether a larger model actually produces better suggestions. No API keys, no proprietary models, fully reproducible.
+
+## Results (in progress)
+
+### TPE vs LLAMBO
+
+LLAMBO converges faster in the first ~20 trials. TPE catches up given enough budget. Experiments still running (24h Slurm jobs, 3 seeds each).
+
+![TPE vs LLAMBO convergence](assets/exp2_tpe_vs_llambo.png)
+
+### LLM model size
+
+0.8B finds good configs from the start. 9B starts worse but converges to the same level after ~15 trials. Bigger is not better for HP suggestions.
+
+![LLM model size comparison](assets/exp1_model_size.png)
+
 ## Usage
 
 ```bash
