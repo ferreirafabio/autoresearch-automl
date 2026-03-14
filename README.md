@@ -1,6 +1,6 @@
 # autoresearch-automl
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code, run short experiments, and keep what works. At its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) that Optuna TPE with 8 expert-picked hyperparameters already beats the LLM agent. Picking the right HPs matters more than LLM reasoning.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code, run short experiments, and keep what works. At its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that Optuna TPE with 8 expert-picked hyperparameters already beats the LLM agent. Picking the right HPs matters more than LLM reasoning.
 
 We know from [LLAMBO](https://arxiv.org/abs/2402.03921) that using an LLM as a surrogate in Bayesian optimization can outperform GP-based BO in low-trial regimes, because the LLM brings pretrained knowledge about training dynamics (learning rate schedules, batch size stability, depth vs compute tradeoffs). As an AutoML enthusiast, it felt natural to fill this void and apply LLAMBO to Karpathy's autoresearch problem.
 
@@ -29,5 +29,5 @@ python -m autoresearch_automl.cli run --backend llambo --trials 100 --llm-model 
 ## Related work
 
 - [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) for the training task and the idea of LLM-driven experimentation
-- [Ravid Shwartz-Ziv](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/) for showing that expert HP selection beats blind LLM search
+- [Ravid Shwartz-Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) for showing that expert HP selection beats blind LLM search
 - [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) for using LLMs as surrogate models in Bayesian optimization
