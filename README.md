@@ -1,19 +1,19 @@
 # autoresearch-automl
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code, run short experiments, and keep what works. At its core, the agent is doing hyperparameter search without a defined search space. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that Optuna TPE with 8 expert-picked hyperparameters already beats the LLM agent. Picking the right HPs matters more than LLM reasoning.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code through trial and error. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that model-based optimization (Optuna TPE + expert-picked hyperparameter search space) already beats it. We fill the gap by integrating [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) into autoresearch, an approach that puts the LLM inside model-based optimization, using it as both surrogate model and candidate generator.
 
-We know from [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) that using an LLM as a surrogate in Bayesian optimization can outperform GP-based BO in low-trial regimes (see figure below), because the LLM brings pretrained knowledge about training dynamics (learning rate schedules, batch size stability, depth vs compute tradeoffs).
+As an AutoML enthusiast, it felt natural to fill this void — this repo applies LLAMBO to Karpathy's autoresearch problem and benchmarks it against TPE.
 
 ![LLAMBO candidate sampling quality](assets/llambo_fig6.png)
 *Figure 6 from [Ye et al. (2024)](https://arxiv.org/abs/2402.03921): LLAMBO outperforms TPE in candidate sampling quality, especially with few observed points.*
-
-As an AutoML enthusiast, it felt natural to fill this void and apply LLAMBO to Karpathy's autoresearch problem.
 
 ## Setup
 
 I run [Optuna](https://github.com/optuna/optuna) TPE and [LLAMBO via OptunaHub](https://hub.optuna.org/samplers/llambo/) on Karpathy's autoresearch training task: single GPU, 5 min budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py by parsing the source code for ALL_CAPS variable assignments. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. I deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
 
 LLAMBO uses self-hosted open source LLMs (Qwen3.5 via vLLM), running on the same GPU as training. I also compare different LLM sizes to check whether a larger model actually produces better suggestions. No API keys, no proprietary models, fully reproducible.
+
+**Note on failure handling:** Infeasible configs (OOM, batch size assertion errors) are reported to the sampler as `val_bpb=100.0` instead of being silently dropped. Both TPE and LLAMBO otherwise ignore failed trials (`TrialState.FAIL`), which means they never learn to avoid bad regions. The penalty value is hardcoded for this task (real val_bpb ranges 0.99–2.4) — for other tasks, this would need adjustment.
 
 ## Results (in progress)
 

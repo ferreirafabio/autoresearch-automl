@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -47,7 +48,13 @@ class ExperimentOutcome:
 
 
 class ExperimentRunner:
-    """Orchestrates a single experiment: inject config → run → collect results."""
+    """Orchestrates a single experiment: inject config → run → collect results.
+
+    Creates a per-job copy of train.py (e.g. train_llambo_seed0.py) in the
+    same directory to avoid race conditions when multiple Slurm jobs share
+    the same project directory. The copy name is deterministic (backend+seed),
+    so reruns after preemption overwrite the old copy instead of leaving orphans.
+    """
 
     def __init__(
         self,
@@ -55,30 +62,49 @@ class ExperimentRunner:
         run_command: list[str] | None = None,
         gpu_device: int | None = None,
         extra_env: dict[str, str] | None = None,
+        job_id: str = "",
     ):
         self.train_py_path = train_py_path
-        self.injector = ConfigInjector(train_py_path)
+        self.original_source = train_py_path.read_text()
+
+        # Per-job copy: train.py → train_{job_id}.py in the same directory
+        # job_id should be deterministic (e.g. "llambo_seed0") so reruns overwrite
+        suffix = job_id or str(os.getpid())
+        stem = train_py_path.stem
+        self.work_train_py = train_py_path.parent / f"{stem}_{suffix}.py"
+        self.work_train_py.write_text(self.original_source)
+        logger.info("Created working copy at %s", self.work_train_py)
+
+        self.injector = ConfigInjector(self.work_train_py)
+        # Run command uses the copy filename, cwd stays in the same directory
+        work_run_command = run_command or ["python", self.work_train_py.name]
         self.objective = ObjectiveFunction(
-            train_py_path,
-            run_command=run_command,
+            self.work_train_py,
+            run_command=work_run_command,
             gpu_device=gpu_device,
             extra_env=extra_env,
         )
 
+    def cleanup(self) -> None:
+        """Remove the per-process working copy."""
+        if self.work_train_py.exists():
+            self.work_train_py.unlink()
+            logger.info("Cleaned up working copy %s", self.work_train_py)
+
     def run(self, config: ExperimentConfig) -> ExperimentOutcome:
         """Run a single experiment with the given configuration.
 
-        1. Save original train.py
+        1. Reset working copy to original train.py
         2. Inject HP config values
         3. Run train.py with budget
-        4. Restore original train.py
-        5. Return results
+        4. Return results
         """
-        original_source = self.train_py_path.read_text()
+        # Reset working copy to original source before each trial
+        self.work_train_py.write_text(self.original_source)
         outcome = ExperimentOutcome(config=config, result=ExperimentResult())
 
         try:
-            # Inject config
+            # Inject config into the working copy
             self.injector.inject_and_write(config.hp_config)
             logger.info(
                 "Trial %d: running with %d HPs, budget=%.0fs",
@@ -103,8 +129,7 @@ class ExperimentRunner:
                     config.trial_id, outcome.result.error,
                 )
 
-        finally:
-            # Always restore original train.py
-            self.train_py_path.write_text(original_source)
+        except Exception:
+            logger.exception("Trial %d: unexpected error", config.trial_id)
 
         return outcome

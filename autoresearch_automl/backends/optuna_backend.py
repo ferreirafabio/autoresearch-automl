@@ -96,6 +96,10 @@ class OptunaBackend(HPOBackend):
 
         return config, self._max_budget
 
+    # Penalty value for failed trials — reported as COMPLETE so TPE's density
+    # estimation learns to avoid infeasible regions (OOM, assertion errors).
+    FAILURE_PENALTY = 100.0
+
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
         if self._pending_trial is None:
             logger.warning("tell() called without a pending trial")
@@ -104,7 +108,11 @@ class OptunaBackend(HPOBackend):
         values = [results.get(obj, float("inf")) for obj in self._objectives]
 
         if any(v == float("inf") for v in values):
-            self._study.tell(self._pending_trial, state=optuna.trial.TrialState.FAIL)
+            penalty = [self.FAILURE_PENALTY] * len(self._objectives)
+            if len(penalty) == 1:
+                self._study.tell(self._pending_trial, values=penalty[0])
+            else:
+                self._study.tell(self._pending_trial, values=penalty)
         elif len(values) == 1:
             self._study.tell(self._pending_trial, values=values[0])
         else:

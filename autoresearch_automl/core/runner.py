@@ -51,6 +51,7 @@ class Runner:
             run_command=config.run_command,
             gpu_device=config.gpu_device,
             extra_env=config.extra_env,
+            job_id=f"{config.backend.name}_seed{config.seed}",
         )
         self.results_db = ResultsDB(config.results_dir / "trials.jsonl")
         self.best_val_bpb = float("inf")
@@ -68,8 +69,9 @@ class Runner:
         space = space_builder.build_configspace()
         logger.info("ConfigSpace with %d HPs: %s", len(space), list(space.keys()))
 
-        # Configure backend
-        budget_range = (cfg.budget_min, cfg.budget_max) if cfg.backend.supports_multi_fidelity else None
+        # Configure backend — always pass budget range so single-fidelity
+        # backends can use budget_max as their fixed budget.
+        budget_range = (cfg.budget_min, cfg.budget_max)
         cfg.backend.configure(
             space=space,
             objectives=cfg.objectives,
@@ -116,14 +118,18 @@ class Runner:
                 tell_objectives["_error"] = outcome.result.error
             cfg.backend.tell(hp_config, budget, tell_objectives)
 
-            # Record
+            # Record — use penalty value for failed trials so replay() is consistent
+            recorded_val_bpb = outcome.result.val_bpb
+            if recorded_val_bpb is None and hasattr(cfg.backend, 'FAILURE_PENALTY'):
+                recorded_val_bpb = cfg.backend.FAILURE_PENALTY
+
             record = TrialRecord(
                 trial_id=trial_id,
                 backend=cfg.backend.name,
                 generation=self.generation,
                 config=hp_config,
                 budget=budget,
-                val_bpb=outcome.result.val_bpb,
+                val_bpb=recorded_val_bpb,
                 train_loss=outcome.result.train_loss,
                 peak_memory_gb=outcome.result.peak_memory_gb,
                 wall_time_seconds=outcome.result.wall_time_seconds,

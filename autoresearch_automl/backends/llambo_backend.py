@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import json
+import os
 import logging
+import time
+from pathlib import Path
 from typing import Any
 
 import optuna
@@ -12,6 +16,56 @@ from autoresearch_automl.backends.base import HPOBackend
 from autoresearch_automl.core.search_space import configspace_to_optuna
 
 logger = logging.getLogger(__name__)
+
+
+class LLMCallLogger:
+    """Logs every LLM call by patching ``OpenAI_interface.ask_base``.
+
+    All LLAMBO LLM calls (surrogate, acquisition, generative) funnel through
+    ``ask_base``, so a single class-level patch captures everything — no need
+    to chase lazily-created OpenAI clients.
+    """
+
+    def __init__(self, log_path: Path):
+        self._log_path = log_path
+
+    def install(self, openai_interface_cls: type) -> None:
+        """Monkey-patch ``ask_base`` on the class to log all LLM calls."""
+        original = openai_interface_cls.ask_base
+
+        if getattr(original, "_llambo_patched", False):
+            return  # already installed
+
+        log_path = self._log_path
+
+        def _logged_ask_base(
+            self_inner: Any,
+            messages: list,
+            ret_dict: dict | None = None,
+        ) -> tuple:
+            t0 = time.time()
+            result = original(self_inner, messages, ret_dict)
+            elapsed = time.time() - t0
+
+            record = {
+                "timestamp": t0,
+                "elapsed_s": round(elapsed, 3),
+                "pid": os.getpid(),
+                "model": getattr(self_inner, "model", ""),
+                "messages": [
+                    {"role": m.get("role", ""), "content": m.get("content", "")}
+                    for m in messages
+                ],
+                "response": result[0] if result else None,
+            }
+            with open(log_path, "a") as f:
+                f.write(json.dumps(record) + "\n")
+
+            return result
+
+        _logged_ask_base._llambo_patched = True  # type: ignore[attr-defined]
+        openai_interface_cls.ask_base = _logged_ask_base
+        logger.info("Patched OpenAI_interface.ask_base → %s", self._log_path)
 
 DEFAULT_TASK_DESCRIPTION = """\
 Optimizing a GPT-2 scale transformer on climbmix-400b-shuffle.
@@ -39,6 +93,7 @@ class LLAMBOBackend(HPOBackend):
         api_key: str | None = None,
         task_description: str | None = None,
         n_initial_samples: int = 5,
+        log_dir: Path | None = None,
     ):
         self._model = model
         self._api_base = api_base
@@ -50,6 +105,8 @@ class LLAMBOBackend(HPOBackend):
         self._optuna_mapping: dict[str, dict] = {}
         self._max_budget: float = 300.0
         self._pending_trial: optuna.Trial | None = None
+        self._log_dir = log_dir
+        self._llm_logger: LLMCallLogger | None = None
 
     @property
     def name(self) -> str:
@@ -71,6 +128,19 @@ class LLAMBOBackend(HPOBackend):
         import optunahub
 
         module = optunahub.load_module("samplers/llambo")
+
+        # Patch ask_base AFTER optunahub loads llambo (makes it importable)
+        if self._log_dir is not None:
+            import sys
+
+            # Find the llm module optunahub loaded (full path varies)
+            llm_mod = next(
+                mod for name, mod in sys.modules.items()
+                if name.endswith("llambo.llm") and mod is not None
+            )
+            log_path = self._log_dir / "llm_calls.jsonl"
+            self._llm_logger = LLMCallLogger(log_path)
+            self._llm_logger.install(llm_mod.OpenAI_interface)
 
         task_desc = self._task_description or DEFAULT_TASK_DESCRIPTION.format(
             budget=self._max_budget,
@@ -106,6 +176,11 @@ class LLAMBOBackend(HPOBackend):
 
         return config, self._max_budget
 
+    # Penalty value for failed trials — clearly worse than any real val_bpb
+    # (observed range ~0.99–2.4) but not so extreme it distorts the surrogate.
+    # Reported as COMPLETE so LLAMBO's surrogate learns to avoid these regions.
+    FAILURE_PENALTY = 100.0
+
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
         if self._pending_trial is None:
             logger.warning("tell() called without a pending trial")
@@ -113,7 +188,8 @@ class LLAMBOBackend(HPOBackend):
 
         val = results.get(self._objectives[0], float("inf"))
         if val == float("inf"):
-            self._study.tell(self._pending_trial, state=optuna.trial.TrialState.FAIL)
+            # Report penalty instead of FAIL so the surrogate learns from failures
+            self._study.tell(self._pending_trial, values=self.FAILURE_PENALTY)
         else:
             self._study.tell(self._pending_trial, values=val)
 
