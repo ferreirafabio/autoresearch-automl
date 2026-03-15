@@ -132,6 +132,26 @@ class OptunaBackend(HPOBackend):
         except ValueError:
             return []
 
+    def seed_trial(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
+        """Inject baseline as a completed frozen trial (bypasses ask-before-tell)."""
+        distributions = self._build_distributions()
+        values = [results.get(obj, float("inf")) for obj in self._objectives]
+        if any(v == float("inf") for v in values):
+            state = optuna.trial.TrialState.FAIL
+            trial_values = None
+        else:
+            state = optuna.trial.TrialState.COMPLETE
+            trial_values = values if len(values) > 1 else [values[0]]
+
+        frozen = optuna.trial.create_trial(
+            params=config,
+            distributions=distributions,
+            values=trial_values,
+            state=state,
+        )
+        self._study.add_trial(frozen)
+        logger.info("Seeded baseline trial into Optuna study: %s", results)
+
     def replay(self, history: list[tuple[dict, float, dict]]) -> None:
         """Replay completed trials into the Optuna study via add_trial()."""
         # If using RDB storage with existing trials, skip replay

@@ -86,6 +86,12 @@ class ObjectiveFunction:
 
             if proc.returncode != 0:
                 result.error = f"train.py exited with code {proc.returncode}"
+                # Extract specific error type from stderr for HPO backends
+                stderr_text = (proc.stderr or "") + (proc.stdout or "")
+                if "OutOfMemoryError" in stderr_text or "out of memory" in stderr_text.lower():
+                    result.error = "GPU out-of-memory"
+                elif "AssertionError" in stderr_text:
+                    result.error = "AssertionError"
                 logger.warning("train.py failed: %s", result.error)
                 if proc.stderr:
                     # Log last 20 lines of stderr for debugging

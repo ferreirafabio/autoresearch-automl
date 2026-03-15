@@ -7,6 +7,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from ConfigSpace import (
     Categorical,
@@ -36,10 +37,10 @@ KNOWN_HP_METADATA: dict[str, dict] = {
     # Model architecture
     "DEPTH": {"type": "int", "low": 4, "high": 24},
     "ASPECT_RATIO": {"type": "int", "low": 32, "high": 128},
-    "HEAD_DIM": {"type": "cat", "choices": [64, 128, 256]},
-    "DEVICE_BATCH_SIZE": {"type": "cat", "choices": [32, 64, 128, 256]},
+    "HEAD_DIM": {"type": "int", "low": 64, "high": 256, "log": True},
+    "DEVICE_BATCH_SIZE": {"type": "int", "low": 32, "high": 256, "log": True},
     # Optimization
-    "TOTAL_BATCH_SIZE": {"type": "cat", "choices": [2**i for i in range(16, 22)]},
+    "TOTAL_BATCH_SIZE": {"type": "int", "low": 65536, "high": 2097152, "log": True},
     "EMBEDDING_LR": {"type": "float", "low": 0.01, "high": 2.0, "log": True},
     "UNEMBEDDING_LR": {"type": "float", "low": 0.0005, "high": 0.05, "log": True},
     "MATRIX_LR": {"type": "float", "low": 0.005, "high": 0.2, "log": True},
@@ -51,6 +52,51 @@ KNOWN_HP_METADATA: dict[str, dict] = {
     # Attention pattern (string HP)
     "WINDOW_PATTERN": {"type": "cat", "choices": ["SSSL", "SSLL", "SLSL", "LLLL", "SSSS", "LSSL"]},
 }
+
+# Karpathy's starting config (commit b11d6f28, train.py lines 364-382).
+# This is the UNOPTIMIZED starting point — NOT his final optimized values.
+# Used as the baseline (trial 0) for all HPO runs.
+KARPATHY_STARTING_CONFIG: dict[str, object] = {
+    "ASPECT_RATIO": 64,
+    "HEAD_DIM": 128,
+    "WINDOW_PATTERN": "SSSL",
+    "TOTAL_BATCH_SIZE": 2**19,  # 524288
+    "EMBEDDING_LR": 0.6,
+    "UNEMBEDDING_LR": 0.004,
+    "MATRIX_LR": 0.04,
+    "SCALAR_LR": 0.5,
+    "WEIGHT_DECAY": 0.2,
+    "WARMUP_RATIO": 0.0,
+    "WARMDOWN_RATIO": 0.5,
+    "FINAL_LR_FRAC": 0.0,
+    "DEPTH": 8,
+    "DEVICE_BATCH_SIZE": 128,
+}
+
+# HPs that must be rounded to nearest power of 2 after sampling
+# (GPU memory alignment, batch size divisibility constraints)
+POWER_OF_2_HPS = frozenset({"HEAD_DIM", "DEVICE_BATCH_SIZE", "TOTAL_BATCH_SIZE"})
+
+
+def snap_to_power_of_2(config: dict[str, object]) -> dict[str, object]:
+    """Snap power-of-2 HPs to nearest power of 2, enforce batch constraints."""
+    result = dict(config)
+    for name in POWER_OF_2_HPS:
+        if name in result and isinstance(result[name], (int, float)):
+            v = max(1, int(result[name]))
+            low = 1 << (v.bit_length() - 1)
+            high = low << 1
+            result[name] = low if (v - low) <= (high - v) else high
+
+    # Enforce TOTAL_BATCH_SIZE >= DEVICE_BATCH_SIZE * MAX_SEQ_LEN (2048)
+    dbs = result.get("DEVICE_BATCH_SIZE")
+    tbs = result.get("TOTAL_BATCH_SIZE")
+    if isinstance(dbs, int) and isinstance(tbs, int):
+        min_tbs = dbs * 2048
+        if tbs < min_tbs:
+            result["TOTAL_BATCH_SIZE"] = min_tbs
+
+    return result
 
 
 @dataclass
@@ -69,6 +115,11 @@ class SearchSpaceBuilder:
     train_py_path: Path
     exclude_names: frozenset[str] = field(default_factory=lambda: EXCLUDE_NAMES)
     hp_metadata: dict[str, dict] = field(default_factory=lambda: dict(KNOWN_HP_METADATA))
+
+    def get_default_config(self) -> dict[str, Any]:
+        """Return the default config (train.py baseline values)."""
+        cs = self.build_configspace()
+        return dict(cs.get_default_configuration())
 
     def extract_hps(self) -> list[ExtractedHP]:
         """Parse train.py AST and find ALL_CAPS = literal assignments."""

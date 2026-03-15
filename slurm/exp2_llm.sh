@@ -14,15 +14,34 @@ set -euo pipefail
 #   sbatch slurm/exp2_llm.sh llm_greedy 0
 #   sbatch slurm/exp2_llm.sh llambo 0
 
-BACKEND="${1:?Usage: sbatch exp2_llm.sh <backend> <seed>}"
-SEED="${2:?Usage: sbatch exp2_llm.sh <backend> <seed>}"
+BACKEND="${1:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name]}"
+SEED="${2:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name]}"
 MODELS_BASE="/work/dlclarge1/ferreira-autoresearch-automl/models"
-MODEL_NAME="Qwen3.5-0.8B"
+MODEL_NAME="${3:-Qwen3.5-0.8B}"
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
-RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
+# Include model name in results dir when non-default model is specified
+if [ "${MODEL_NAME}" = "Qwen3.5-0.8B" ]; then
+    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
+else
+    MODEL_TAG=$(echo "${MODEL_NAME}" | tr '.' '_' | tr '-' '_')
+    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}/seed_${SEED}"
+fi
 TRIALS=9999
-VLLM_PORT=8000
+VLLM_PORT=$((8100 + RANDOM % 900))
+
+# Adjust vLLM GPU memory, available VRAM, and extra flags based on model size
+# Values measured via slurm/test_vram_usage.sh on H200 (140 GiB)
+VLLM_EXTRA_ARGS=""
+case "${MODEL_NAME}" in
+    Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB" ;;
+    Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB" ;;
+    Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB" ;;
+    Qwen3.5-27B)   VLLM_GPU_UTIL=0.45; AVAILABLE_VRAM="~76GB"; VLLM_EXTRA_ARGS="--enforce-eager" ;;
+    Qwen3.5-35B*)  VLLM_GPU_UTIL=0.55; AVAILABLE_VRAM="~62GB"; VLLM_EXTRA_ARGS="--enforce-eager" ;;
+    Qwen3-32B-AWQ) VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~112GB" ;;
+    *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB" ;;
+esac
 
 if [ ! -d "$MODEL_DIR" ]; then
     echo "Error: Model not found at $MODEL_DIR"
@@ -50,19 +69,20 @@ echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
 
-# Start vLLM server in background (0.8B model, 30% GPU for KV cache)
-echo "Starting vLLM server..."
+# Start vLLM server in background
+echo "Starting vLLM server (port ${VLLM_PORT}, gpu_util=${VLLM_GPU_UTIL})..."
 vllm serve "$MODEL_DIR" \
     --host 127.0.0.1 --port $VLLM_PORT \
     --tensor-parallel-size 1 \
     --dtype bfloat16 \
     --max-model-len 32768 \
-    --gpu-memory-utilization 0.50 &
+    --gpu-memory-utilization $VLLM_GPU_UTIL \
+    $VLLM_EXTRA_ARGS &
 VLLM_PID=$!
 
 # Wait for vLLM to be ready
 echo "Waiting for vLLM server to start..."
-for i in $(seq 1 300); do
+for i in $(seq 1 600); do
     STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
     if [ "$STATUS" = "200" ]; then
         echo "vLLM server ready after ${i}s"
@@ -77,7 +97,7 @@ done
 
 STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
 if [ "$STATUS" != "200" ]; then
-    echo "vLLM server failed to start within 300s (status: $STATUS)"
+    echo "vLLM server failed to start within 600s (status: $STATUS)"
     kill $VLLM_PID 2>/dev/null
     exit 1
 fi
@@ -85,6 +105,7 @@ fi
 # Run HPO
 export OPENAI_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1"
 export OPENAI_API_KEY="dummy"
+export AVAILABLE_VRAM="${AVAILABLE_VRAM}"
 
 echo ""
 echo "Starting HPO with ${BACKEND} backend..."

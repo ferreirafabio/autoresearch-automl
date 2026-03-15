@@ -11,7 +11,7 @@ from typing import Any
 from autoresearch_automl.backends.base import HPOBackend
 from autoresearch_automl.core.config_injector import ConfigInjector
 from autoresearch_automl.core.experiment import ExperimentConfig, ExperimentOutcome, ExperimentRunner
-from autoresearch_automl.core.search_space import SearchSpaceBuilder
+from autoresearch_automl.core.search_space import KARPATHY_STARTING_CONFIG, SearchSpaceBuilder, snap_to_power_of_2
 from autoresearch_automl.tracking.results_db import ResultsDB, TrialRecord
 
 logger = logging.getLogger(__name__)
@@ -84,8 +84,61 @@ class Runner:
         if cfg.resume:
             start_trial_id = self._resume_from_checkpoint()
 
+        # Seed baseline config as trial #0 (only on fresh runs)
+        # Always use the hardcoded starting config, not train.py values
+        # (train.py may have been modified by previous experiments)
+        if start_trial_id == 0:
+            baseline = dict(KARPATHY_STARTING_CONFIG)
+            baseline = snap_to_power_of_2(baseline)
+            logger.info("Running baseline config as trial 0: %s", baseline)
+
+            exp_config = ExperimentConfig(
+                trial_id=0,
+                hp_config=baseline,
+                budget=cfg.budget_max,
+                seed=cfg.seed,
+                generation=0,
+                backend_name=cfg.backend.name,
+            )
+            outcome = self.runner.run(exp_config)
+
+            # Tell backend about baseline via seed_trial (bypasses ask-before-tell)
+            tell_objectives = dict(outcome.objectives)
+            if not outcome.result.success and outcome.result.error:
+                tell_objectives["_error"] = outcome.result.error
+            cfg.backend.seed_trial(baseline, cfg.budget_max, tell_objectives)
+
+            # Record baseline trial
+            recorded_val_bpb = outcome.result.val_bpb
+            if recorded_val_bpb is None and hasattr(cfg.backend, 'FAILURE_PENALTY'):
+                recorded_val_bpb = cfg.backend.FAILURE_PENALTY
+
+            record = TrialRecord(
+                trial_id=0,
+                backend=cfg.backend.name,
+                generation=0,
+                config=baseline,
+                budget=cfg.budget_max,
+                val_bpb=recorded_val_bpb,
+                train_loss=outcome.result.train_loss,
+                peak_memory_gb=outcome.result.peak_memory_gb,
+                wall_time_seconds=outcome.result.wall_time_seconds,
+                tokens_per_second=outcome.result.tokens_per_second,
+                success=outcome.result.success,
+                error=outcome.result.error,
+                seed=cfg.seed,
+                extra_metrics=outcome.result.extra_metrics,
+            )
+            self.results_db.add(record)
+
+            if outcome.result.val_bpb is not None and outcome.result.val_bpb < self.best_val_bpb:
+                self.best_val_bpb = outcome.result.val_bpb
+                logger.info("Baseline val_bpb: %.4f", self.best_val_bpb)
+
+            start_trial_id = 1
+
         # Optional: warm-start with LLM configs (Mode C) — skip if resuming
-        if cfg.hybrid_mode == "C" and start_trial_id == 0:
+        if cfg.hybrid_mode == "C" and start_trial_id <= 1:
             self._warmstart(space, cfg.backend)
 
         # Main loop
@@ -100,6 +153,7 @@ class Runner:
             # Suggest
             hp_config, budget = cfg.backend.suggest()
             hp_config = self._to_native_types(hp_config)
+            hp_config = snap_to_power_of_2(hp_config)
 
             # Run experiment
             exp_config = ExperimentConfig(
@@ -119,6 +173,7 @@ class Runner:
             cfg.backend.tell(hp_config, budget, tell_objectives)
 
             # Record — use penalty value for failed trials so replay() is consistent
+            # (LLAMBO doesn't use FAILURE_PENALTY; it reports FAIL state instead)
             recorded_val_bpb = outcome.result.val_bpb
             if recorded_val_bpb is None and hasattr(cfg.backend, 'FAILURE_PENALTY'):
                 recorded_val_bpb = cfg.backend.FAILURE_PENALTY

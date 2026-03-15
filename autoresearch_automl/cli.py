@@ -93,7 +93,7 @@ def run(
         backend_kwargs["storage"] = storage
     if llm_model and backend in ("llm_greedy", "llambo"):
         backend_kwargs["model"] = llm_model
-    if backend == "llambo":
+    if backend in ("llambo", "llm_greedy"):
         backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(backend, **backend_kwargs)
 
@@ -137,6 +137,8 @@ def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir:
     backend_kwargs = {}
     if llm_model and method in ("llm_greedy", "llambo"):
         backend_kwargs["model"] = llm_model
+    if method in ("llambo", "llm_greedy"):
+        backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(method, **backend_kwargs)
 
     train_py_path = Path(train_py)

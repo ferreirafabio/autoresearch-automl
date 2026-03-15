@@ -125,6 +125,8 @@ class ResultsDB:
                 objectives["peak_memory_gb"] = r.peak_memory_gb
             if r.wall_time_seconds is not None:
                 objectives["wall_time_seconds"] = r.wall_time_seconds
+            if r.error is not None:
+                objectives["_error"] = r.error
             history.append((r.config, r.budget, objectives))
         return history
 

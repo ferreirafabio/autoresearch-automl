@@ -60,6 +60,17 @@ class HPOBackend(ABC):
         For multi-objective: Pareto front.
         """
 
+    def seed_trial(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
+        """Inject a known-good baseline result without going through suggest/tell.
+
+        This allows all backends to start from the same baseline config (e.g.,
+        Karpathy's hand-tuned defaults) before their first suggest() call.
+
+        Default implementation calls tell() — backends with ask-before-tell
+        requirements should override this.
+        """
+        self.tell(config, budget, results)
+
     def replay(self, history: list[tuple[dict[str, Any], float, dict[str, float]]]) -> None:
         """Replay completed trials to reconstruct optimizer state after preemption.
 
