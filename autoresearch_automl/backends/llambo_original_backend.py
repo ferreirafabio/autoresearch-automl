@@ -213,6 +213,17 @@ class LLAMBOOriginalBackend(HPOBackend):
         # Create OpenAI client (reads OPENAI_BASE_URL + OPENAI_API_KEY from env)
         client = OpenAI()
 
+        # Auto-increase max_tokens for large thinking models
+        if self._max_tokens <= 500:
+            model_lower = self._model.lower()
+            if any(s in model_lower for s in ["27b", "32b", "35b", "70b"]):
+                self._max_tokens = 4096
+                logger.info(
+                    "Auto-increased max_tokens to %d for large model %s",
+                    self._max_tokens,
+                    self._model,
+                )
+
         # Setup logging
         if self._log_dir is not None:
             self._llm_logger = LLMCallLogger(
