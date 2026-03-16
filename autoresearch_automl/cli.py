@@ -17,6 +17,7 @@ BACKEND_REGISTRY = {
     "llm_greedy": "autoresearch_automl.backends.llm_greedy_backend:LLMGreedyBackend",
     "optuna": "autoresearch_automl.backends.optuna_backend:OptunaBackend",
     "llambo": "autoresearch_automl.backends.llambo_backend:LLAMBOBackend",
+    "llambo_original": "autoresearch_automl.backends.llambo_original_backend:LLAMBOOriginalBackend",
     "smac": "autoresearch_automl.backends.smac_backend:SMACBackend",
     "dehb": "autoresearch_automl.backends.dehb_backend:DEHBBackend",
     "bohb": "autoresearch_automl.backends.bohb_backend:BOHBBackend",
@@ -91,9 +92,9 @@ def run(
     backend_kwargs = {}
     if backend == "optuna" and storage:
         backend_kwargs["storage"] = storage
-    if llm_model and backend in ("llm_greedy", "llambo"):
+    if llm_model and backend in ("llm_greedy", "llambo", "llambo_original"):
         backend_kwargs["model"] = llm_model
-    if backend in ("llambo", "llm_greedy"):
+    if backend in ("llambo", "llambo_original", "llm_greedy"):
         backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(backend, **backend_kwargs)
 
@@ -135,9 +136,9 @@ def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir:
 
     sc = get_scenario(scenario)
     backend_kwargs = {}
-    if llm_model and method in ("llm_greedy", "llambo"):
+    if llm_model and method in ("llm_greedy", "llambo", "llambo_original"):
         backend_kwargs["model"] = llm_model
-    if method in ("llambo", "llm_greedy"):
+    if method in ("llambo", "llambo_original", "llm_greedy"):
         backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(method, **backend_kwargs)
 

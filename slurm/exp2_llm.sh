@@ -13,11 +13,13 @@ set -euo pipefail
 # Usage:
 #   sbatch slurm/exp2_llm.sh llm_greedy 0
 #   sbatch slurm/exp2_llm.sh llambo 0
+#   sbatch slurm/exp2_llm.sh llambo 0 Qwen3.5-27B nothink   # thinking off comparison
 
-BACKEND="${1:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name]}"
-SEED="${2:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name]}"
+BACKEND="${1:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name] [nothink]}"
+SEED="${2:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name] [nothink]}"
 MODELS_BASE="/work/dlclarge1/ferreira-autoresearch-automl/models"
 MODEL_NAME="${3:-Qwen3.5-0.8B}"
+THINKING_OVERRIDE="${4:-}"  # pass "nothink" to force thinking off
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 # Include model name in results dir when non-default model is specified
@@ -25,7 +27,11 @@ if [ "${MODEL_NAME}" = "Qwen3.5-0.8B" ]; then
     RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
 else
     MODEL_TAG=$(echo "${MODEL_NAME}" | tr '.' '_' | tr '-' '_')
-    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}/seed_${SEED}"
+    NOTHINK_SUFFIX=""
+    if [ "${THINKING_OVERRIDE}" = "nothink" ]; then
+        NOTHINK_SUFFIX="_nothink"
+    fi
+    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
 fi
 TRIALS=9999
 VLLM_PORT=$((8100 + RANDOM % 900))
@@ -45,6 +51,11 @@ case "${MODEL_NAME}" in
     Qwen3-32B-AWQ) VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~112GB" ;;
     *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB"; ENABLE_THINKING="false" ;;
 esac
+
+# Override thinking if "nothink" flag is passed
+if [ "${THINKING_OVERRIDE}" = "nothink" ]; then
+    ENABLE_THINKING="false"
+fi
 
 if [ ! -d "$MODEL_DIR" ]; then
     echo "Error: Model not found at $MODEL_DIR"
@@ -76,6 +87,10 @@ mkdir -p "$RESULTS_DIR"
 REASONING_ARGS=""
 if [ "$ENABLE_THINKING" = "true" ]; then
     REASONING_ARGS="--reasoning-parser qwen3 --default-chat-template-kwargs {\"enable_thinking\":true}"
+else
+    # Explicitly disable thinking for models that support it (Qwen3.5-9B+)
+    # Without this, large models still "think" in plain text inside content
+    REASONING_ARGS="--default-chat-template-kwargs {\"enable_thinking\":false}"
 fi
 
 echo "Starting vLLM server (port ${VLLM_PORT}, gpu_util=${VLLM_GPU_UTIL}, thinking=${ENABLE_THINKING})..."

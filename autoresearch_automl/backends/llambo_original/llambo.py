@@ -1,0 +1,194 @@
+"""LLAMBO orchestrator — adapted from original paper code.
+
+Manages the surrogate model and acquisition function to propose
+configurations. Does NOT own the evaluation loop (that's the backend's job).
+
+Adapted from: tennisonliu/LLAMBO (llambo.py)
+Changes: removed init_f/bbox_eval_f, sample_configuration() replaces optimize(),
+added update_observations() for external tell() calls.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import pandas as pd
+
+from autoresearch_automl.backends.llambo_original.acquisition_function import LLM_ACQ
+from autoresearch_automl.backends.llambo_original.discriminative_sm import LLM_DIS_SM
+
+logger = logging.getLogger(__name__)
+
+
+class LLAMBO:
+    """LLAMBO optimizer — coordinates acquisition + discriminative surrogate.
+
+    Usage:
+        llambo = LLAMBO(task_context, ...)
+        llambo.update_observations(config_dict, fval)  # seed baseline
+        config = llambo.sample_configuration()  # get next suggestion
+        # ... evaluate config externally ...
+        llambo.update_observations(config_dict, fval)  # report result
+        config = llambo.sample_configuration()  # next suggestion
+    """
+
+    def __init__(
+        self,
+        task_context: dict,
+        n_candidates: int = 10,
+        n_templates: int = 1,
+        n_gens: int = 5,
+        alpha: float = -0.2,
+        chat_engine: str | None = None,
+        client: Any = None,
+        max_tokens: int = 500,
+        timeout: float = 600.0,
+        prompt_setting: str | None = None,
+        shuffle_features: bool = False,
+        llm_call_logger: Any = None,
+    ):
+        self.task_context = task_context
+        self.lower_is_better = task_context["lower_is_better"]
+        self.n_candidates = n_candidates
+        self.n_templates = n_templates
+        self.n_gens = n_gens
+        self.alpha = alpha
+
+        self.observed_configs = pd.DataFrame()
+        self.observed_fvals = pd.DataFrame()
+
+        # Column order (set from first observation)
+        self._hp_names: list[str] | None = None
+
+        # Initialize surrogate model (discriminative — uses actual metric values)
+        self.surrogate_model = LLM_DIS_SM(
+            task_context,
+            n_gens,
+            self.lower_is_better,
+            n_templates=n_templates,
+            chat_engine=chat_engine,
+            prompt_setting=prompt_setting,
+            shuffle_features=shuffle_features,
+            client=client,
+            max_tokens=max_tokens,
+            timeout=timeout,
+            llm_call_logger=llm_call_logger,
+        )
+
+        # Initialize acquisition function
+        self.acq_func = LLM_ACQ(
+            task_context,
+            n_candidates,
+            n_templates,
+            self.lower_is_better,
+            chat_engine=chat_engine,
+            prompt_setting=prompt_setting,
+            shuffle_features=shuffle_features,
+            client=client,
+            max_tokens=max_tokens,
+            timeout=timeout,
+            llm_call_logger=llm_call_logger,
+        )
+
+        logger.info(
+            "[LLAMBO] Initialized: n_candidates=%d, n_templates=%d, n_gens=%d, "
+            "alpha=%.2f, lower_is_better=%s",
+            n_candidates,
+            n_templates,
+            n_gens,
+            alpha,
+            self.lower_is_better,
+        )
+
+    def update_observations(self, config_dict: dict, fval: float) -> None:
+        """Add an observation to the history.
+
+        Args:
+            config_dict: HP name → value (must use LLAMBO-internal encoding,
+                         e.g. ordinal integers for WINDOW_PATTERN).
+            fval: Observed performance value (or penalty for failures).
+        """
+        if self._hp_names is None:
+            self._hp_names = list(config_dict.keys())
+
+        # Ensure consistent column order
+        ordered = {k: config_dict[k] for k in self._hp_names}
+
+        new_config = pd.DataFrame([ordered])
+        new_fval = pd.DataFrame([{"score": fval}])
+
+        if self.observed_configs.empty:
+            self.observed_configs = new_config
+        else:
+            self.observed_configs = pd.concat(
+                [self.observed_configs, new_config], axis=0, ignore_index=True
+            )
+
+        if self.observed_fvals.empty:
+            self.observed_fvals = new_fval
+        else:
+            self.observed_fvals = pd.concat(
+                [self.observed_fvals, new_fval], axis=0, ignore_index=True
+            )
+
+        # Update num_samples in task_context
+        self.task_context["num_samples"] = len(self.observed_fvals)
+
+        logger.info(
+            "[LLAMBO] Observation added: fval=%.6f (total: %d observations)",
+            fval,
+            len(self.observed_fvals),
+        )
+
+    def sample_configuration(self) -> dict:
+        """Sample the next configuration to evaluate.
+
+        Returns:
+            dict mapping HP names to values.
+
+        Raises:
+            RuntimeError: if acquisition or surrogate fails completely.
+        """
+        if self.observed_fvals.empty:
+            raise RuntimeError("Need at least one observation before sampling")
+
+        # Step 1: Generate candidate points via acquisition function
+        candidate_points, acq_time = self.acq_func.get_candidate_points(
+            self.observed_configs,
+            self.observed_fvals[["score"]],
+            alpha=self.alpha,
+        )
+
+        logger.info(
+            "[LLAMBO] ACQ generated %d candidates in %.1fs",
+            candidate_points.shape[0],
+            acq_time,
+        )
+
+        # Ensure candidates have the same columns as observed configs
+        # (ACQ might return different column order or extra/missing columns)
+        expected_cols = set(self._hp_names)
+        actual_cols = set(candidate_points.columns)
+        if actual_cols != expected_cols:
+            logger.warning(
+                "[LLAMBO] Candidate columns mismatch: expected %s, got %s",
+                expected_cols,
+                actual_cols,
+            )
+            # Keep only columns that exist in both, add missing with defaults
+            for col in expected_cols - actual_cols:
+                # Use median of observed values as fallback
+                candidate_points[col] = self.observed_configs[col].median()
+            candidate_points = candidate_points[self._hp_names]
+
+        # Step 2: Select best candidate using discriminative surrogate
+        sel_candidate, sm_time = self.surrogate_model.select_query_point(
+            self.observed_configs,
+            self.observed_fvals[["score"]],
+            candidate_points,
+        )
+
+        logger.info("[LLAMBO] SM selected candidate in %.1fs", sm_time)
+
+        return sel_candidate.to_dict("records")[0]
