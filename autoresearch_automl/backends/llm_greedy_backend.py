@@ -102,12 +102,20 @@ class LLMGreedyBackend(HPOBackend):
                 model=self._model,
                 messages=messages,
                 temperature=0.7,
-                max_tokens=1024,
+                max_tokens=16384,
             )
             elapsed = time.time() - t0
             msg = response.choices[0].message
+            # vLLM 0.17+ with --reasoning-parser: thinking in model_extra["reasoning"],
+            # content in msg.content. Small models may put everything in reasoning
+            # with empty content — fall back to reasoning as the response text.
+            extra = getattr(msg, "model_extra", {}) or {}
+            thinking = extra.get("reasoning") or getattr(msg, "reasoning_content", None) or ""
             text = (msg.content or "").strip()
-            thinking = getattr(msg, "reasoning_content", None) or ""
+            if not text and thinking:
+                # Model put entire output in <think> tags — use reasoning as response
+                text = thinking.strip()
+                thinking = ""  # no separate thinking trace available
 
             # Buffer for logging — will be flushed in tell() with trial result
             self._pending_llm_call = {

@@ -32,15 +32,18 @@ VLLM_PORT=$((8100 + RANDOM % 900))
 
 # Adjust vLLM GPU memory, available VRAM, and extra flags based on model size
 # Values measured via slurm/test_vram_usage.sh on H200 (140 GiB)
+# Small models (<= 4B) can't do proper thinking (infinite <think> loop, never produce answer)
+# Large models (>= 9B) produce proper <think>...</think> + answer with reasoning parser
 VLLM_EXTRA_ARGS=""
+ENABLE_THINKING="true"
 case "${MODEL_NAME}" in
-    Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB" ;;
-    Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB" ;;
+    Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB"; ENABLE_THINKING="false" ;;
+    Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB"; ENABLE_THINKING="false" ;;
     Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB" ;;
     Qwen3.5-27B)   VLLM_GPU_UTIL=0.45; AVAILABLE_VRAM="~76GB"; VLLM_EXTRA_ARGS="--enforce-eager" ;;
     Qwen3.5-35B*)  VLLM_GPU_UTIL=0.55; AVAILABLE_VRAM="~62GB"; VLLM_EXTRA_ARGS="--enforce-eager" ;;
     Qwen3-32B-AWQ) VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~112GB" ;;
-    *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB" ;;
+    *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB"; ENABLE_THINKING="false" ;;
 esac
 
 if [ ! -d "$MODEL_DIR" ]; then
@@ -70,13 +73,19 @@ echo "=============================================="
 mkdir -p "$RESULTS_DIR"
 
 # Start vLLM server in background
-echo "Starting vLLM server (port ${VLLM_PORT}, gpu_util=${VLLM_GPU_UTIL})..."
+REASONING_ARGS=""
+if [ "$ENABLE_THINKING" = "true" ]; then
+    REASONING_ARGS="--reasoning-parser qwen3 --default-chat-template-kwargs {\"enable_thinking\":true}"
+fi
+
+echo "Starting vLLM server (port ${VLLM_PORT}, gpu_util=${VLLM_GPU_UTIL}, thinking=${ENABLE_THINKING})..."
 vllm serve "$MODEL_DIR" \
     --host 127.0.0.1 --port $VLLM_PORT \
     --tensor-parallel-size 1 \
     --dtype bfloat16 \
     --max-model-len 32768 \
     --gpu-memory-utilization $VLLM_GPU_UTIL \
+    $REASONING_ARGS \
     $VLLM_EXTRA_ARGS &
 VLLM_PID=$!
 

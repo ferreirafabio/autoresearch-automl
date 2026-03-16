@@ -65,7 +65,9 @@ class LLMCallLogger:
                 def _create_with_thinking(*args: Any, **kwargs: Any) -> Any:
                     completion = orig_create(*args, **kwargs)
                     msg = completion.choices[0].message if completion.choices else None
-                    thinking = getattr(msg, "reasoning_content", None) if msg else None
+                    # vLLM 0.17+ with --reasoning-parser: thinking in model_extra["reasoning"]
+                    extra = (getattr(msg, "model_extra", {}) or {}) if msg else {}
+                    thinking = extra.get("reasoning") or getattr(msg, "reasoning_content", None) if msg else None
                     if thinking:
                         thinking_content.append(thinking)
                     return completion
