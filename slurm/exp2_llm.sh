@@ -41,21 +41,17 @@ VLLM_PORT=$((8100 + RANDOM % 900))
 # Small models (<= 4B) can't do proper thinking (infinite <think> loop, never produce answer)
 # Large models (>= 9B) produce proper <think>...</think> + answer with reasoning parser
 VLLM_EXTRA_ARGS=""
-ENABLE_THINKING="true"
+# Thinking disabled for all models — thinking traces waste tokens on structured HP output
+ENABLE_THINKING="false"
 case "${MODEL_NAME}" in
-    Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB"; ENABLE_THINKING="false" ;;
-    Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB"; ENABLE_THINKING="false" ;;
+    Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB" ;;
+    Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB" ;;
     Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB"; VLLM_EXTRA_ARGS="--enable-prefix-caching" ;;
     Qwen3.5-27B)   VLLM_GPU_UTIL=0.45; AVAILABLE_VRAM="~76GB"; VLLM_EXTRA_ARGS="--enforce-eager --enable-prefix-caching" ;;
     Qwen3.5-35B*)  VLLM_GPU_UTIL=0.55; AVAILABLE_VRAM="~62GB"; VLLM_EXTRA_ARGS="--enforce-eager --enable-prefix-caching" ;;
     Qwen3-32B-AWQ) VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~112GB" ;;
-    *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB"; ENABLE_THINKING="false" ;;
+    *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB" ;;
 esac
-
-# Override thinking if "nothink" flag is passed
-if [ "${THINKING_OVERRIDE}" = "nothink" ]; then
-    ENABLE_THINKING="false"
-fi
 
 if [ ! -d "$MODEL_DIR" ]; then
     echo "Error: Model not found at $MODEL_DIR"

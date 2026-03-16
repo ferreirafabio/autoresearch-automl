@@ -102,7 +102,7 @@ class LLMGreedyBackend(HPOBackend):
                 model=self._model,
                 messages=messages,
                 temperature=0.7,
-                max_tokens=16384,
+                max_tokens=2048,
             )
             elapsed = time.time() - t0
             msg = response.choices[0].message

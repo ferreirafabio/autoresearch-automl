@@ -200,7 +200,7 @@ class LLAMBOBackend(HPOBackend):
             if name.endswith("llambo.llm") and mod is not None
         )
 
-        # Patch OpenAI client creation to always inject max_tokens=16384
+        # Patch OpenAI client creation to always inject max_tokens=2048
         # (OptunaHub LLAMBO doesn't set max_tokens, which is fine for
         # non-thinking models but we want consistency across all backends)
         self._patch_max_tokens(llm_mod.OpenAI_interface)
@@ -222,6 +222,7 @@ class LLAMBOBackend(HPOBackend):
             "model": self._model,
             "n_initial_samples": self._n_initial_samples,
             "sm_mode": "discriminative",
+            "alpha": -0.2,
         }
 
         if self._api_base:
@@ -238,7 +239,7 @@ class LLAMBOBackend(HPOBackend):
 
     @staticmethod
     def _patch_max_tokens(openai_interface_cls: type) -> None:
-        """Patch OpenAI_interface to inject max_tokens=16384 into all LLM calls."""
+        """Patch OpenAI_interface to inject max_tokens=2048 into all LLM calls."""
         original_init = openai_interface_cls.__init__
         if getattr(original_init, "_max_tokens_patched", False):
             return
@@ -260,7 +261,7 @@ class LLAMBOBackend(HPOBackend):
 
         _patched_init._max_tokens_patched = True  # type: ignore[attr-defined]
         openai_interface_cls.__init__ = _patched_init
-        logger.info("Patched OpenAI_interface to inject max_tokens=16384")
+        logger.info("Patched OpenAI_interface to inject max_tokens=2048")
 
     def _build_task_description(self) -> str:
         """Build task description with failure context appended."""

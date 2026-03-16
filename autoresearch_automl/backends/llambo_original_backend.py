@@ -165,11 +165,11 @@ class LLAMBOOriginalBackend(HPOBackend):
         self,
         model: str = "gpt-4o-mini",
         log_dir: Path | None = None,
-        max_tokens: int = 16384,
+        max_tokens: int = 2048,
         timeout: float = 600.0,
         n_candidates: int = 10,
         n_templates: int = 1,
-        n_gens: int = 5,
+        n_gens: int = 10,
         alpha: float = -0.2,
         task_description: str | None = None,
     ):

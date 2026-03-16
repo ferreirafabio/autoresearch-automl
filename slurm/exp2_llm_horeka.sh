@@ -2,7 +2,7 @@
 #SBATCH --job-name=exp2-llm
 #SBATCH --partition=accelerated-h200
 #SBATCH --account=hk-project-p0024002
-#SBATCH --gpus=1
+#SBATCH --gres=gpu:1
 #SBATCH --time=24:00:00
 #SBATCH --output=/hkfs/work/workspace/scratch/fr_ff1042-autoresearch/logs/exp2_%x_%j.log
 #SBATCH --requeue
