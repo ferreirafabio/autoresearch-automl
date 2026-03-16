@@ -17,21 +17,25 @@ LLAMBO uses self-hosted open source LLMs (Qwen3.5 via vLLM), running on the same
 
 ## Results (in progress)
 
-### TPE vs LLAMBO
+### 0.8B: TPE vs LLAMBO vs LLM Greedy
 
-LLAMBO converges faster in the first ~20 trials. TPE catches up given enough budget. Experiments still running (24h Slurm jobs, 3 seeds each).
+TPE dominates with 0.8B — reaches ~0.978 by trial 40. LLAMBO (OptunaHub) and LLM Greedy plateau around 1.00 with high variance. LLAMBO 0.8B has a 70% failure rate due to random categorical sampling producing OOM configs.
 
-![TPE vs LLAMBO convergence](assets/exp2_tpe_vs_llambo.png)
+![0.8B convergence](assets/exp2_0.8b_convergence.png)
 
-### LLM model size
+### 27B with thinking (in progress)
 
-0.8B finds good configs from the start. 9B starts worse but converges to the same level after ~15 trials. Bigger is not better for HP suggestions.
+27B experiments restarted with standardized settings (max_tokens=16384, prefix caching). Results accumulating.
 
-![LLM model size comparison](assets/exp1_model_size.png)
+![27B think convergence](assets/exp2_27b_think_convergence.png)
 
-### Autoresearch LLAMBO Progress
+### 27B without thinking (in progress)
 
-Grey dots are discarded trials, colored dots are new bests, staircase is the running best.
+![27B nothink convergence](assets/exp2_27b_nothink_convergence.png)
+
+### Progress (seed 0)
+
+Grey dots are all trials, colored dots are new bests, staircase is the running best.
 
 ![Progress plot](assets/exp2_progress.png)
 
