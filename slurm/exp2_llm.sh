@@ -2,7 +2,7 @@
 #SBATCH --job-name=exp2-llm
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
@@ -45,9 +45,9 @@ ENABLE_THINKING="true"
 case "${MODEL_NAME}" in
     Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB"; ENABLE_THINKING="false" ;;
     Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB"; ENABLE_THINKING="false" ;;
-    Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB" ;;
-    Qwen3.5-27B)   VLLM_GPU_UTIL=0.45; AVAILABLE_VRAM="~76GB"; VLLM_EXTRA_ARGS="--enforce-eager" ;;
-    Qwen3.5-35B*)  VLLM_GPU_UTIL=0.55; AVAILABLE_VRAM="~62GB"; VLLM_EXTRA_ARGS="--enforce-eager" ;;
+    Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB"; VLLM_EXTRA_ARGS="--enable-prefix-caching" ;;
+    Qwen3.5-27B)   VLLM_GPU_UTIL=0.45; AVAILABLE_VRAM="~76GB"; VLLM_EXTRA_ARGS="--enforce-eager --enable-prefix-caching" ;;
+    Qwen3.5-35B*)  VLLM_GPU_UTIL=0.55; AVAILABLE_VRAM="~62GB"; VLLM_EXTRA_ARGS="--enforce-eager --enable-prefix-caching" ;;
     Qwen3-32B-AWQ) VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~112GB" ;;
     *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB"; ENABLE_THINKING="false" ;;
 esac

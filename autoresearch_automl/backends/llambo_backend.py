@@ -192,15 +192,21 @@ class LLAMBOBackend(HPOBackend):
 
         module = optunahub.load_module("samplers/llambo")
 
-        # Patch ask_base AFTER optunahub loads llambo (makes it importable)
-        if self._log_dir is not None:
-            import sys
+        import sys
 
-            # Find the llm module optunahub loaded (full path varies)
-            llm_mod = next(
-                mod for name, mod in sys.modules.items()
-                if name.endswith("llambo.llm") and mod is not None
-            )
+        # Find the llm module optunahub loaded (full path varies)
+        llm_mod = next(
+            mod for name, mod in sys.modules.items()
+            if name.endswith("llambo.llm") and mod is not None
+        )
+
+        # Patch OpenAI client creation to always inject max_tokens=16384
+        # (OptunaHub LLAMBO doesn't set max_tokens, which is fine for
+        # non-thinking models but we want consistency across all backends)
+        self._patch_max_tokens(llm_mod.OpenAI_interface)
+
+        # Patch ask_base for LLM call logging
+        if self._log_dir is not None:
             self._llm_logger = LLMCallLogger(self._log_dir, backend_name="llambo", seed=seed)
             self._llm_logger.install(llm_mod.OpenAI_interface)
 
@@ -229,6 +235,32 @@ class LLAMBOBackend(HPOBackend):
             direction="minimize",
             sampler=sampler,
         )
+
+    @staticmethod
+    def _patch_max_tokens(openai_interface_cls: type) -> None:
+        """Patch OpenAI_interface to inject max_tokens=16384 into all LLM calls."""
+        original_init = openai_interface_cls.__init__
+        if getattr(original_init, "_max_tokens_patched", False):
+            return
+
+        def _patched_init(self_inner: Any, *args: Any, **kwargs: Any) -> None:
+            original_init(self_inner, *args, **kwargs)
+            # Wrap client.create to inject max_tokens
+            client = getattr(self_inner, "client", None)
+            if client and not getattr(client, "_max_tokens_patched", False):
+                orig_create = client.chat.completions.create
+
+                def _create_with_max_tokens(*a: Any, **kw: Any) -> Any:
+                    if "max_tokens" not in kw:
+                        kw["max_tokens"] = 16384
+                    return orig_create(*a, **kw)
+
+                client.chat.completions.create = _create_with_max_tokens
+                client._max_tokens_patched = True  # type: ignore[attr-defined]
+
+        _patched_init._max_tokens_patched = True  # type: ignore[attr-defined]
+        openai_interface_cls.__init__ = _patched_init
+        logger.info("Patched OpenAI_interface to inject max_tokens=16384")
 
     def _build_task_description(self) -> str:
         """Build task description with failure context appended."""

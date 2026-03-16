@@ -165,7 +165,7 @@ class LLAMBOOriginalBackend(HPOBackend):
         self,
         model: str = "gpt-4o-mini",
         log_dir: Path | None = None,
-        max_tokens: int = 500,
+        max_tokens: int = 16384,
         timeout: float = 600.0,
         n_candidates: int = 10,
         n_templates: int = 1,
@@ -213,16 +213,6 @@ class LLAMBOOriginalBackend(HPOBackend):
         # Create OpenAI client (reads OPENAI_BASE_URL + OPENAI_API_KEY from env)
         client = OpenAI()
 
-        # Auto-increase max_tokens for large thinking models
-        if self._max_tokens <= 500:
-            model_lower = self._model.lower()
-            if any(s in model_lower for s in ["27b", "32b", "35b", "70b"]):
-                self._max_tokens = 4096
-                logger.info(
-                    "Auto-increased max_tokens to %d for large model %s",
-                    self._max_tokens,
-                    self._model,
-                )
 
         # Setup logging
         if self._log_dir is not None:
