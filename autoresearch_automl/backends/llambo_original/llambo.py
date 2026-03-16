@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from autoresearch_automl.backends.llambo_original.acquisition_function import LLM_ACQ
@@ -169,18 +170,32 @@ class LLAMBO:
         # Ensure candidates have the same columns as observed configs
         # (ACQ might return different column order or extra/missing columns)
         expected_cols = set(self._hp_names)
-        actual_cols = set(candidate_points.columns)
-        if actual_cols != expected_cols:
+        if not candidate_points.empty:
+            actual_cols = set(candidate_points.columns)
+            if actual_cols != expected_cols:
+                logger.warning(
+                    "[LLAMBO] Candidate columns mismatch: expected %s, got %s",
+                    expected_cols,
+                    actual_cols,
+                )
+                # Keep only columns that exist in both, add missing with defaults
+                for col in expected_cols - actual_cols:
+                    candidate_points[col] = self.observed_configs[col].median()
+                candidate_points = candidate_points[self._hp_names]
+
+        # Pad with random candidates if ACQ didn't produce enough
+        min_candidates = max(self.n_candidates, 5)
+        if candidate_points.shape[0] < min_candidates:
+            n_random = min_candidates - candidate_points.shape[0]
             logger.warning(
-                "[LLAMBO] Candidate columns mismatch: expected %s, got %s",
-                expected_cols,
-                actual_cols,
+                "[LLAMBO] ACQ only produced %d candidates, adding %d random",
+                candidate_points.shape[0],
+                n_random,
             )
-            # Keep only columns that exist in both, add missing with defaults
-            for col in expected_cols - actual_cols:
-                # Use median of observed values as fallback
-                candidate_points[col] = self.observed_configs[col].median()
-            candidate_points = candidate_points[self._hp_names]
+            random_candidates = self._sample_random_candidates(n_random)
+            candidate_points = pd.concat(
+                [candidate_points, random_candidates], ignore_index=True
+            )
 
         # Step 2: Select best candidate using discriminative surrogate
         sel_candidate, sm_time = self.surrogate_model.select_query_point(
@@ -192,3 +207,39 @@ class LLAMBO:
         logger.info("[LLAMBO] SM selected candidate in %.1fs", sm_time)
 
         return sel_candidate.to_dict("records")[0]
+
+    def _sample_random_candidates(self, n: int) -> pd.DataFrame:
+        """Sample random candidates from HP ranges as fallback."""
+        rng = np.random.RandomState()
+        constraints = self.task_context["hyperparameter_constraints"]
+        samples = []
+        for _ in range(n):
+            sample = {}
+            for hp_name, (hp_type, transform, search_range) in constraints.items():
+                if hp_type == "int":
+                    if transform == "log":
+                        log_val = rng.uniform(
+                            np.log(search_range[0]), np.log(search_range[1])
+                        )
+                        sample[hp_name] = int(round(np.exp(log_val)))
+                    else:
+                        sample[hp_name] = rng.randint(
+                            search_range[0], search_range[1] + 1
+                        )
+                elif hp_type == "float":
+                    if transform == "log":
+                        log_val = rng.uniform(
+                            np.log(search_range[0] + 1e-10),
+                            np.log(search_range[1] + 1e-10),
+                        )
+                        sample[hp_name] = np.exp(log_val)
+                    else:
+                        sample[hp_name] = rng.uniform(
+                            search_range[0], search_range[1]
+                        )
+                elif hp_type == "ordinal":
+                    sample[hp_name] = rng.choice(search_range)
+                else:
+                    sample[hp_name] = search_range[0]
+            samples.append(sample)
+        return pd.DataFrame(samples)

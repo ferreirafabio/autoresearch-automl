@@ -537,5 +537,9 @@ class LLM_ACQ:
                     )
                     raise RuntimeError("LLM failed to generate candidate points")
 
+        # Deduplicate across retry attempts
+        if not filtered_candidate_points.empty:
+            filtered_candidate_points = filtered_candidate_points.drop_duplicates().reset_index(drop=True)
+
         time_taken = time.time() - start_time
         return filtered_candidate_points, time_taken
