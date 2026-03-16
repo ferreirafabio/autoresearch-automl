@@ -2,7 +2,7 @@
 #SBATCH --job-name=exp2-llm
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 #SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
@@ -33,7 +33,7 @@ else
     fi
     RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
 fi
-TRIALS=9999
+TRIALS=200
 VLLM_PORT=$((8100 + RANDOM % 900))
 
 # Adjust vLLM GPU memory, available VRAM, and extra flags based on model size
