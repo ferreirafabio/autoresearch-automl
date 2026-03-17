@@ -95,7 +95,9 @@ class SMACBackend(HPOBackend):
 
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
         from smac.runhistory import TrialValue
-        value = TrialValue(cost=[results.get(o, float("inf")) for o in self._objectives])
+        # Use inf for None/missing objectives (failed trials return val_bpb=None)
+        cost = [results.get(o) if results.get(o) is not None else float("inf") for o in self._objectives]
+        value = TrialValue(cost=cost)
         self._facade.tell(self._pending_info, value)
         self._results.append((config, budget, results))
 
@@ -104,7 +106,7 @@ class SMACBackend(HPOBackend):
         from ConfigSpace import Configuration
 
         cfg = Configuration(self._space, values=config)
-        cost = [results.get(o, float("inf")) for o in self._objectives]
+        cost = [results.get(o) if results.get(o) is not None else float("inf") for o in self._objectives]
         self._facade.runhistory.add(
             config=cfg,
             cost=cost,
@@ -121,7 +123,7 @@ class SMACBackend(HPOBackend):
         for config_dict, budget, results in history:
             try:
                 config = Configuration(self._space, values=config_dict)
-                cost = [results.get(o, float("inf")) for o in self._objectives]
+                cost = [results.get(o) if results.get(o) is not None else float("inf") for o in self._objectives]
                 self._facade.runhistory.add(
                     config=config,
                     cost=cost,
