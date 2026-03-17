@@ -15,6 +15,7 @@ authors = [
 
 dependencies = [
     "optuna>=4.0",
+    "cmaes>=0.12",
     "optunahub>=0.1",
     "ConfigSpace>=1.0",
     "openai>=1.0",

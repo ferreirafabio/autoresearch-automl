@@ -16,6 +16,7 @@ set -euo pipefail
 #   sbatch slurm/exp2_classical.sh smac 0
 #   sbatch slurm/exp2_classical.sh dehb 0
 #   sbatch slurm/exp2_classical.sh bohb 0
+#   sbatch slurm/exp2_classical.sh cma_es 0
 
 BACKEND="${1:?Usage: sbatch exp2_classical.sh <backend> <seed>}"
 SEED="${2:?Usage: sbatch exp2_classical.sh <backend> <seed>}"

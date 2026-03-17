@@ -9,17 +9,17 @@ As an AutoML enthusiast, it felt natural to fill this void — this repo applies
 
 ## Setup
 
-I run [Optuna](https://github.com/optuna/optuna) TPE and [LLAMBO via OptunaHub](https://hub.optuna.org/samplers/llambo/) on Karpathy's autoresearch training task: single GPU, 5 min budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py by parsing the source code for ALL_CAPS variable assignments. No manual HP curation. Ravid Shwartz-Ziv showed that expert-picked HPs matter. I deliberately avoid expert curation to test whether LLAMBO can compensate through pretrained knowledge.
+We benchmark 7 HPO backends on Karpathy's autoresearch training task: single H200 GPU, 5-minute budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py by parsing the source code — no manual HP curation.
 
-LLAMBO uses self-hosted open source LLMs (Qwen3.5 via vLLM), running on the same GPU as training. I also compare different LLM sizes to check whether a larger model actually produces better suggestions. No API keys, no proprietary models, fully reproducible.
+**Backends:**
+- **Classical:** Optuna TPE, Random Search, SMAC3, CMA-ES
+- **LLM-based:** LLAMBO (OptunaHub), LLAMBO Original (paper-faithful), LLM Greedy
+
+LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on the same GPU as training. No API keys, no proprietary models, fully reproducible. Each condition runs 3 seeds.
 
 **Note on failure handling:** Infeasible configs (OOM, batch size assertion errors) are reported to the sampler as `val_bpb=100.0` instead of being silently dropped. Both TPE and LLAMBO otherwise ignore failed trials (`TrialState.FAIL`), which means they never learn to avoid bad regions. The penalty value is hardcoded for this task (real val_bpb ranges 0.99–2.4) — for other tasks, this would need adjustment.
 
-## Note: H200 vs H100 baseline offset
-
-Our baseline (Karpathy's default config) achieves val_bpb=1.008 on H200, while Karpathy reports ~0.998 on H100. Same code, same config, same `torch.compile` + FA3. The gap is entirely due to **GPU power throttling**: H200's HBM3e memory (4.8 TB/s) draws more power than H100's HBM3 (3.35 TB/s), leaving less of the shared 700W TDP for the SMs. Under sustained load, our H200 clocks down to ~1600 MHz (81% of max 1980 MHz), yielding 18% fewer training steps per 5-minute trial. Adjusting for actual clock speed, compute efficiency is identical (40.3% vs 39.8% MFU). This baseline offset does not affect HPO convergence.
-
-## Results (in progress)
+## Results
 
 ### 0.8B: TPE vs LLAMBO vs LLM Greedy
 
@@ -27,21 +27,39 @@ TPE dominates with 0.8B — reaches ~0.978 by trial 40. LLAMBO (OptunaHub) and L
 
 ![0.8B convergence](assets/exp2_0.8b_convergence.png)
 
-### 27B with thinking (in progress)
+### 27B: TPE vs LLAMBO vs LLM Greedy
 
-27B experiments restarted with standardized settings (max_tokens=16384, prefix caching). Results accumulating.
+Scaling to 27B improves all LLM-based backends. LLAMBO Original 27B reaches ~0.989 — the best LLM method, only 1.3% behind TPE. LLM Greedy 27B is competitive at ~0.995 with a 99% success rate.
 
-![27B think convergence](assets/exp2_27b_think_convergence.png)
+![27B convergence](assets/exp2_27b_convergence.png)
 
-### 27B without thinking (in progress)
+### All backends combined
 
-![27B nothink convergence](assets/exp2_27b_nothink_convergence.png)
+![All backends convergence](assets/exp2_all_convergence.png)
+
+### Model size comparison (0.8B vs 27B)
+
+![Model size comparison](assets/exp2_model_size.png)
 
 ### Progress (seed 0)
 
 Grey dots are all trials, colored dots are new bests, staircase is the running best.
 
-![Progress plot](assets/exp2_progress.png)
+**0.8B:**
+
+| | | |
+|---|---|---|
+| ![TPE](assets/progress_optuna.png) | ![LLAMBO](assets/progress_llambo.png) | ![LLAMBO Original](assets/progress_llambo_original.png) |
+| TPE | LLAMBO (OptunaHub) | LLAMBO Original |
+| ![LLM Greedy](assets/progress_llm_greedy.png) | | |
+| LLM Greedy | | |
+
+**27B:**
+
+| | | |
+|---|---|---|
+| ![LLAMBO 27B](assets/progress_llambo_Qwen3_5_27B_nothink.png) | ![LLAMBO Original 27B](assets/progress_llambo_original_Qwen3_5_27B_nothink.png) | ![LLM Greedy 27B](assets/progress_llm_greedy_Qwen3_5_27B_nothink.png) |
+| LLAMBO 27B | LLAMBO Original 27B | LLM Greedy 27B |
 
 ## Usage
 
@@ -53,13 +71,34 @@ uv pip install -e ".[dev,all]"
 # TPE
 python -m autoresearch_automl.cli run --backend optuna --trials 100 --seed 0
 
+# Random Search
+python -m autoresearch_automl.cli run --backend random --trials 100 --seed 0
+
+# SMAC3
+python -m autoresearch_automl.cli run --backend smac --trials 100 --seed 0
+
+# CMA-ES
+python -m autoresearch_automl.cli run --backend cma_es --trials 100 --seed 0
+
 # LLAMBO (requires vLLM running)
 export OPENAI_BASE_URL=http://127.0.0.1:8000/v1
 export OPENAI_API_KEY=dummy
 python -m autoresearch_automl.cli run --backend llambo --trials 100 --llm-model Qwen3.5-0.8B
+
+# LLAMBO Original (paper-faithful)
+python -m autoresearch_automl.cli run --backend llambo_original --trials 100 --llm-model Qwen3.5-0.8B
+
+# LLM Greedy
+python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-model Qwen3.5-0.8B
 ```
 
-## Note: OptunaHub LLAMBO vs Original Paper
+## Notes
+
+### H200 vs H100 baseline offset
+
+Our baseline (Karpathy's default config) achieves val_bpb=1.008 on H200, while Karpathy reports ~0.998 on H100. Same code, same config, same `torch.compile` + FA3. The gap is entirely due to **GPU power throttling**: H200's HBM3e memory (4.8 TB/s) draws more power than H100's HBM3 (3.35 TB/s), leaving less of the shared 700W TDP for the SMs. Under sustained load, our H200 clocks down to ~1600 MHz (81% of max 1980 MHz), yielding 18% fewer training steps per 5-minute trial. Adjusting for actual clock speed, compute efficiency is identical (40.3% vs 39.8% MFU). This baseline offset does not affect HPO convergence.
+
+### OptunaHub LLAMBO vs Original Paper
 
 While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) in several ways that materially affect optimization quality. OptunaHub does great work making research accessible — these notes are meant to help users who need paper-faithful behavior.
 
