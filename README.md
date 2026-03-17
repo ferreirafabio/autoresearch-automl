@@ -39,9 +39,9 @@ Dashed lines are 0.8B, solid lines are 27B.
 
 ![LLM-Based vs Classical HPO](assets/exp2_all_convergence.png)
 
-### Progress (seed 0)
+### Pareto Fronts (seed 0)
 
-Grey dots are all trials, colored dots are new bests, staircase is the running best.
+Grey dots are all trials, colored dots are new bests, staircase is the Pareto front (best-so-far).
 
 **0.8B:**
 
