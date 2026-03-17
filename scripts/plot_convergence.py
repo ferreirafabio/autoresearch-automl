@@ -37,12 +37,13 @@ def plot_convergence_multi(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence",
-    ylim: tuple[float, float] = (0.97, 1.05),
+    ylim: tuple[float, float] = (0.975, 1.012),
     xlim: tuple[int, int] | None = None,
 ):
     """Plot convergence with mean +/- std across seeds for multiple backends."""
     fig, ax = plt.subplots(figsize=(10, 6))
 
+    max_trials = 0
     for backend_dir, style in backends.items():
         seed_curves = []
         for seed in range(3):
@@ -58,6 +59,7 @@ def plot_convergence_multi(
 
         # Align to shortest curve
         min_len = min(len(c) for c in seed_curves)
+        max_trials = max(max_trials, min_len)
         aligned = np.array([c[:min_len] for c in seed_curves])
         aligned[aligned == float("inf")] = np.nan
 
@@ -77,6 +79,8 @@ def plot_convergence_multi(
     ax.set_ylim(*ylim)
     if xlim:
         ax.set_xlim(*xlim)
+    else:
+        ax.set_xlim(0, max_trials)
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     ax.legend(fontsize=10, loc="upper right")
     ax.grid(True, alpha=0.3)
@@ -90,7 +94,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
     """Exp2: 0.8B model — all backends."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
-        "llambo": {"label": "LLAMBO (OptunaHub) 0.8B", "color": "#9C27B0"},
+        "llambo": {"label": "LLAMBO (Optuna) 0.8B", "color": "#9C27B0"},
         "llambo_original": {"label": "LLAMBO (Original) 0.8B", "color": "#E91E63"},
         "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800"},
     }
@@ -99,16 +103,15 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
         backends,
         output_path,
         title="Exp2: HPO Backend Comparison (Qwen3.5-0.8B)",
-        ylim=(0.97, 1.05),
     )
 
 
-def plot_exp2_27b_nothink(results_dir: Path, output_path: Path):
-    """Exp2: 27B no thinking — all backends."""
+def plot_exp2_27b(results_dir: Path, output_path: Path):
+    """Exp2: 27B — all backends."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (OptunaHub) 27B", "color": "#9C27B0"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0"},
         "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Original) 27B", "color": "#E91E63"},
     }
     plot_convergence_multi(
@@ -116,7 +119,6 @@ def plot_exp2_27b_nothink(results_dir: Path, output_path: Path):
         backends,
         output_path,
         title="Exp2: HPO Backend Comparison (Qwen3.5-27B)",
-        ylim=(0.97, 1.05),
     )
 
 
@@ -126,8 +128,8 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
         "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800", "linestyle": "-"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "--"},
-        "llambo": {"label": "LLAMBO (OH) 0.8B", "color": "#9C27B0", "linestyle": "-"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (OH) 27B", "color": "#9C27B0", "linestyle": "--"},
+        "llambo": {"label": "LLAMBO (Optuna) 0.8B", "color": "#9C27B0", "linestyle": "-"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0", "linestyle": "--"},
         "llambo_original": {"label": "LLAMBO (Orig) 0.8B", "color": "#E91E63", "linestyle": "-"},
         "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "--"},
     }
@@ -136,7 +138,23 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         backends,
         output_path,
         title="Exp2: All Backends Comparison",
-        ylim=(0.97, 1.05),
+    )
+
+
+def plot_exp2_model_size(results_dir: Path, output_path: Path):
+    """Compare 0.8B vs 27B for each LLM backend."""
+    backends = {
+        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
+        "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800", "linestyle": "-"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "--"},
+        "llambo_original": {"label": "LLAMBO (Orig) 0.8B", "color": "#E91E63", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "--"},
+    }
+    plot_convergence_multi(
+        results_dir / "exp2_benchmark",
+        backends,
+        output_path,
+        title="Exp2: Model Size Comparison (0.8B vs 27B)",
     )
 
 
@@ -164,7 +182,7 @@ def plot_progress(results_dir: Path, output_path: Path):
     n = len(all_backends)
     cols = min(3, n)
     rows = (n + cols - 1) // cols
-    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows), sharey=True, squeeze=False)
+    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows), squeeze=False)
 
     for idx, backend_name in enumerate(all_backends):
         ax = axes[idx // cols][idx % cols]
@@ -216,13 +234,15 @@ def plot_progress(results_dir: Path, output_path: Path):
         best_str = f"{best:.4f}" if best < float("inf") else "N/A"
         ax.set_title(f"{backend_name}\n{len(trials)} trials, {n_fail} failed, best={best_str}", fontsize=10)
         ax.set_xlabel("Trial #", fontsize=10)
+        ax.set_ylabel("val_bpb", fontsize=10)
+        ax.set_xlim(0, len(trials))
+        ax.set_ylim(0.975, 1.025)
         ax.grid(True, alpha=0.2)
 
     # Hide unused subplots
     for idx in range(n, rows * cols):
         axes[idx // cols][idx % cols].set_visible(False)
 
-    axes[0][0].set_ylabel("val_bpb (lower is better)", fontsize=11)
     fig.suptitle("Exp2 Progress (seed 0)", fontsize=14)
     fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -236,6 +256,7 @@ if __name__ == "__main__":
     assets_dir.mkdir(exist_ok=True)
 
     plot_exp2_0_8b(results_dir, assets_dir / "exp2_0.8b_convergence.png")
-    plot_exp2_27b_nothink(results_dir, assets_dir / "exp2_27b_nothink_convergence.png")
+    plot_exp2_27b(results_dir, assets_dir / "exp2_27b_convergence.png")
     plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
+    plot_exp2_model_size(results_dir, assets_dir / "exp2_model_size.png")
     plot_progress(results_dir, assets_dir / "exp2_progress.png")
