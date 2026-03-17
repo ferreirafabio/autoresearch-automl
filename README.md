@@ -39,7 +39,7 @@ Dashed lines are 0.8B, solid lines are 27B.
 
 ![LLM-Based vs Classical HPO](assets/exp2_all_convergence.png)
 
-### Incumbent Traces (seed 0)
+### Incumbent Traces (seed 0, 27B)
 
 Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far).
 

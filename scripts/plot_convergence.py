@@ -363,62 +363,54 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=1.5, alpha=0.6, zorder=3)
 
-    # Annotate incumbents
+    # Annotate incumbents — always place labels above to avoid clipping
     prev_config = None
+    ylim_lo, ylim_hi = 0.975, 1.012
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if prev_config is None:
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
         prev_config = config
-        y_offset = 10 if idx % 2 == 0 else -12
+        # Place above the point; cycle offsets to reduce overlap
+        y_offset = 8 + (idx % 3) * 6
         ax.annotate(
             label, xy=(trial_i, val), xytext=(4, y_offset),
             textcoords="offset points", fontsize=5.5, color="#333333",
-            rotation=20, ha="left",
-            va="bottom" if y_offset > 0 else "top",
+            rotation=20, ha="left", va="bottom",
+            annotation_clip=True,
         )
 
     n_fail = sum(1 for t in trials if not t.get("success", False))
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
                  fontsize=9)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.975, 1.012)
+    ax.set_ylim(ylim_lo, ylim_hi)
     ax.grid(True, alpha=0.2)
 
 
 def plot_progress_combined(results_dir: Path, output_path: Path):
-    """Combined Pareto front plot: 2 rows (0.8B, 27B), one subplot per method."""
+    """Combined incumbent traces plot: single row, 27B backends."""
     bench_dir = results_dir / "exp2_benchmark"
 
-    row_0_8b = [
-        ("optuna", "TPE (Optuna)", "#2196F3"),
-        ("llambo", "LLAMBO (Optuna) 0.8B", "#9C27B0"),
-        ("llambo_original", "LLAMBO (Original) 0.8B", "#E91E63"),
-        ("llm_greedy", "LLM Greedy 0.8B", "#FF9800"),
-    ]
-    row_27b = [
+    backends = [
         ("optuna", "TPE (Optuna)", "#2196F3"),
         ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) 27B", "#9C27B0"),
         ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Original) 27B", "#E91E63"),
         ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
     ]
 
-    fig, axes = plt.subplots(2, 4, figsize=(22, 10))
+    fig, axes = plt.subplots(1, 4, figsize=(22, 5.5))
 
-    for col, (backend, name, color) in enumerate(row_0_8b):
-        plot_progress_subplot(axes[0, col], bench_dir, backend, name, color)
-    for col, (backend, name, color) in enumerate(row_27b):
-        plot_progress_subplot(axes[1, col], bench_dir, backend, name, color)
+    for col, (backend, name, color) in enumerate(backends):
+        plot_progress_subplot(axes[col], bench_dir, backend, name, color)
 
-    # Shared labels
-    for ax in axes[1, :]:
+    for ax in axes:
         ax.set_xlabel("Trial #", fontsize=9)
-    for ax in axes[:, 0]:
-        ax.set_ylabel("val_bpb", fontsize=9)
+    axes[0].set_ylabel("val_bpb", fontsize=9)
 
-    fig.suptitle("Karpathy's Autoresearch: Incumbent Traces (seed 0)", fontsize=14, y=0.98)
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.suptitle("Karpathy's Autoresearch: Incumbent Traces (seed 0)", fontsize=14, y=1.02)
+    fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {output_path}")
