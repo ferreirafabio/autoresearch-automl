@@ -9,13 +9,19 @@ As an AutoML enthusiast, it felt natural to fill this void — this repo applies
 
 ## Setup
 
-We benchmark 7 HPO backends on Karpathy's autoresearch training task: single H200 GPU, 5-minute budget per trial, minimize val_bpb. The search space (14 hyperparameters) is extracted automatically from train.py by parsing the source code — no manual HP curation.
+We benchmark 7 HPO backends on Karpathy's autoresearch training task: single H200 GPU, 5-minute budget per trial, 24-hour training-time budget, minimize val_bpb.
+
+**Zero-curation search space:** The search space (14 hyperparameters) is extracted fully automatically from `train.py` by parsing the AST — no manual HP selection or range tuning. The extractor finds all module-level uppercase constants with numeric or string values and infers types and ranges. This means any change to `train.py` (adding a new HP, renaming one) is picked up automatically. The search space is a property of the code, not an expert decision. Karpathy's `train.py` contains ~15 additional tunable values hardcoded inside functions (e.g., softcap, rotary embedding base, Muon momentum schedule) that our extractor intentionally does not expose — the unconstrained Karpathy agent baseline covers those.
 
 **Backends:**
 - **Classical:** Optuna TPE, Random Search, SMAC3, CMA-ES
 - **LLM-based:** LLAMBO (OptunaHub), LLAMBO Original (paper-faithful), LLM Greedy
 
 LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on the same GPU as training. No API keys, no proprietary models, fully reproducible. Each condition runs 3 seeds.
+
+**Fair GPU memory allocation:** LLM backends share a single H200 (140 GB) between the vLLM inference server and the training process. With the 27B model, vLLM reserves ~45% of GPU memory, leaving ~76 GB for training. To ensure a fair comparison, we cap GPU memory for *all* backends — including classical ones — to the same 76 GB via `torch.cuda.set_per_process_memory_fraction()`. Without this cap, classical methods would silently exploit the full 140 GB, fitting deeper and wider models that LLM backends could never reach.
+
+**Training-time budget:** We track cumulative *training time* (sum of `wall_time_seconds` across trials) rather than wall-clock time. LLM backends spend significant overhead on inference (e.g., LLAMBO ~50%), so a 24h wall-clock limit would give them far less actual training time. Every backend gets exactly 24 hours of GPU training, regardless of sampling overhead.
 
 **Note on failure handling:** Infeasible configs (OOM, batch size assertion errors) are reported to the sampler as `val_bpb=100.0` instead of being silently dropped. Both TPE and LLAMBO otherwise ignore failed trials (`TrialState.FAIL`), which means they never learn to avoid bad regions. The penalty value is hardcoded for this task (real val_bpb ranges 0.99–2.4) — for other tasks, this would need adjustment.
 
