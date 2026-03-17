@@ -39,25 +39,11 @@ Dashed lines are 0.8B, solid lines are 27B.
 
 ![LLM-Based vs Classical HPO](assets/exp2_all_convergence.png)
 
-### Pareto Fronts (seed 0)
+### Incumbent Traces (seed 0)
 
-Grey dots are all trials, colored dots are new bests, staircase is the Pareto front (best-so-far).
+Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far).
 
-**0.8B:**
-
-| | | |
-|---|---|---|
-| ![TPE](assets/progress_optuna.png) | ![LLAMBO](assets/progress_llambo.png) | ![LLAMBO Original](assets/progress_llambo_original.png) |
-| TPE | LLAMBO (OptunaHub) | LLAMBO Original |
-| ![LLM Greedy](assets/progress_llm_greedy.png) | | |
-| LLM Greedy | | |
-
-**27B:**
-
-| | | |
-|---|---|---|
-| ![LLAMBO 27B](assets/progress_llambo_Qwen3_5_27B_nothink.png) | ![LLAMBO Original 27B](assets/progress_llambo_original_Qwen3_5_27B_nothink.png) | ![LLM Greedy 27B](assets/progress_llm_greedy_Qwen3_5_27B_nothink.png) |
-| LLAMBO 27B | LLAMBO Original 27B | LLM Greedy 27B |
+![Incumbent Traces](assets/exp2_pareto_fronts.png)
 
 ## Usage
 

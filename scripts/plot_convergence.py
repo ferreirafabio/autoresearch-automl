@@ -320,6 +320,110 @@ def plot_progress(results_dir: Path, assets_dir: Path):
         )
 
 
+def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
+    """Draw a single Pareto-front progress plot on the given axes."""
+    jsonl = bench_dir / backend_name / "seed_0" / "trials.jsonl"
+    if not jsonl.exists():
+        ax.set_title(f"{display_name}\n(no data)", fontsize=10)
+        return
+
+    trials = load_trials(jsonl)
+    if not trials:
+        return
+
+    val_bpbs = []
+    for t in trials:
+        val_bpbs.append(t["val_bpb"] if t["success"] and t["val_bpb"] is not None else None)
+
+    success_x = [i for i, v in enumerate(val_bpbs) if v is not None]
+    success_y = [v for v in val_bpbs if v is not None]
+
+    best = float("inf")
+    incumbents = []
+    disc_x, disc_y = [], []
+    for i, v in zip(success_x, success_y):
+        if v < best:
+            best = v
+            incumbents.append((i, v, trials[i]["config"]))
+        else:
+            disc_x.append(i)
+            disc_y.append(v)
+
+    ax.scatter(disc_x, disc_y, c="#cccccc", s=8, alpha=0.4, zorder=2)
+
+    inc_x = [p[0] for p in incumbents]
+    inc_y = [p[1] for p in incumbents]
+    ax.scatter(inc_x, inc_y, c=color, s=30, zorder=4,
+               edgecolors="black", linewidths=0.5)
+
+    curve = best_so_far(trials)
+    valid_curve = [(i, v) for i, v in enumerate(curve) if v < float("inf")]
+    if valid_curve:
+        stair_x, stair_y = zip(*valid_curve)
+        ax.step(stair_x, stair_y, where="post", color=color,
+                linewidth=1.5, alpha=0.6, zorder=3)
+
+    # Annotate incumbents
+    prev_config = None
+    for idx, (trial_i, val, config) in enumerate(incumbents):
+        if prev_config is None:
+            label = "baseline"
+        else:
+            label = _config_diff(prev_config, config)
+        prev_config = config
+        y_offset = 10 if idx % 2 == 0 else -12
+        ax.annotate(
+            label, xy=(trial_i, val), xytext=(4, y_offset),
+            textcoords="offset points", fontsize=5.5, color="#333333",
+            rotation=20, ha="left",
+            va="bottom" if y_offset > 0 else "top",
+        )
+
+    n_fail = sum(1 for t in trials if not t.get("success", False))
+    ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
+                 fontsize=9)
+    ax.set_xlim(0, len(trials))
+    ax.set_ylim(0.975, 1.012)
+    ax.grid(True, alpha=0.2)
+
+
+def plot_progress_combined(results_dir: Path, output_path: Path):
+    """Combined Pareto front plot: 2 rows (0.8B, 27B), one subplot per method."""
+    bench_dir = results_dir / "exp2_benchmark"
+
+    row_0_8b = [
+        ("optuna", "TPE (Optuna)", "#2196F3"),
+        ("llambo", "LLAMBO (Optuna) 0.8B", "#9C27B0"),
+        ("llambo_original", "LLAMBO (Original) 0.8B", "#E91E63"),
+        ("llm_greedy", "LLM Greedy 0.8B", "#FF9800"),
+    ]
+    row_27b = [
+        ("optuna", "TPE (Optuna)", "#2196F3"),
+        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) 27B", "#9C27B0"),
+        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Original) 27B", "#E91E63"),
+        ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
+    ]
+
+    fig, axes = plt.subplots(2, 4, figsize=(22, 10))
+
+    for col, (backend, name, color) in enumerate(row_0_8b):
+        plot_progress_subplot(axes[0, col], bench_dir, backend, name, color)
+    for col, (backend, name, color) in enumerate(row_27b):
+        plot_progress_subplot(axes[1, col], bench_dir, backend, name, color)
+
+    # Shared labels
+    for ax in axes[1, :]:
+        ax.set_xlabel("Trial #", fontsize=9)
+    for ax in axes[:, 0]:
+        ax.set_ylabel("val_bpb", fontsize=9)
+
+    fig.suptitle("Karpathy's Autoresearch: Incumbent Traces (seed 0)", fontsize=14, y=0.98)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {output_path}")
+
+
 if __name__ == "__main__":
     results_dir = Path("/work/dlclarge1/ferreira-autoresearch-automl/results")
     assets_dir = Path("/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl/assets")
@@ -330,3 +434,4 @@ if __name__ == "__main__":
     plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
     plot_exp2_model_size(results_dir, assets_dir / "exp2_model_size.png")
     plot_progress(results_dir, assets_dir)
+    plot_progress_combined(results_dir, assets_dir / "exp2_pareto_fronts.png")
