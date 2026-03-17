@@ -94,14 +94,14 @@ class SMACBackend(HPOBackend):
         return config, budget
 
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
-        from smac import TrialValue
+        from smac.runhistory import TrialValue
         value = TrialValue(cost=[results.get(o, float("inf")) for o in self._objectives])
         self._facade.tell(self._pending_info, value)
         self._results.append((config, budget, results))
 
     def replay(self, history: list[tuple[dict, float, dict]]) -> None:
         """Replay trials into SMAC's runhistory."""
-        from smac import TrialInfo, TrialValue
+        from smac.runhistory import TrialInfo, TrialValue
         from ConfigSpace import Configuration
 
         for config_dict, budget, results in history:
