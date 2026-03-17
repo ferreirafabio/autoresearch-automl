@@ -62,6 +62,7 @@ def main(verbose: bool):
 @click.option("--storage", default=None, help="Optuna storage URL for parallel execution")
 @click.option("--llm-model", default=None, help="LLM model name for LLM-based backends (e.g. Qwen/Qwen3.5-9B)")
 @click.option("--resume/--no-resume", default=True, help="Auto-resume from existing trials.jsonl (default: on)")
+@click.option("--time-budget", default=86400.0, help="Training-time budget in seconds (sum of wall_time_seconds). Default: 86400 (24h). 0 to disable.")
 def run(
     backend: str,
     trials: int,
@@ -76,6 +77,7 @@ def run(
     storage: str | None,
     llm_model: str | None,
     resume: bool,
+    time_budget: float,
 ):
     """Run HPO optimization loop."""
     # Load config file if provided
@@ -115,12 +117,14 @@ def run(
         hybrid_mode=hybrid_mode,
         llm_model=llm_model,
         resume=resume,
+        time_budget=time_budget,
     )
 
     runner = Runner(run_config)
     summary = runner.run()
     click.echo(f"\nRun complete! Best val_bpb: {summary['best_val_bpb']:.4f}")
     click.echo(f"Total time: {summary['total_time_hours']:.2f}h")
+    click.echo(f"Training time: {summary['total_train_time_hours']:.2f}h")
 
 
 @main.command()

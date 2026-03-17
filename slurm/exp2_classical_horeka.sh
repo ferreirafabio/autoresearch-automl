@@ -45,7 +45,8 @@ python -m autoresearch_automl.cli run \
     --budget-max 300 \
     --seed "$SEED" \
     --results-dir "$RESULTS_DIR" \
-    --resume
+    --resume \
+    --time-budget 86400
 
 echo ""
 echo "=============================================="

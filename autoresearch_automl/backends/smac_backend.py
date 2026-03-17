@@ -99,18 +99,35 @@ class SMACBackend(HPOBackend):
         self._facade.tell(self._pending_info, value)
         self._results.append((config, budget, results))
 
+    def seed_trial(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
+        """Inject baseline trial directly into SMAC's runhistory (no suggest needed)."""
+        from ConfigSpace import Configuration
+
+        cfg = Configuration(self._space, values=config)
+        cost = [results.get(o, float("inf")) for o in self._objectives]
+        self._facade.runhistory.add(
+            config=cfg,
+            cost=cost,
+            seed=0,
+            budget=budget if self._multi_fidelity else None,
+        )
+        self._results.append((config, budget, results))
+        logger.info("Seeded baseline trial into SMAC runhistory")
+
     def replay(self, history: list[tuple[dict, float, dict]]) -> None:
         """Replay trials into SMAC's runhistory."""
-        from smac.runhistory import TrialInfo, TrialValue
         from ConfigSpace import Configuration
 
         for config_dict, budget, results in history:
             try:
                 config = Configuration(self._space, values=config_dict)
                 cost = [results.get(o, float("inf")) for o in self._objectives]
-                info = TrialInfo(config=config, seed=0, budget=budget if self._multi_fidelity else None)
-                value = TrialValue(cost=cost)
-                self._facade.runhistory.add(info, value)
+                self._facade.runhistory.add(
+                    config=config,
+                    cost=cost,
+                    seed=0,
+                    budget=budget if self._multi_fidelity else None,
+                )
             except Exception as e:
                 logger.warning("Failed to replay trial into SMAC: %s", e)
         logger.info("Replayed %d trials into SMAC runhistory", len(history))

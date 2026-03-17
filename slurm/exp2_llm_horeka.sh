@@ -34,7 +34,7 @@ else
     fi
     RESULTS_DIR="/hkfs/work/workspace/scratch/fr_ff1042-autoresearch/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
 fi
-TRIALS=200
+TRIALS=9999
 VLLM_PORT=$((8100 + RANDOM % 900))
 
 # Adjust vLLM GPU memory, available VRAM, and extra flags based on model size
@@ -137,7 +137,8 @@ python -m autoresearch_automl.cli run \
     --seed "$SEED" \
     --llm-model "$MODEL_DIR" \
     --results-dir "$RESULTS_DIR" \
-    --resume
+    --resume \
+    --time-budget 86400
 
 echo ""
 echo "=============================================="

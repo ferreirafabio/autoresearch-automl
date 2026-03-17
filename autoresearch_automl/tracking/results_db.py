@@ -98,19 +98,23 @@ class ResultsDB:
         """Extract state needed for resuming a run."""
         records = self.load_all()
         if not records:
-            return {"n_completed": 0, "best_val_bpb": float("inf"), "max_generation": 0, "next_trial_id": 0}
+            return {"n_completed": 0, "best_val_bpb": float("inf"), "max_generation": 0, "next_trial_id": 0, "total_train_time": 0.0}
 
         regular = [r for r in records if r.trial_id >= 0]
         best = float("inf")
+        total_train_time = 0.0
         for r in records:
             if r.val_bpb is not None and r.val_bpb < best:
                 best = r.val_bpb
+            if r.wall_time_seconds is not None:
+                total_train_time += r.wall_time_seconds
 
         return {
             "n_completed": len(records),
             "best_val_bpb": best,
             "max_generation": max((r.generation for r in records), default=0),
             "next_trial_id": max((r.trial_id for r in regular), default=-1) + 1 if regular else 0,
+            "total_train_time": total_train_time,
         }
 
     def replay_history(self) -> list[tuple[dict, float, dict]]:

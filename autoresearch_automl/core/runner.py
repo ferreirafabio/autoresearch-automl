@@ -31,6 +31,9 @@ class RunConfig:
     run_command: list[str] | None = None  # default: ["uv", "run", "train.py"]
     gpu_device: int | None = None
     extra_env: dict[str, str] = field(default_factory=dict)
+    # Training-time budget in seconds (sum of wall_time_seconds across trials)
+    # Default: 86400s = 24h. Set to 0 to disable.
+    time_budget: float = 86400.0
     # Hybrid mode settings
     hybrid_mode: str | None = None  # "A", "B", "C", or None
     structural_interval: int = 20  # trials between structural mutations (Mode B)
@@ -56,6 +59,7 @@ class Runner:
         self.results_db = ResultsDB(config.results_dir / "trials.jsonl")
         self.best_val_bpb = float("inf")
         self.generation = 0
+        self.cumulative_train_time = 0.0  # sum of wall_time_seconds across all trials
 
     def run(self) -> dict[str, Any]:
         """Execute the full HPO loop.
@@ -131,6 +135,9 @@ class Runner:
             )
             self.results_db.add(record)
 
+            if outcome.result.wall_time_seconds:
+                self.cumulative_train_time += outcome.result.wall_time_seconds
+
             if outcome.result.val_bpb is not None and outcome.result.val_bpb < self.best_val_bpb:
                 self.best_val_bpb = outcome.result.val_bpb
                 logger.info("Baseline val_bpb: %.4f", self.best_val_bpb)
@@ -144,7 +151,21 @@ class Runner:
         # Main loop
         start_time = time.time()
         for trial_id in range(start_trial_id, cfg.n_trials):
-            logger.info("=== Trial %d/%d ===", trial_id + 1, cfg.n_trials)
+            # Check training-time budget before starting a new trial
+            if cfg.time_budget > 0 and self.cumulative_train_time >= cfg.time_budget:
+                logger.info(
+                    "Training-time budget exhausted: %.1fs / %.1fs (%.2fh / %.2fh). Stopping after %d trials.",
+                    self.cumulative_train_time, cfg.time_budget,
+                    self.cumulative_train_time / 3600, cfg.time_budget / 3600,
+                    trial_id,
+                )
+                break
+
+            logger.info(
+                "=== Trial %d/%d === (train_time: %.1fs / %.1fs)",
+                trial_id + 1, cfg.n_trials,
+                self.cumulative_train_time, cfg.time_budget if cfg.time_budget > 0 else float('inf'),
+            )
 
             # Mode B: structural mutation at intervals
             if cfg.hybrid_mode == "B" and trial_id > 0 and trial_id % cfg.structural_interval == 0:
@@ -196,6 +217,10 @@ class Runner:
             )
             self.results_db.add(record)
 
+            # Track cumulative training time
+            if outcome.result.wall_time_seconds:
+                self.cumulative_train_time += outcome.result.wall_time_seconds
+
             # Track best
             if outcome.result.val_bpb is not None and outcome.result.val_bpb < self.best_val_bpb:
                 self.best_val_bpb = outcome.result.val_bpb
@@ -209,6 +234,7 @@ class Runner:
             "incumbents": incumbents,
             "total_trials": cfg.n_trials,
             "total_time_hours": total_time / 3600,
+            "total_train_time_hours": self.cumulative_train_time / 3600,
             "backend": cfg.backend.name,
             "seed": cfg.seed,
             "generations": self.generation,
@@ -230,10 +256,15 @@ class Runner:
         self.best_val_bpb = state["best_val_bpb"]
         self.generation = state["max_generation"]
 
+        # Restore cumulative training time from completed trials
+        self.cumulative_train_time = state["total_train_time"]
+
         next_id = state["next_trial_id"]
         logger.info(
-            "Resumed: %d completed trials, best_val_bpb=%.4f, generation=%d, resuming from trial %d",
-            state["n_completed"], self.best_val_bpb, self.generation, next_id,
+            "Resumed: %d completed trials, best_val_bpb=%.4f, generation=%d, "
+            "cumulative_train_time=%.1fs (%.2fh), resuming from trial %d",
+            state["n_completed"], self.best_val_bpb, self.generation,
+            self.cumulative_train_time, self.cumulative_train_time / 3600, next_id,
         )
         return next_id
 
