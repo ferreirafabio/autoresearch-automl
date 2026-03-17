@@ -317,7 +317,7 @@ def plot_progress(results_dir: Path, assets_dir: Path):
         )
 
 
-def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
+def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, descriptions=None):
     """Draw a single Pareto-front progress plot on the given axes."""
     jsonl = bench_dir / backend_name / "seed_0" / "trials.jsonl"
     if not jsonl.exists():
@@ -360,15 +360,23 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=1.5, alpha=0.6, zorder=3)
 
-    # Annotate incumbents — Karpathy style: fixed offset, rotation, clip
+    # Annotate incumbents — use LLM descriptions if available, else auto-diff
+    # descriptions: dict mapping trial_idx -> description string
+    desc_map = {}
+    if descriptions:
+        for d in descriptions:
+            desc_map[d["trial"]] = d["description"]
+
     prev_config = None
     for idx, (trial_i, val, config) in enumerate(incumbents):
-        if prev_config is None:
+        if trial_i in desc_map:
+            label = desc_map[trial_i]
+        elif prev_config is None:
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
-            if len(label) > 35:
-                label = label[:32] + "..."
+        if len(label) > 35:
+            label = label[:32] + "..."
         prev_config = config
         ax.annotate(
             label, xy=(trial_i, val), xytext=(6, 6),
@@ -386,8 +394,14 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
 
 
 def plot_progress_combined(results_dir: Path, output_path: Path):
-    """Combined incumbent traces plot: single row, 27B backends."""
+    """Combined incumbent traces plot: 2x2 grid, 27B backends."""
     bench_dir = results_dir / "exp2_benchmark"
+
+    # Load cached LLM descriptions if available
+    desc_path = Path(__file__).parent.parent / "assets" / "incumbent_descriptions.json"
+    all_descriptions = {}
+    if desc_path.exists():
+        all_descriptions = json.loads(desc_path.read_text())
 
     backends = [
         ("optuna", "TPE (Optuna)", "#2196F3"),
@@ -396,17 +410,20 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
         ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
     ]
 
-    fig, axes = plt.subplots(1, 4, figsize=(22, 5.5))
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 
-    for col, (backend, name, color) in enumerate(backends):
-        plot_progress_subplot(axes[col], bench_dir, backend, name, color)
+    for idx, (backend, name, color) in enumerate(backends):
+        row, col = divmod(idx, 2)
+        descs = all_descriptions.get(backend)
+        plot_progress_subplot(axes[row, col], bench_dir, backend, name, color, descriptions=descs)
 
-    for ax in axes:
-        ax.set_xlabel("Trial #", fontsize=9)
-    axes[0].set_ylabel("val_bpb", fontsize=9)
+    for ax in axes[1, :]:
+        ax.set_xlabel("Trial #", fontsize=10)
+    for ax in axes[:, 0]:
+        ax.set_ylabel("val_bpb", fontsize=10)
 
-    fig.suptitle("Karpathy's Autoresearch: Incumbent Traces (seed 0)", fontsize=14, y=1.02)
-    fig.tight_layout()
+    fig.suptitle("Incumbent Traces", fontsize=15, y=0.98)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {output_path}")
