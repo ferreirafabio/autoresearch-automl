@@ -67,8 +67,8 @@ def plot_convergence_multi(
         std = np.nanstd(aligned, axis=0)
 
         x = np.arange(min_len)
-        n_seeds = len(seed_curves)
-        label = f"{style['label']} ({n_seeds} seeds, {min_len} trials)"
+        best_val = np.nanmin(mean)
+        label = f"{style['label']} (best={best_val:.4f})"
         ax.plot(x, mean, label=label, color=style["color"], linewidth=2,
                 linestyle=style.get("linestyle", "-"))
         ax.fill_between(x, mean - std, mean + std, color=style["color"], alpha=0.12)
@@ -102,7 +102,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Exp2: HPO Backend Comparison (Qwen3.5-0.8B)",
+        title="Karpathy's Autoresearch: HPO Convergence (0.8B Optimizer)",
     )
 
 
@@ -118,7 +118,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Exp2: HPO Backend Comparison (Qwen3.5-27B)",
+        title="Karpathy's Autoresearch: HPO Convergence (27B Optimizer)",
     )
 
 
@@ -137,7 +137,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Exp2: All Backends Comparison",
+        title="Karpathy's Autoresearch: LLM-Based vs Classical HPO",
     )
 
 
@@ -154,100 +154,170 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Exp2: Model Size Comparison (0.8B vs 27B)",
+        title="Karpathy's Autoresearch: Does Optimizer LLM Size Matter?",
     )
 
 
-def plot_progress(results_dir: Path, output_path: Path):
-    """Progress plot: scatter + running best staircase for available backends."""
-    bench_dir = results_dir / "exp2_benchmark"
+HP_SHORT = {
+    "ASPECT_RATIO": "AR",
+    "DEPTH": "D",
+    "DEVICE_BATCH_SIZE": "DBS",
+    "EMBEDDING_LR": "emb_lr",
+    "FINAL_LR_FRAC": "final_lr",
+    "HEAD_DIM": "HD",
+    "MATRIX_LR": "mat_lr",
+    "SCALAR_LR": "scl_lr",
+    "TOTAL_BATCH_SIZE": "TBS",
+    "UNEMBEDDING_LR": "uemb_lr",
+    "WARMDOWN_RATIO": "warmdown",
+    "WARMUP_RATIO": "warmup",
+    "WEIGHT_DECAY": "wd",
+    "WINDOW_PATTERN": "WP",
+}
 
-    # Find all backends with data
-    all_backends = []
-    for d in sorted(bench_dir.iterdir()):
-        if d.is_dir() and (d / "seed_0" / "trials.jsonl").exists():
-            all_backends.append(d.name)
 
-    if not all_backends:
-        print("No data for progress plot")
+def _format_val(v):
+    """Format HP value concisely."""
+    if isinstance(v, float):
+        if v == 0.0:
+            return "0"
+        if abs(v) < 0.01:
+            return f"{v:.4f}"
+        return f"{v:g}"
+    if isinstance(v, int) and v >= 10000:
+        return f"{v // 1000}K"
+    return str(v)
+
+
+def _config_diff(prev: dict, curr: dict, max_diffs: int = 3) -> str:
+    """Summarize key HP changes between two configs."""
+    diffs = []
+    for hp in curr:
+        if hp not in prev or prev[hp] != curr[hp]:
+            short = HP_SHORT.get(hp, hp)
+            diffs.append(f"{short}={_format_val(curr[hp])}")
+    if not diffs:
+        return "baseline"
+    if len(diffs) > max_diffs:
+        return ", ".join(diffs[:max_diffs]) + f" +{len(diffs) - max_diffs}"
+    return ", ".join(diffs)
+
+
+def plot_progress_single(
+    bench_dir: Path,
+    backend_name: str,
+    display_name: str,
+    color: str,
+    output_path: Path,
+):
+    """Karpathy-style progress plot: scatter + annotated Pareto front."""
+    jsonl = bench_dir / backend_name / "seed_0" / "trials.jsonl"
+    if not jsonl.exists():
+        print(f"No data for {backend_name}")
         return
 
-    colors = {
-        "optuna": "#2196F3",
-        "llambo": "#9C27B0",
-        "llm_greedy": "#FF9800",
-        "llambo_original": "#E91E63",
-    }
+    trials = load_trials(jsonl)
+    if not trials:
+        return
 
-    n = len(all_backends)
-    cols = min(3, n)
-    rows = (n + cols - 1) // cols
-    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows), squeeze=False)
+    fig, ax = plt.subplots(figsize=(14, 7))
 
-    for idx, backend_name in enumerate(all_backends):
-        ax = axes[idx // cols][idx % cols]
-        jsonl = bench_dir / backend_name / "seed_0" / "trials.jsonl"
-        trials = load_trials(jsonl)
-        if not trials:
-            ax.set_title(f"{backend_name} (no data)")
-            continue
+    val_bpbs = []
+    for t in trials:
+        val_bpbs.append(t["val_bpb"] if t["success"] and t["val_bpb"] is not None else None)
 
-        # Pick color based on base name
-        color = "#666666"
-        for key, c in colors.items():
-            if backend_name.startswith(key):
-                color = c
-                break
+    success_x = [i for i, v in enumerate(val_bpbs) if v is not None]
+    success_y = [v for v in val_bpbs if v is not None]
 
-        val_bpbs = []
-        for t in trials:
-            val_bpbs.append(t["val_bpb"] if t["success"] and t["val_bpb"] is not None else None)
+    # Find incumbents (Pareto front)
+    best = float("inf")
+    incumbents = []  # (trial_idx, val_bpb, config)
+    disc_x, disc_y = [], []
+    for i, v in zip(success_x, success_y):
+        if v < best:
+            best = v
+            incumbents.append((i, v, trials[i]["config"]))
+        else:
+            disc_x.append(i)
+            disc_y.append(v)
 
-        success_x = [i for i, v in enumerate(val_bpbs) if v is not None]
-        success_y = [v for v in val_bpbs if v is not None]
+    # Scatter discarded
+    ax.scatter(disc_x, disc_y, c="#cccccc", s=15, alpha=0.4, zorder=2, label="Discarded")
 
-        best = float("inf")
-        kept_x, kept_y = [], []
-        disc_x, disc_y = [], []
-        for i, v in zip(success_x, success_y):
-            if v < best:
-                best = v
-                kept_x.append(i)
-                kept_y.append(v)
-            else:
-                disc_x.append(i)
-                disc_y.append(v)
+    # Scatter + staircase for incumbents
+    inc_x = [p[0] for p in incumbents]
+    inc_y = [p[1] for p in incumbents]
+    ax.scatter(inc_x, inc_y, c=color, s=60, zorder=4,
+               edgecolors="black", linewidths=0.5, label="Kept")
 
-        ax.scatter(disc_x, disc_y, c="#cccccc", s=12, alpha=0.5, zorder=2)
-        ax.scatter(kept_x, kept_y, c=color, s=50, zorder=4,
-                   edgecolors="black", linewidths=0.5, label="Kept")
+    curve = best_so_far(trials)
+    valid_curve = [(i, v) for i, v in enumerate(curve) if v < float("inf")]
+    if valid_curve:
+        stair_x, stair_y = zip(*valid_curve)
+        ax.step(stair_x, stair_y, where="post", color=color,
+                linewidth=2, alpha=0.6, zorder=3, label="Running best")
 
-        curve = best_so_far(trials)
-        valid_curve = [(i, v) for i, v in enumerate(curve) if v < float("inf")]
-        if valid_curve:
-            stair_x, stair_y = zip(*valid_curve)
-            ax.step(stair_x, stair_y, where="post", color=color,
-                    linewidth=2, alpha=0.7, zorder=3)
+    # Annotate incumbents with config diffs
+    prev_config = None
+    for idx, (trial_i, val, config) in enumerate(incumbents):
+        if prev_config is None:
+            label = "baseline"
+        else:
+            label = _config_diff(prev_config, config)
+        prev_config = config
 
-        n_success = len(success_x)
-        n_fail = len(trials) - n_success
-        best_str = f"{best:.4f}" if best < float("inf") else "N/A"
-        ax.set_title(f"{backend_name}\n{len(trials)} trials, {n_fail} failed, best={best_str}", fontsize=10)
-        ax.set_xlabel("Trial #", fontsize=10)
-        ax.set_ylabel("val_bpb", fontsize=10)
-        ax.set_xlim(0, len(trials))
-        ax.set_ylim(0.975, 1.025)
-        ax.grid(True, alpha=0.2)
+        # Alternate annotation side to avoid overlap
+        y_offset = 12 if idx % 2 == 0 else -14
+        ax.annotate(
+            label,
+            xy=(trial_i, val),
+            xytext=(5, y_offset),
+            textcoords="offset points",
+            fontsize=7,
+            color="#333333",
+            rotation=25,
+            ha="left",
+            va="bottom" if y_offset > 0 else "top",
+        )
 
-    # Hide unused subplots
-    for idx in range(n, rows * cols):
-        axes[idx // cols][idx % cols].set_visible(False)
-
-    fig.suptitle("Exp2 Progress (seed 0)", fontsize=14)
+    n_fail = sum(1 for t in trials if not t.get("success", False))
+    ax.set_title(
+        f"Karpathy's Autoresearch: {display_name}\n"
+        f"{len(trials)} trials, {len(incumbents)} improvements, {n_fail} failed",
+        fontsize=13,
+    )
+    ax.set_xlabel("Trial #", fontsize=12)
+    ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
+    ax.set_xlim(0, len(trials))
+    ax.set_ylim(0.975, 1.012)
+    ax.legend(fontsize=10, loc="upper right")
+    ax.grid(True, alpha=0.2)
     fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {output_path}")
+
+
+def plot_progress(results_dir: Path, assets_dir: Path):
+    """Generate per-backend Karpathy-style progress plots."""
+    bench_dir = results_dir / "exp2_benchmark"
+
+    backends_to_plot = [
+        ("optuna", "TPE (Optuna)", "#2196F3"),
+        ("llm_greedy", "LLM Greedy 0.8B", "#FF9800"),
+        ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
+        ("llambo_original", "LLAMBO (Original) 0.8B", "#E91E63"),
+        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Original) 27B", "#E91E63"),
+        ("llambo", "LLAMBO (Optuna) 0.8B", "#9C27B0"),
+        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) 27B", "#9C27B0"),
+    ]
+
+    for backend_name, display_name, color in backends_to_plot:
+        safe_name = backend_name.replace("/", "_")
+        plot_progress_single(
+            bench_dir, backend_name, display_name, color,
+            assets_dir / f"progress_{safe_name}.png",
+        )
 
 
 if __name__ == "__main__":
@@ -259,4 +329,4 @@ if __name__ == "__main__":
     plot_exp2_27b(results_dir, assets_dir / "exp2_27b_convergence.png")
     plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
     plot_exp2_model_size(results_dir, assets_dir / "exp2_model_size.png")
-    plot_progress(results_dir, assets_dir / "exp2_progress.png")
+    plot_progress(results_dir, assets_dir)
