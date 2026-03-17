@@ -39,6 +39,9 @@ echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
 
+# Cap GPU memory to 80GB (matches H100 VRAM, ensures fair comparison across all backends)
+export CUDA_MEM_FRACTION=0.57
+
 python -m autoresearch_automl.cli run \
     --backend "$BACKEND" \
     --trials $TRIALS \

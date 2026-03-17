@@ -126,6 +126,8 @@ fi
 export OPENAI_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1"
 export OPENAI_API_KEY="dummy"
 export AVAILABLE_VRAM="${AVAILABLE_VRAM}"
+# Cap training subprocess to 80GB (H100-equivalent) for fair comparison
+export CUDA_MEM_FRACTION=0.57
 
 echo ""
 echo "Starting HPO with ${BACKEND} backend..."
