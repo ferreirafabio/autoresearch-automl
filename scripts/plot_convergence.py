@@ -87,10 +87,11 @@ def plot_convergence_multi(
 
 
 def plot_exp2_0_8b(results_dir: Path, output_path: Path):
-    """Exp2: 0.8B model — TPE vs LLAMBO (OptunaHub) vs LLM Greedy."""
+    """Exp2: 0.8B model — all backends."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
         "llambo": {"label": "LLAMBO (OptunaHub) 0.8B", "color": "#9C27B0"},
+        "llambo_original": {"label": "LLAMBO (Original) 0.8B", "color": "#E91E63"},
         "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800"},
     }
     plot_convergence_multi(
@@ -99,25 +100,6 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
         output_path,
         title="Exp2: HPO Backend Comparison (Qwen3.5-0.8B)",
         ylim=(0.97, 1.05),
-        xlim=(0, 200),
-    )
-
-
-def plot_exp2_27b_think(results_dir: Path, output_path: Path):
-    """Exp2: 27B thinking — all backends."""
-    backends = {
-        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
-        "llm_greedy_Qwen3_5_27B": {"label": "LLM Greedy 27B think", "color": "#FF9800"},
-        "llambo_Qwen3_5_27B": {"label": "LLAMBO (OptunaHub) 27B think", "color": "#9C27B0"},
-        "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Original) 27B think", "color": "#E91E63"},
-    }
-    plot_convergence_multi(
-        results_dir / "exp2_benchmark",
-        backends,
-        output_path,
-        title="Exp2: HPO Backend Comparison (Qwen3.5-27B, thinking ON)",
-        ylim=(0.97, 1.05),
-        xlim=(0, 200),
     )
 
 
@@ -125,37 +107,36 @@ def plot_exp2_27b_nothink(results_dir: Path, output_path: Path):
     """Exp2: 27B no thinking — all backends."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B nothink", "color": "#FF9800"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (OptunaHub) 27B nothink", "color": "#9C27B0"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Original) 27B nothink", "color": "#E91E63"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (OptunaHub) 27B", "color": "#9C27B0"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Original) 27B", "color": "#E91E63"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Exp2: HPO Backend Comparison (Qwen3.5-27B, thinking OFF)",
+        title="Exp2: HPO Backend Comparison (Qwen3.5-27B)",
         ylim=(0.97, 1.05),
-        xlim=(0, 200),
     )
 
 
-def plot_exp2_model_comparison(results_dir: Path, output_path: Path):
-    """Compare 0.8B vs 27B (think vs nothink) for each LLM backend."""
+def plot_exp2_all(results_dir: Path, output_path: Path):
+    """All backends on one plot."""
     backends = {
+        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
         "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B": {"label": "LLM Greedy 27B think", "color": "#FF9800", "linestyle": "--"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B nothink", "color": "#FF9800", "linestyle": ":"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "--"},
         "llambo": {"label": "LLAMBO (OH) 0.8B", "color": "#9C27B0", "linestyle": "-"},
-        "llambo_Qwen3_5_27B": {"label": "LLAMBO (OH) 27B think", "color": "#9C27B0", "linestyle": "--"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (OH) 27B nothink", "color": "#9C27B0", "linestyle": ":"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (OH) 27B", "color": "#9C27B0", "linestyle": "--"},
+        "llambo_original": {"label": "LLAMBO (Orig) 0.8B", "color": "#E91E63", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "--"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Exp2: Model Size Comparison (0.8B vs 27B)",
+        title="Exp2: All Backends Comparison",
         ylim=(0.97, 1.05),
-        xlim=(0, 200),
     )
 
 
@@ -255,7 +236,6 @@ if __name__ == "__main__":
     assets_dir.mkdir(exist_ok=True)
 
     plot_exp2_0_8b(results_dir, assets_dir / "exp2_0.8b_convergence.png")
-    plot_exp2_27b_think(results_dir, assets_dir / "exp2_27b_think_convergence.png")
     plot_exp2_27b_nothink(results_dir, assets_dir / "exp2_27b_nothink_convergence.png")
-    plot_exp2_model_comparison(results_dir, assets_dir / "exp2_model_comparison.png")
+    plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
     plot_progress(results_dir, assets_dir / "exp2_progress.png")
