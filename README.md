@@ -33,9 +33,11 @@ Scaling to 27B improves all LLM-based backends. LLAMBO Original 27B reaches ~0.9
 
 ![27B convergence](assets/exp2_27b_convergence.png)
 
-### All backends combined
+### LLM-Based vs Classical HPO
 
-![All backends convergence](assets/exp2_all_convergence.png)
+Dashed lines are 0.8B, solid lines are 27B.
+
+![LLM-Based vs Classical HPO](assets/exp2_all_convergence.png)
 
 ### Model size comparison (0.8B vs 27B)
 
