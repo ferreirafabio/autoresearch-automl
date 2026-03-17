@@ -24,6 +24,7 @@ class ExperimentConfig:
     generation: int = 0  # structural generation index
     backend_name: str = "unknown"
     tags: dict[str, str] = field(default_factory=dict)
+    source_override: str | None = None  # LLM-generated source (Karpathy agent)
 
 
 @dataclass
@@ -99,13 +100,20 @@ class ExperimentRunner:
         3. Run train.py with budget
         4. Return results
         """
-        # Reset working copy to original source before each trial
-        self.work_train_py.write_text(self.original_source)
         outcome = ExperimentOutcome(config=config, result=ExperimentResult())
 
         try:
-            # Inject config into the working copy
-            self.injector.inject_and_write(config.hp_config)
+            if config.source_override:
+                # Karpathy agent: write LLM-generated source directly
+                self.work_train_py.write_text(config.source_override)
+                logger.info(
+                    "Trial %d: wrote LLM-generated source (%d chars)",
+                    config.trial_id, len(config.source_override),
+                )
+            else:
+                # Normal path: reset to original + inject HP values
+                self.work_train_py.write_text(self.original_source)
+                self.injector.inject_and_write(config.hp_config)
             logger.info(
                 "Trial %d: running with %d HPs, budget=%.0fs",
                 config.trial_id, len(config.hp_config), config.budget,

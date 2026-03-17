@@ -83,6 +83,10 @@ class Runner:
             seed=cfg.seed,
         )
 
+        # Karpathy agent needs the original source code
+        if hasattr(cfg.backend, 'set_source'):
+            cfg.backend.set_source(self.runner.original_source)
+
         # Resume from checkpoint if enabled
         start_trial_id = 0
         if cfg.resume:
@@ -174,7 +178,15 @@ class Runner:
             # Suggest
             hp_config, budget = cfg.backend.suggest()
             hp_config = self._to_native_types(hp_config)
-            hp_config = snap_to_power_of_2(hp_config)
+
+            # Check for source override (Karpathy agent produces full source code)
+            source_override = None
+            if hasattr(cfg.backend, 'get_source_override'):
+                source_override = cfg.backend.get_source_override()
+
+            if source_override is None:
+                # Normal backends: snap HP values to constraints
+                hp_config = snap_to_power_of_2(hp_config)
 
             # Run experiment
             exp_config = ExperimentConfig(
@@ -184,6 +196,7 @@ class Runner:
                 seed=cfg.seed,
                 generation=self.generation,
                 backend_name=cfg.backend.name,
+                source_override=source_override,
             )
             outcome = self.runner.run(exp_config)
 
