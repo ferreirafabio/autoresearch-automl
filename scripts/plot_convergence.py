@@ -189,13 +189,16 @@ def _format_val(v):
     return str(v)
 
 
-def _config_diff(prev: dict, curr: dict, max_diffs: int = 3) -> str:
-    """Summarize key HP changes between two configs."""
+def _config_diff(prev: dict, curr: dict, max_diffs: int = 2) -> str:
+    """Karpathy-style HP change description: 'warmdown 0.5→0.7, TBS 524K→262K'."""
     diffs = []
     for hp in curr:
         if hp not in prev or prev[hp] != curr[hp]:
             short = HP_SHORT.get(hp, hp)
-            diffs.append(f"{short}={_format_val(curr[hp])}")
+            if hp in prev:
+                diffs.append(f"{short} {_format_val(prev[hp])}→{_format_val(curr[hp])}")
+            else:
+                diffs.append(f"{short}={_format_val(curr[hp])}")
     if not diffs:
         return "baseline"
     if len(diffs) > max_diffs:
@@ -257,27 +260,21 @@ def plot_progress_single(
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=2, alpha=0.6, zorder=3, label="Running best")
 
-    # Annotate incumbents with config diffs
+    # Annotate incumbents — Karpathy style
     prev_config = None
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if prev_config is None:
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
+            if len(label) > 45:
+                label = label[:42] + "..."
         prev_config = config
-
-        # Alternate annotation side to avoid overlap
-        y_offset = 12 if idx % 2 == 0 else -14
         ax.annotate(
-            label,
-            xy=(trial_i, val),
-            xytext=(5, y_offset),
-            textcoords="offset points",
-            fontsize=7,
-            color="#333333",
-            rotation=25,
-            ha="left",
-            va="bottom" if y_offset > 0 else "top",
+            label, xy=(trial_i, val), xytext=(6, 6),
+            textcoords="offset points", fontsize=8, color="#1a7a3a",
+            alpha=0.9, rotation=30, ha="left", va="bottom",
+            annotation_clip=True,
         )
 
     n_fail = sum(1 for t in trials if not t.get("success", False))
@@ -363,21 +360,20 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=1.5, alpha=0.6, zorder=3)
 
-    # Annotate incumbents — always place labels above to avoid clipping
+    # Annotate incumbents — Karpathy style: fixed offset, rotation, clip
     prev_config = None
-    ylim_lo, ylim_hi = 0.975, 1.012
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if prev_config is None:
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
+            if len(label) > 35:
+                label = label[:32] + "..."
         prev_config = config
-        # Place above the point; cycle offsets to reduce overlap
-        y_offset = 8 + (idx % 3) * 6
         ax.annotate(
-            label, xy=(trial_i, val), xytext=(4, y_offset),
-            textcoords="offset points", fontsize=5.5, color="#333333",
-            rotation=20, ha="left", va="bottom",
+            label, xy=(trial_i, val), xytext=(6, 6),
+            textcoords="offset points", fontsize=5.5, color="#1a7a3a",
+            alpha=0.9, rotation=30, ha="left", va="bottom",
             annotation_clip=True,
         )
 
@@ -385,7 +381,7 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color):
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
                  fontsize=9)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(ylim_lo, ylim_hi)
+    ax.set_ylim(0.975, 1.012)
     ax.grid(True, alpha=0.2)
 
 
