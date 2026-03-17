@@ -1,0 +1,125 @@
+{
+  "optuna": [
+    {
+      "trial": 0,
+      "val_bpb": 1.008423,
+      "description": "baseline"
+    },
+    {
+      "trial": 19,
+      "val_bpb": 0.995501,
+      "description": "window pattern SSSL\u2192LSSL, halve batch size +10"
+    },
+    {
+      "trial": 28,
+      "val_bpb": 0.980025,
+      "description": "depth 6\u21928, unemb LR 0.002\u21920.005 +8"
+    },
+    {
+      "trial": 78,
+      "val_bpb": 0.978607,
+      "description": "warmup 0.0009\u21920.018, window pattern LSSL\u2192SLSL +9"
+    },
+    {
+      "trial": 280,
+      "val_bpb": 0.978412,
+      "description": "window pattern SLSL\u2192SSSS, warmup 0.018\u21920.046 +8"
+    },
+    {
+      "trial": 281,
+      "val_bpb": 0.977501,
+      "description": "emb LR 1.04\u21920.78, weight decay 0.098\u21920.091 +7"
+    },
+    {
+      "trial": 294,
+      "val_bpb": 0.976117,
+      "description": "2\u00d7 unemb LR, emb LR 0.78\u21920.53 +7"
+    }
+  ],
+  "llambo_Qwen3_5_27B_nothink": [
+    {
+      "trial": 0,
+      "val_bpb": 1.009143,
+      "description": "baseline"
+    },
+    {
+      "trial": 10,
+      "val_bpb": 0.997441,
+      "description": "window pattern SSSL\u2192SSLL, batch size 524K\u2192131K +12"
+    },
+    {
+      "trial": 175,
+      "val_bpb": 0.997017,
+      "description": "matrix LR 0.048\u21920.017, halve emb LR +7"
+    }
+  ],
+  "llambo_original_Qwen3_5_27B_nothink": [
+    {
+      "trial": 0,
+      "val_bpb": 1.009244,
+      "description": "baseline"
+    },
+    {
+      "trial": 2,
+      "val_bpb": 0.993381,
+      "description": "final LR frac 0\u21920.020, warmup 0\u21920.030 +8"
+    },
+    {
+      "trial": 19,
+      "val_bpb": 0.992836,
+      "description": "window pattern SSSL\u2192SSSS, warmup 0.030\u21920.16 +11"
+    },
+    {
+      "trial": 67,
+      "val_bpb": 0.989443,
+      "description": "window pattern SSSS\u2192LLLL, 2\u00d7 device batch +11"
+    }
+  ],
+  "llm_greedy_Qwen3_5_27B_nothink": [
+    {
+      "trial": 0,
+      "val_bpb": 1.008888,
+      "description": "baseline"
+    },
+    {
+      "trial": 1,
+      "val_bpb": 1.008421,
+      "description": "depth 8\u219212, halve device batch"
+    },
+    {
+      "trial": 6,
+      "val_bpb": 1.007574,
+      "description": "matrix LR 0.040\u21920.045, scalar LR 0.50\u21920.55"
+    },
+    {
+      "trial": 35,
+      "val_bpb": 1.007418,
+      "description": "weight decay 0.20\u21920.22"
+    },
+    {
+      "trial": 48,
+      "val_bpb": 0.995723,
+      "description": "depth 12\u219210"
+    },
+    {
+      "trial": 55,
+      "val_bpb": 0.995679,
+      "description": "weight decay 0.22\u21920.23"
+    },
+    {
+      "trial": 57,
+      "val_bpb": 0.995226,
+      "description": "weight decay 0.225\u21920.23"
+    },
+    {
+      "trial": 62,
+      "val_bpb": 0.995145,
+      "description": "weight decay 0.23\u21920.235"
+    },
+    {
+      "trial": 89,
+      "val_bpb": 0.994964,
+      "description": "weight decay 0.235\u21920.233"
+    }
+  ]
+}
