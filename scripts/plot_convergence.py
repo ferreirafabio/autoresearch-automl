@@ -179,55 +179,70 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
     )
 
 
-HP_SHORT = {
-    "ASPECT_RATIO": "AR",
-    "DEPTH": "D",
-    "DEVICE_BATCH_SIZE": "DBS",
-    "EMBEDDING_LR": "emb_lr",
-    "FINAL_LR_FRAC": "final_lr",
-    "HEAD_DIM": "HD",
-    "MATRIX_LR": "mat_lr",
-    "SCALAR_LR": "scl_lr",
-    "TOTAL_BATCH_SIZE": "TBS",
-    "UNEMBEDDING_LR": "uemb_lr",
+HP_HUMAN = {
+    "ASPECT_RATIO": "aspect ratio",
+    "DEPTH": "depth",
+    "DEVICE_BATCH_SIZE": "device batch size",
+    "EMBEDDING_LR": "embedding lr",
+    "FINAL_LR_FRAC": "final lr frac",
+    "HEAD_DIM": "head dim",
+    "MATRIX_LR": "matrix lr",
+    "SCALAR_LR": "scalar lr",
+    "TOTAL_BATCH_SIZE": "total batch size",
+    "UNEMBEDDING_LR": "unembedding lr",
     "WARMDOWN_RATIO": "warmdown",
     "WARMUP_RATIO": "warmup",
-    "WEIGHT_DECAY": "wd",
-    "WINDOW_PATTERN": "WP",
+    "WEIGHT_DECAY": "weight decay",
+    "WINDOW_PATTERN": "window pattern",
 }
 
 
 def _format_val(v):
-    """Format HP value concisely."""
+    """Format HP value concisely (3-4 significant digits)."""
     if isinstance(v, float):
         if v == 0.0:
             return "0"
-        if abs(v) < 0.01:
-            return f"{v:.4f}"
-        return f"{v:g}"
+        if abs(v) >= 100:
+            return f"{v:.0f}"
+        if abs(v) >= 1:
+            return f"{v:.2f}"
+        if abs(v) >= 0.01:
+            return f"{v:.3f}"
+        return f"{v:.1e}"
     if isinstance(v, int) and v >= 10000:
         return f"{v // 1000}K"
     return str(v)
 
 
+def _describe_change(old_v, new_v):
+    """Return a human-readable verb for the direction of change."""
+    try:
+        o, n = float(old_v), float(new_v)
+        if n > o:
+            return "increase"
+        return "decrease"
+    except (ValueError, TypeError):
+        return "change"
+
+
 def _config_diff(prev: dict, curr: dict) -> str:
-    """Show the single most significant HP change (largest relative delta)."""
+    """Human-readable description: 'decrease weight decay (0.22→0.08)'."""
     best_diff = None
     best_rel = -1.0
     for hp in curr:
         if hp not in prev or prev[hp] != curr[hp]:
-            short = HP_SHORT.get(hp, hp)
+            name = HP_HUMAN.get(hp, hp.lower())
             if hp in prev:
-                diff_str = f"{short} {_format_val(prev[hp])}→{_format_val(curr[hp])}"
-                # Compute relative change for ranking
+                verb = _describe_change(prev[hp], curr[hp])
+                diff_str = f"{verb} {name} ({_format_val(prev[hp])}→{_format_val(curr[hp])})"
                 try:
                     old_v, new_v = float(prev[hp]), float(curr[hp])
                     denom = max(abs(old_v), 1e-12)
                     rel = abs(new_v - old_v) / denom
                 except (ValueError, TypeError):
-                    rel = float("inf")  # categorical changes rank highest
+                    rel = float("inf")
             else:
-                diff_str = f"{short}={_format_val(curr[hp])}"
+                diff_str = f"set {name}={_format_val(curr[hp])}"
                 rel = float("inf")
             if rel > best_rel:
                 best_rel = rel
