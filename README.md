@@ -1,6 +1,6 @@
 # autoresearch-automl
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error — no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical AutoML (TPE + expert HPs) already beats it. We benchmark additional HPO methods (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and a hybrid we propose called Centaur (CMA-ES as critic guides an LLM actor, inspired by actor-critic methods in RL, with CMA-ES providing interpretability of the optimization trajectory) — all under fair conditions — to find out which approach actually wins.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical AutoML (TPE + expert HPs) already beats it. This makes autoresearch an excellent testbed to benchmark HPO methods on a real GPU training task. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and a hybrid we propose called Centaur (CMA-ES as critic guides an LLM actor, inspired by actor-critic methods in RL, with CMA-ES providing interpretability of the optimization trajectory), all under fair conditions.
 
 ## Methods
 
@@ -58,11 +58,11 @@ We introduce **Centaur**, a hybrid backend where CMA-ES acts as *critic* and an 
 To understand *why* some methods outperform others, we measure how each backend explores the 13-dimensional continuous HP space. All values are normalized to [0,1] within their bounds. Only successful (non-OOM) trials are included.
 
 **Metrics:**
-- **Spread** — mean per-HP standard deviation (higher = more diverse sampling across each dimension)
-- **Pairwise** — mean L2 distance between all config pairs (higher = configs are more different from each other)
-- **Dist→Default** — mean L2 distance from Karpathy's default config (higher = exploring further from the starting point)
-- **Step** — mean L2 distance between consecutive trials (higher = larger jumps between suggestions)
-- **Cells** — unique cells when discretizing each HP into 5 bins (higher = more coverage of the search space)
+- **Spread:** mean per-HP standard deviation (higher = more diverse sampling across each dimension)
+- **Pairwise:** mean L2 distance between all config pairs (higher = configs are more different from each other)
+- **Dist→Default:** mean L2 distance from Karpathy's default config (higher = exploring further from the starting point)
+- **Step:** mean L2 distance between consecutive trials (higher = larger jumps between suggestions)
+- **Cells:** unique cells when discretizing each HP into 5 bins (higher = more coverage of the search space)
 
 | Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
 |--------|-------|----------|------|--------|----------|-------------|------|-------|
@@ -79,9 +79,9 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 - **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
 - **LLAMBO (Optuna) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
-- **LLAMBO (Paper) is the most diverse method with 0% OOM** — spread 0.255, 357 unique cells — yet still underperforms CMA-ES and TPE.
+- **LLAMBO (Paper) is the most diverse method with 0% OOM** (spread 0.255, 357 unique cells), yet still underperforms CMA-ES and TPE.
 - **The top 3 methods (CMA-ES, TPE, Centaur) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
-- **SMAC has high spread (0.241) but only 36 unique cells** — it revisits similar configs while also producing 44% OOM. This is partly due to a bug where OOM trials were marked as `SUCCESS` instead of `MEMORYOUT`, preventing the GP surrogate from learning to avoid infeasible regions (fix included in this repo, rerun pending).
+- **SMAC has high spread (0.241) but only 36 unique cells.** It revisits similar configs while also producing 44% OOM. This is partly due to a bug where OOM trials were marked as `SUCCESS` instead of `MEMORYOUT`, preventing the GP surrogate from learning to avoid infeasible regions (fix included in this repo, rerun pending).
 - **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
 
 ## Usage
