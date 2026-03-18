@@ -182,14 +182,14 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
 HP_HUMAN = {
     "ASPECT_RATIO": "aspect ratio",
     "DEPTH": "depth",
-    "DEVICE_BATCH_SIZE": "device batch size",
-    "EMBEDDING_LR": "embedding lr",
-    "FINAL_LR_FRAC": "final lr frac",
+    "DEVICE_BATCH_SIZE": "batch size",
+    "EMBEDDING_LR": "emb lr",
+    "FINAL_LR_FRAC": "final lr",
     "HEAD_DIM": "head dim",
     "MATRIX_LR": "matrix lr",
     "SCALAR_LR": "scalar lr",
-    "TOTAL_BATCH_SIZE": "total batch size",
-    "UNEMBEDDING_LR": "unembedding lr",
+    "TOTAL_BATCH_SIZE": "total batch",
+    "UNEMBEDDING_LR": "unemb lr",
     "WARMDOWN_RATIO": "warmdown",
     "WARMUP_RATIO": "warmup",
     "WEIGHT_DECAY": "weight decay",
@@ -198,7 +198,7 @@ HP_HUMAN = {
 
 
 def _format_val(v):
-    """Format HP value concisely (3-4 significant digits)."""
+    """Format HP value concisely (3-4 significant digits, no sci notation)."""
     if isinstance(v, float):
         if v == 0.0:
             return "0"
@@ -206,9 +206,10 @@ def _format_val(v):
             return f"{v:.0f}"
         if abs(v) >= 1:
             return f"{v:.2f}"
-        if abs(v) >= 0.01:
-            return f"{v:.3f}"
-        return f"{v:.1e}"
+        if abs(v) >= 0.001:
+            # Trim trailing zeros: 0.040 -> 0.04, 0.225 -> 0.225
+            return f"{v:.4f}".rstrip("0").rstrip(".")
+        return f"{v:.4f}".rstrip("0").rstrip(".")
     if isinstance(v, int) and v >= 10000:
         return f"{v // 1000}K"
     return str(v)
@@ -314,8 +315,6 @@ def plot_progress_single(
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
-            if len(label) > 45:
-                label = label[:42] + "..."
         prev_config = config
         texts.append(ax.text(trial_i, val, label, fontsize=8, color="#1a7a3a", alpha=0.9))
 
@@ -424,8 +423,6 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
-        if len(label) > 35:
-            label = label[:32] + "..."
         prev_config = config
         texts.append(ax.text(trial_i, val, label, fontsize=5.5, color="#1a7a3a", alpha=0.9))
 
