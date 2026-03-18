@@ -5,21 +5,21 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 ## Methods
 
 **Classical (fixed 14-HP search space):**
-- **TPE** — Tree-structured Parzen Estimator. [Optuna](https://github.com/optuna/optuna) implementation.
-- **CMA-ES** — Covariance Matrix Adaptation Evolution Strategy. [Optuna CMA sampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html).
-- **SMAC** — Sequential Model-based Algorithm Configuration with Random Forest surrogate. [SMAC3](https://github.com/automl/SMAC3).
-- **Random** — Uniform random sampling. [Optuna RandomSampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html).
+- **TPE:** Tree-structured Parzen Estimator ([Optuna](https://github.com/optuna/optuna)).
+- **CMA-ES:** Covariance Matrix Adaptation Evolution Strategy ([Optuna CMA sampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html)).
+- **SMAC:** Sequential Model-based Algorithm Configuration with Random Forest surrogate ([SMAC3](https://github.com/automl/SMAC3)).
+- **Random:** Uniform random sampling ([Optuna RandomSampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html)).
 
 **LLM-based (fixed 14-HP search space):**
-- **LLAMBO (Optuna)** — LLM as surrogate + candidate generator inside Bayesian optimization. [OptunaHub port](https://hub.optuna.org/samplers/llambo/).
-- **LLAMBO (Paper)** — Paper-faithful reimplementation with continuous surrogate labels and full HP visibility. Based on [Ye et al., 2024](https://arxiv.org/abs/2402.03921), [original code](https://github.com/tennisonliu/LLAMBO).
-- **Karpathy Agent (14 HPs)** — LLM sees trial history and suggests the next config within the fixed search space. No surrogate model, pure LLM suggestion.
+- **LLAMBO (Optuna):** LLM as surrogate + candidate generator inside Bayesian optimization ([OptunaHub port](https://hub.optuna.org/samplers/llambo/)).
+- **LLAMBO (Paper):** Paper-faithful reimplementation with continuous surrogate labels and full HP visibility ([Ye et al., 2024](https://arxiv.org/abs/2402.03921), [original code](https://github.com/tennisonliu/LLAMBO)).
+- **Karpathy Agent (14 HPs):** LLM sees trial history and suggests the next config within the fixed search space. No surrogate model, pure LLM suggestion.
 
 **LLM-based (open, no fixed search space):**
-- **Karpathy Agent (Code)** — LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs. Based on [Karpathy's autoresearch](https://github.com/karpathy/autoresearch).
+- **Karpathy Agent (Code):** LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs ([Karpathy's autoresearch](https://github.com/karpathy/autoresearch)).
 
 **Hybrid (fixed 14-HP search space):**
-- **Centaur** — CMA-ES runs every trial as *critic* (learning covariance structure); on 30% of trials the LLM acts as *actor*, receiving CMA-ES state to make informed suggestions. See [centaur.md](centaur.md).
+- **Centaur:** CMA-ES runs every trial as *critic* (learning covariance structure); on 30% of trials the LLM acts as *actor*, receiving CMA-ES state to make informed suggestions. See [centaur.md](centaur.md).
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
 
