@@ -28,7 +28,7 @@ All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU 
 
 Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via AST (no manual curation). 3 seeds per condition.
 
-**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~76 GB VRAM (matching LLM methods' available memory after vLLM). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
+**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz-Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
 
 ## Results
 
