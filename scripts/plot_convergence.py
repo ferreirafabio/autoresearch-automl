@@ -45,6 +45,7 @@ def plot_convergence_multi(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     max_trials = 0
+    ranking = []  # (best_val, label, color)
     for backend_dir, style in backends.items():
         seed_curves = []
         for seed in range(3):
@@ -69,10 +70,10 @@ def plot_convergence_multi(
 
         x = np.arange(min_len)
         best_val = np.nanmin(mean)
-        label = f"{style['label']} (best={best_val:.4f})"
-        ax.plot(x, mean, label=label, color=style["color"], linewidth=2,
-                linestyle=style.get("linestyle", "-"))
+        line, = ax.plot(x, mean, color=style["color"], linewidth=2,
+                        linestyle=style.get("linestyle", "-"))
         ax.fill_between(x, mean - std, mean + std, color=style["color"], alpha=0.12)
+        ranking.append((best_val, line, style["label"]))
 
     ax.set_xlabel("Trial", fontsize=12)
     ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
@@ -83,8 +84,19 @@ def plot_convergence_multi(
     else:
         ax.set_xlim(0, max_trials)
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
-    ax.legend(fontsize=10, loc="upper right")
     ax.grid(True, alpha=0.3)
+
+    # Sorted monospace legend with right-aligned scores
+    if ranking:
+        ranking.sort(key=lambda r: r[0])
+        max_name_len = max(len(r[2]) for r in ranking)
+        handles, labels = [], []
+        for val, handle, name in ranking:
+            labels.append(f"{name.ljust(max_name_len + 2)}{val:.4f}")
+            handles.append(handle)
+        ax.legend(handles, labels, fontsize=8, loc="upper right",
+                  prop={"family": "monospace", "size": 8})
+
     fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -96,7 +108,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
     backends = {
         "optuna": {"label": "TPE", "color": "#2196F3"},
         "llambo": {"label": "LLAMBO (Optuna) [0.8B]", "color": "#9C27B0"},
-        "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#E91E63"},
+        "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4"},
         "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FF9800"},
     }
     plot_convergence_multi(
@@ -115,7 +127,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
         "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800"},
         "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#E91E63"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4"},
         "random": {"label": "Random", "color": "#607D8B"},
     }
     plot_convergence_multi(
@@ -133,11 +145,11 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         "cma_es": {"label": "CMA-ES", "color": "#00796B", "linestyle": "-"},
         "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
         "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
-        "smac": {"label": "SMAC", "color": "#795548", "linestyle": "-"},
+        "smac": {"label": "SMAC", "color": "#8BC34A", "linestyle": "-"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
         "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#E91E63", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4CAF50", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
@@ -152,9 +164,9 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
     backends = {
         "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "-"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#E91E63", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4CAF50", "linestyle": "--"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4CAF50", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
@@ -320,8 +332,8 @@ def plot_progress(results_dir: Path, assets_dir: Path):
         ("optuna", "TPE", "#2196F3"),
         ("llm_greedy", "Karpathy Agent (14 HPs) [0.8B]", "#FF9800"),
         ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
-        ("llambo_original", "LLAMBO (Paper) [0.8B]", "#E91E63"),
-        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#E91E63"),
+        ("llambo_original", "LLAMBO (Paper) [0.8B]", "#00BCD4"),
+        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
         ("llambo", "LLAMBO (Optuna) [0.8B]", "#9C27B0"),
         ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) [27B]", "#9C27B0"),
     ]
@@ -425,9 +437,9 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
         ("optuna", "TPE", "#2196F3"),
         ("cma_es", "CMA-ES", "#00796B"),
         ("centaur_Qwen3_5_27B", "Centaur [27B]", "#D32F2F"),
-        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#E91E63"),
+        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
         ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
-        ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#4CAF50"),
+        ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
         ("random", "Random", "#607D8B"),
     ]
 
