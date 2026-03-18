@@ -5,6 +5,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from adjustText import adjust_text
 
 
 def load_trials(jsonl_path: Path) -> list[dict]:
@@ -275,8 +276,8 @@ def plot_progress_single(
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=2, alpha=0.6, zorder=3, label="Running best")
 
-    # Annotate incumbents with collision avoidance
-    placed = []
+    # Annotate incumbents with adjustText for automatic decluttering
+    texts = []
     prev_config = None
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if prev_config is None:
@@ -286,24 +287,7 @@ def plot_progress_single(
             if len(label) > 45:
                 label = label[:42] + "..."
         prev_config = config
-
-        dy, va, rot = 8, "bottom", 30
-        x_range = max(len(trials), 1)
-        for px, py, pdir in placed[-5:]:
-            x_close = abs(trial_i - px) < 0.10 * x_range
-            y_close = abs(val - py) < 0.004
-            if x_close and y_close and pdir == "above":
-                dy, va, rot = -8, "top", -30
-                break
-
-        direction = "above" if dy > 0 else "below"
-        placed.append((trial_i, val, direction))
-        ax.annotate(
-            label, xy=(trial_i, val), xytext=(6, dy),
-            textcoords="offset points", fontsize=8, color="#1a7a3a",
-            alpha=0.9, rotation=rot, ha="left", va=va,
-            annotation_clip=True,
-        )
+        texts.append(ax.text(trial_i, val, label, fontsize=8, color="#1a7a3a", alpha=0.9))
 
     n_fail = sum(1 for t in trials if not t.get("success", False))
     ax.set_title(
@@ -317,6 +301,11 @@ def plot_progress_single(
     ax.set_ylim(0.975, 1.012)
     ax.legend(fontsize=10, loc="upper right")
     ax.grid(True, alpha=0.2)
+
+    if texts:
+        adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color="#1a7a3a", alpha=0.4, lw=0.5),
+                    force_points=(0.5, 0.8), force_text=(0.5, 0.8), expand=(1.2, 1.4))
+
     fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -395,8 +384,8 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
         for d in descriptions:
             desc_map[d["trial"]] = d["description"]
 
-    # Annotate with collision avoidance: alternate above/below when points are close
-    placed = []  # list of (x_data, y_data, direction) for collision checks
+    # Build labels for adjustText
+    texts = []
     prev_config = None
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if trial_i in desc_map:
@@ -408,26 +397,7 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
         if len(label) > 35:
             label = label[:32] + "..."
         prev_config = config
-
-        # Default: above-right
-        dy, va, rot = 8, "bottom", 30
-        # Check collision with recent annotations (within 15% x-range and close y)
-        x_range = max(len(trials), 1)
-        for px, py, pdir in placed[-5:]:
-            x_close = abs(trial_i - px) < 0.10 * x_range
-            y_close = abs(val - py) < 0.004
-            if x_close and y_close and pdir == "above":
-                dy, va, rot = -8, "top", -30
-                break
-
-        direction = "above" if dy > 0 else "below"
-        placed.append((trial_i, val, direction))
-        ax.annotate(
-            label, xy=(trial_i, val), xytext=(6, dy),
-            textcoords="offset points", fontsize=5.5, color="#1a7a3a",
-            alpha=0.9, rotation=rot, ha="left", va=va,
-            annotation_clip=True,
-        )
+        texts.append(ax.text(trial_i, val, label, fontsize=5.5, color="#1a7a3a", alpha=0.9))
 
     n_fail = sum(1 for t in trials if not t.get("success", False))
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
@@ -435,6 +405,10 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     ax.set_xlim(0, len(trials))
     ax.set_ylim(0.975, 1.012)
     ax.grid(True, alpha=0.2)
+
+    if texts:
+        adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color="#1a7a3a", alpha=0.4, lw=0.5),
+                    force_points=(0.5, 0.8), force_text=(0.5, 0.8), expand=(1.2, 1.4))
 
 
 def plot_progress_combined(results_dir: Path, output_path: Path):
