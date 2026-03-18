@@ -22,7 +22,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 - **Karpathy Agent (Code):** LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs ([Karpathy's autoresearch](https://github.com/karpathy/autoresearch)).
 
 **Hybrid (fixed 14-HP search space):**
-- **Centaur:** CMA-ES runs every trial as *critic* (learning covariance structure); on 30% of trials the LLM acts as *actor*, receiving CMA-ES state to make informed suggestions. See [centaur.md](centaur.md).
+- **Centaur:** CMA-ES as *critic* learns from 100% of trials (always refitting its covariance structure). On 30% of trials the LLM acts as *actor*, receiving CMA-ES internal state (mean, sigma, top configs) to make informed suggestions. The remaining 70% are pure CMA-ES suggestions. See [centaur.md](centaur.md).
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
 
