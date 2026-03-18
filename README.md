@@ -1,33 +1,17 @@
 # autoresearch-automl
 
-**Can LLM-based HPO match classical AutoML methods on a real GPU training task — and can hybrid approaches combining both do even better?**
-
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) showed that LLMs can optimize training code through trial and error. Shwartz-Ziv [showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical HPO (TPE + expert search space) already beats it. We systematically benchmark classical, LLM-based, and hybrid HPO approaches — all on the same task, same GPU memory cap, same training-time budget, same baseline config — to find out which strategy actually wins.
+Systematic benchmark of classical (TPE, CMA-ES, SMAC), LLM-based ([LLAMBO](https://arxiv.org/abs/2402.03921), [Karpathy Agent](https://github.com/karpathy/autoresearch)), and hybrid (Centaur) HPO on a real GPU training task. Motivated by [Shwartz-Ziv's finding](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical HPO already beats LLM agents — we test whether that holds under fair conditions.
 
 ## Setup
 
-We benchmark 10 HPO backends on Karpathy's autoresearch training task: single H200 GPU, 5-minute budget per trial, 24-hour training-time budget, minimize val_bpb.
-
-**Zero-curation search space:** The search space (14 hyperparameters) is extracted fully automatically from `train.py` by parsing the AST — no manual HP selection or range tuning. The extractor finds all module-level uppercase constants with numeric or string values and infers types and ranges. This means any change to `train.py` (adding a new HP, renaming one) is picked up automatically. The search space is a property of the code, not an expert decision. Karpathy's `train.py` contains ~15 additional tunable values hardcoded inside functions (e.g., softcap, rotary embedding base, Muon momentum schedule) that our extractor intentionally does not expose — the LLM Code Editor baseline covers those.
+Single H200 GPU, 5 min/trial, 24h training-time budget, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via AST (no manual curation). LLM backends use self-hosted Qwen3.5 (0.8B/27B) via vLLM on the same GPU. 3 seeds per condition.
 
 **Backends:**
-- **Classical:** TPE (Optuna), Random Search, SMAC, CMA-ES
-- **LLM-based:** LLAMBO (Optuna) (OptunaHub port), LLAMBO (Paper) (paper-faithful), Karpathy Agent (14 HPs) (LLM suggests from history within fixed HP space), Karpathy Agent (Code) (no fixed search space, edits code directly)
-- **Hybrid:** Centaur (CMA-ES guided LLM optimization)
+- **Classical:** TPE, CMA-ES, SMAC, Random
+- **LLM-based:** LLAMBO ([Optuna](https://hub.optuna.org/samplers/llambo/), [Paper](https://github.com/tennisonliu/LLAMBO)), Karpathy Agent (14 HPs), Karpathy Agent (Code)
+- **Hybrid:** Centaur (CMA-ES + LLM)
 
-LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on the same GPU as training. No API keys, no proprietary models, fully reproducible. Each condition runs 3 seeds.
-
-**Fair GPU memory allocation:** LLM backends share a single H200 (140 GB) between the vLLM inference server and the training process. With the 27B model, vLLM reserves ~45% of GPU memory, leaving ~76 GB for training. To ensure a fair comparison, we cap GPU memory for *all* backends — including classical ones — to the same 76 GB via `torch.cuda.set_per_process_memory_fraction()`. Without this cap, classical methods would silently exploit the full 140 GB, fitting deeper and wider models that LLM backends could never reach.
-
-**Training-time budget:** We track cumulative *training time* (sum of `wall_time_seconds` across trials) rather than wall-clock time. LLM backends spend significant overhead on inference (e.g., LLAMBO ~50%), so a 24h wall-clock limit would give them far less actual training time. Every backend gets exactly 24 hours of GPU training, regardless of sampling overhead.
-
-**Note on failure handling:** Infeasible configs (OOM, batch size assertion errors) are reported to the sampler as `val_bpb=100.0` instead of being silently dropped. Both TPE and LLAMBO otherwise ignore failed trials (`TrialState.FAIL`), which means they never learn to avoid bad regions. SMAC additionally marks failed trials with `StatusType.MEMORYOUT` so its GP surrogate can distinguish failures from real results. The penalty value is hardcoded for this task (real val_bpb ranges 0.99–2.4) — for other tasks, this would need adjustment.
-
-**Fairness summary:**
-- All methods use identical `CUDA_MEM_FRACTION=0.543` (~76 GB usable)
-- All methods seeded with the same baseline config (Karpathy defaults)
-- Same 14-HP search space extracted from the same `train.py` (except Karpathy Agent (Code), which has no fixed search space)
-- Training-time budget (86400s) counts only GPU training time, not LLM inference overhead — this is intentional so LLM methods get equal training compute despite sampling overhead
+**Fairness:** All methods capped to ~76 GB VRAM (matching LLM backends' available memory after vLLM). Budget counts GPU training time only (not LLM inference overhead). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
 
 ## Results
 
@@ -115,7 +99,13 @@ python -m autoresearch_automl.cli run --backend llambo_original --trials 100 --l
 python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-model Qwen3.5-0.8B
 ```
 
-## Notes
+## Related work
+
+- [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) for the training task and the idea of LLM-driven experimentation
+- [Ravid Shwartz-Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) for showing that expert HP selection beats blind LLM search
+- [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) for using LLMs as surrogate models in Bayesian optimization
+
+## Details
 
 ### H200 vs H100 baseline offset
 
@@ -136,9 +126,3 @@ While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](http
 **Impact on our experiments:** The categorical delegation was the most painful. Our `WINDOW_PATTERN` hyperparameter (attention pattern per layer) strongly affects VRAM usage and model quality, but the OptunaHub port samples it randomly — the LLM never sees or reasons about it. The binary labeling also loses information: the LLM can't distinguish a config scoring 0.99 from one scoring 1.50, they're both "good" or both "bad" depending on the threshold.
 
 We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_original/) of the paper's code (LLAMBO (Paper), `--backend llambo_original`) alongside the OptunaHub version (LLAMBO (Optuna), `--backend llambo`) to quantify these differences. Both are included in our benchmark.
-
-## Related work
-
-- [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) for the training task and the idea of LLM-driven experimentation
-- [Ravid Shwartz-Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) for showing that expert HP selection beats blind LLM search
-- [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) for using LLMs as surrogate models in Bayesian optimization
