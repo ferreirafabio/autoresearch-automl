@@ -98,23 +98,30 @@ class SMACBackend(HPOBackend):
 
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
         from smac.runhistory import TrialValue
-        # Use inf for None/missing objectives (failed trials return val_bpb=None)
+        from smac.runhistory.enumerations import StatusType
+
         cost = [results.get(o) if results.get(o) is not None else self.FAILURE_COST for o in self._objectives]
-        value = TrialValue(cost=cost)
+        is_failure = any(results.get(o) is None for o in self._objectives)
+        status = StatusType.MEMORYOUT if is_failure else StatusType.SUCCESS
+        value = TrialValue(cost=cost, status=status)
         self._facade.tell(self._pending_info, value)
         self._results.append((config, budget, results))
 
     def seed_trial(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
         """Inject baseline trial directly into SMAC's runhistory (no suggest needed)."""
         from ConfigSpace import Configuration
+        from smac.runhistory.enumerations import StatusType
 
         cfg = Configuration(self._space, values=config)
         cost = [results.get(o) if results.get(o) is not None else self.FAILURE_COST for o in self._objectives]
+        is_failure = any(results.get(o) is None for o in self._objectives)
+        status = StatusType.MEMORYOUT if is_failure else StatusType.SUCCESS
         self._facade.runhistory.add(
             config=cfg,
             cost=cost,
             seed=0,
             budget=budget if self._multi_fidelity else None,
+            status=status,
         )
         self._results.append((config, budget, results))
         logger.info("Seeded baseline trial into SMAC runhistory")
@@ -122,16 +129,20 @@ class SMACBackend(HPOBackend):
     def replay(self, history: list[tuple[dict, float, dict]]) -> None:
         """Replay trials into SMAC's runhistory."""
         from ConfigSpace import Configuration
+        from smac.runhistory.enumerations import StatusType
 
         for config_dict, budget, results in history:
             try:
                 config = Configuration(self._space, values=config_dict)
                 cost = [results.get(o) if results.get(o) is not None else self.FAILURE_COST for o in self._objectives]
+                is_failure = any(results.get(o) is None for o in self._objectives)
+                status = StatusType.MEMORYOUT if is_failure else StatusType.SUCCESS
                 self._facade.runhistory.add(
                     config=config,
                     cost=cost,
                     seed=0,
                     budget=budget if self._multi_fidelity else None,
+                    status=status,
                 )
             except Exception as e:
                 logger.warning("Failed to replay trial into SMAC: %s", e)

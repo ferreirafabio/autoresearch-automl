@@ -1,4 +1,4 @@
-"""Plot convergence curves for Exp2 benchmark: TPE vs LLAMBO vs LLM Greedy."""
+"""Plot convergence curves for Exp2 benchmark: classical vs LLM-based vs hybrid HPO."""
 
 import json
 from pathlib import Path
@@ -93,10 +93,10 @@ def plot_convergence_multi(
 def plot_exp2_0_8b(results_dir: Path, output_path: Path):
     """Exp2: 0.8B model — all backends."""
     backends = {
-        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
-        "llambo": {"label": "LLAMBO (Optuna) 0.8B", "color": "#9C27B0"},
-        "llambo_original": {"label": "LLAMBO (Original) 0.8B", "color": "#E91E63"},
-        "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800"},
+        "optuna": {"label": "TPE", "color": "#2196F3"},
+        "llambo": {"label": "LLAMBO (Optuna) [0.8B]", "color": "#9C27B0"},
+        "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#E91E63"},
+        "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FF9800"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
@@ -109,12 +109,12 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
 def plot_exp2_27b(results_dir: Path, output_path: Path):
     """Exp2: 27B — all backends."""
     backends = {
-        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
+        "optuna": {"label": "TPE", "color": "#2196F3"},
         "cma_es": {"label": "CMA-ES", "color": "#00796B"},
-        "centaur_Qwen3_5_27B": {"label": "Centaur 27B", "color": "#D32F2F"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Original) 27B", "color": "#E91E63"},
+        "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#E91E63"},
         "random": {"label": "Random", "color": "#607D8B"},
     }
     plot_convergence_multi(
@@ -128,15 +128,15 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
 def plot_exp2_all(results_dir: Path, output_path: Path):
     """All backends on one plot."""
     backends = {
-        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
+        "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "-"},
         "cma_es": {"label": "CMA-ES", "color": "#00796B", "linestyle": "-"},
-        "centaur_Qwen3_5_27B": {"label": "Centaur 27B", "color": "#D32F2F", "linestyle": "-"},
+        "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
         "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
         "smac": {"label": "SMAC", "color": "#795548", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "-"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent 27B", "color": "#4CAF50", "linestyle": "-"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#E91E63", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4CAF50", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
@@ -149,11 +149,11 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
 def plot_exp2_model_size(results_dir: Path, output_path: Path):
     """Compare 0.8B vs 27B for each LLM backend."""
     backends = {
-        "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent 0.8B", "color": "#4CAF50", "linestyle": "--"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent 27B", "color": "#4CAF50", "linestyle": "-"},
+        "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "-"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#E91E63", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4CAF50", "linestyle": "--"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4CAF50", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
@@ -194,21 +194,31 @@ def _format_val(v):
     return str(v)
 
 
-def _config_diff(prev: dict, curr: dict, max_diffs: int = 2) -> str:
-    """Karpathy-style HP change description: 'warmdown 0.5→0.7, TBS 524K→262K'."""
-    diffs = []
+def _config_diff(prev: dict, curr: dict) -> str:
+    """Show the single most significant HP change (largest relative delta)."""
+    best_diff = None
+    best_rel = -1.0
     for hp in curr:
         if hp not in prev or prev[hp] != curr[hp]:
             short = HP_SHORT.get(hp, hp)
             if hp in prev:
-                diffs.append(f"{short} {_format_val(prev[hp])}→{_format_val(curr[hp])}")
+                diff_str = f"{short} {_format_val(prev[hp])}→{_format_val(curr[hp])}"
+                # Compute relative change for ranking
+                try:
+                    old_v, new_v = float(prev[hp]), float(curr[hp])
+                    denom = max(abs(old_v), 1e-12)
+                    rel = abs(new_v - old_v) / denom
+                except (ValueError, TypeError):
+                    rel = float("inf")  # categorical changes rank highest
             else:
-                diffs.append(f"{short}={_format_val(curr[hp])}")
-    if not diffs:
+                diff_str = f"{short}={_format_val(curr[hp])}"
+                rel = float("inf")
+            if rel > best_rel:
+                best_rel = rel
+                best_diff = diff_str
+    if best_diff is None:
         return "baseline"
-    if len(diffs) > max_diffs:
-        return ", ".join(diffs[:max_diffs]) + f" +{len(diffs) - max_diffs}"
-    return ", ".join(diffs)
+    return best_diff
 
 
 def plot_progress_single(
@@ -305,13 +315,13 @@ def plot_progress(results_dir: Path, assets_dir: Path):
     bench_dir = results_dir / "exp2_benchmark"
 
     backends_to_plot = [
-        ("optuna", "TPE (Optuna)", "#2196F3"),
-        ("llm_greedy", "LLM Greedy 0.8B", "#FF9800"),
-        ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
-        ("llambo_original", "LLAMBO (Original) 0.8B", "#E91E63"),
-        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Original) 27B", "#E91E63"),
-        ("llambo", "LLAMBO (Optuna) 0.8B", "#9C27B0"),
-        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) 27B", "#9C27B0"),
+        ("optuna", "TPE", "#2196F3"),
+        ("llm_greedy", "Karpathy Agent (14 HPs) [0.8B]", "#FF9800"),
+        ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
+        ("llambo_original", "LLAMBO (Paper) [0.8B]", "#E91E63"),
+        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#E91E63"),
+        ("llambo", "LLAMBO (Optuna) [0.8B]", "#9C27B0"),
+        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) [27B]", "#9C27B0"),
     ]
 
     for backend_name, display_name, color in backends_to_plot:
@@ -409,11 +419,11 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
         all_descriptions = json.loads(desc_path.read_text())
 
     backends = [
-        ("optuna", "TPE (Optuna)", "#2196F3"),
+        ("optuna", "TPE", "#2196F3"),
         ("cma_es", "CMA-ES", "#00796B"),
-        ("centaur_Qwen3_5_27B", "Centaur 27B", "#D32F2F"),
-        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Original) 27B", "#E91E63"),
-        ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
+        ("centaur_Qwen3_5_27B", "Centaur [27B]", "#D32F2F"),
+        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#E91E63"),
+        ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
         ("random", "Random", "#607D8B"),
     ]
 

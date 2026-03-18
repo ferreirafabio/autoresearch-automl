@@ -1,21 +1,18 @@
 # autoresearch-automl
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent tweak training code through trial and error. Ravid Shwartz-Ziv [showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that model-based optimization (Optuna TPE + expert-picked hyperparameter search space) already beats it. We fill the gap by integrating [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) into autoresearch, an approach that puts the LLM inside model-based optimization, using it as both surrogate model and candidate generator.
+**Can LLM-based HPO match classical AutoML methods on a real GPU training task — and can hybrid approaches combining both do even better?**
 
-As an AutoML enthusiast, it felt natural to fill this void — this repo applies LLAMBO to Karpathy's autoresearch problem and benchmarks it against TPE.
-
-![LLAMBO candidate sampling quality](assets/llambo_fig6.png)
-*Figure 6 from [Ye et al. (2024)](https://arxiv.org/abs/2402.03921): LLAMBO outperforms TPE in candidate sampling quality, especially with few observed points.*
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) showed that LLMs can optimize training code through trial and error. Shwartz-Ziv [showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical HPO (TPE + expert search space) already beats it. We systematically benchmark classical, LLM-based, and hybrid HPO approaches — all on the same task, same GPU memory cap, same training-time budget, same baseline config — to find out which strategy actually wins.
 
 ## Setup
 
-We benchmark 7 HPO backends on Karpathy's autoresearch training task: single H200 GPU, 5-minute budget per trial, 24-hour training-time budget, minimize val_bpb.
+We benchmark 10 HPO backends on Karpathy's autoresearch training task: single H200 GPU, 5-minute budget per trial, 24-hour training-time budget, minimize val_bpb.
 
-**Zero-curation search space:** The search space (14 hyperparameters) is extracted fully automatically from `train.py` by parsing the AST — no manual HP selection or range tuning. The extractor finds all module-level uppercase constants with numeric or string values and infers types and ranges. This means any change to `train.py` (adding a new HP, renaming one) is picked up automatically. The search space is a property of the code, not an expert decision. Karpathy's `train.py` contains ~15 additional tunable values hardcoded inside functions (e.g., softcap, rotary embedding base, Muon momentum schedule) that our extractor intentionally does not expose — the unconstrained Karpathy agent baseline covers those.
+**Zero-curation search space:** The search space (14 hyperparameters) is extracted fully automatically from `train.py` by parsing the AST — no manual HP selection or range tuning. The extractor finds all module-level uppercase constants with numeric or string values and infers types and ranges. This means any change to `train.py` (adding a new HP, renaming one) is picked up automatically. The search space is a property of the code, not an expert decision. Karpathy's `train.py` contains ~15 additional tunable values hardcoded inside functions (e.g., softcap, rotary embedding base, Muon momentum schedule) that our extractor intentionally does not expose — the LLM Code Editor baseline covers those.
 
 **Backends:**
-- **Classical:** Optuna TPE, Random Search, SMAC3, CMA-ES
-- **LLM-based:** LLAMBO (OptunaHub), LLAMBO Original (paper-faithful), LLM Greedy
+- **Classical:** TPE (Optuna), Random Search, SMAC, CMA-ES
+- **LLM-based:** LLAMBO (Optuna) (OptunaHub port), LLAMBO (Paper) (paper-faithful), Karpathy Agent (14 HPs) (LLM suggests from history within fixed HP space), Karpathy Agent (Code) (no fixed search space, edits code directly)
 - **Hybrid:** Centaur (CMA-ES guided LLM optimization)
 
 LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on the same GPU as training. No API keys, no proprietary models, fully reproducible. Each condition runs 3 seeds.
@@ -24,13 +21,19 @@ LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on t
 
 **Training-time budget:** We track cumulative *training time* (sum of `wall_time_seconds` across trials) rather than wall-clock time. LLM backends spend significant overhead on inference (e.g., LLAMBO ~50%), so a 24h wall-clock limit would give them far less actual training time. Every backend gets exactly 24 hours of GPU training, regardless of sampling overhead.
 
-**Note on failure handling:** Infeasible configs (OOM, batch size assertion errors) are reported to the sampler as `val_bpb=100.0` instead of being silently dropped. Both TPE and LLAMBO otherwise ignore failed trials (`TrialState.FAIL`), which means they never learn to avoid bad regions. The penalty value is hardcoded for this task (real val_bpb ranges 0.99–2.4) — for other tasks, this would need adjustment.
+**Note on failure handling:** Infeasible configs (OOM, batch size assertion errors) are reported to the sampler as `val_bpb=100.0` instead of being silently dropped. Both TPE and LLAMBO otherwise ignore failed trials (`TrialState.FAIL`), which means they never learn to avoid bad regions. SMAC additionally marks failed trials with `StatusType.MEMORYOUT` so its GP surrogate can distinguish failures from real results. The penalty value is hardcoded for this task (real val_bpb ranges 0.99–2.4) — for other tasks, this would need adjustment.
+
+**Fairness summary:**
+- All methods use identical `CUDA_MEM_FRACTION=0.543` (~76 GB usable)
+- All methods seeded with the same baseline config (Karpathy defaults)
+- Same 14-HP search space extracted from the same `train.py` (except Karpathy Agent (Code), which has no fixed search space)
+- Training-time budget (86400s) counts only GPU training time, not LLM inference overhead — this is intentional so LLM methods get equal training compute despite sampling overhead
 
 ## Results
 
 ### All Methods
 
-Convergence curves (mean ± std across available seeds). Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, LLM Greedy, Karpathy Agent), and hybrid (Centaur).
+Convergence curves (mean ± std across available seeds). Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent (14 HPs), Karpathy Agent (Code)), and hybrid (Centaur).
 
 ![All methods convergence](assets/exp2_all_convergence.png)
 
@@ -63,22 +66,22 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 | Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
 |--------|-------|----------|------|--------|----------|-------------|------|-------|
-| cma_es | 2 | **0.9795** | 0% | 0.138 | 0.697 | 0.889 | 0.561 | 220 |
-| optuna (TPE) | 2 | **0.9821** | 0% | 0.196 | 0.963 | 1.288 | 0.569 | 169 |
-| centaur (27B) | 1 | **0.9848** | 0% | 0.126 | 0.611 | 1.064 | 0.541 | 88 |
-| llambo_original (27B) | 3 | 0.9880 | 0% | 0.255 | 1.272 | 1.127 | 1.210 | 357 |
-| random | 2 | 0.9893 | 56% | 0.274 | 1.388 | 1.243 | 1.391 | 169 |
-| llambo (27B) | 3 | 0.9905 | 84% | 0.164 | 0.843 | 0.968 | 0.696 | 78 |
-| llm_greedy (27B) | 3 | 0.9930 | 1% | 0.020 | 0.101 | 0.249 | 0.059 | 14 |
-| smac | 2 | 1.0045 | 44% | 0.241 | 1.199 | 1.115 | 0.450 | 36 |
+| CMA-ES | 2 | **0.9795** | 0% | 0.138 | 0.697 | 0.889 | 0.561 | 220 |
+| TPE | 2 | **0.9821** | 0% | 0.196 | 0.963 | 1.288 | 0.569 | 169 |
+| Centaur [27B] | 1 | **0.9848** | 0% | 0.126 | 0.611 | 1.064 | 0.541 | 88 |
+| LLAMBO (Paper) [27B] | 3 | 0.9880 | 0% | 0.255 | 1.272 | 1.127 | 1.210 | 357 |
+| Random | 2 | 0.9893 | 56% | 0.274 | 1.388 | 1.243 | 1.391 | 169 |
+| LLAMBO (Optuna) [27B] | 3 | 0.9905 | 84% | 0.164 | 0.843 | 0.968 | 0.696 | 78 |
+| Karpathy Agent (14 HPs) [27B] | 3 | 0.9930 | 1% | 0.020 | 0.101 | 0.249 | 0.059 | 14 |
+| SMAC | 2 | 1.0045 | 44% | 0.241 | 1.199 | 1.115 | 0.450 | 36 |
 
 **Observations:**
 
-- **LLM greedy has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
-- **LLAMBO (OptunaHub) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
-- **llambo_original is the most diverse method with 0% OOM** — spread 0.255, 357 unique cells — yet still underperforms CMA-ES and TPE.
+- **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
+- **LLAMBO (Optuna) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
+- **LLAMBO (Paper) is the most diverse method with 0% OOM** — spread 0.255, 357 unique cells — yet still underperforms CMA-ES and TPE.
 - **The top 3 methods (CMA-ES, TPE, Centaur) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
-- **SMAC has high spread (0.241) but only 36 unique cells** — it revisits similar configs while also producing 44% OOM.
+- **SMAC has high spread (0.241) but only 36 unique cells** — it revisits similar configs while also producing 44% OOM. This is partly due to a bug where OOM trials were marked as `SUCCESS` instead of `MEMORYOUT`, preventing the GP surrogate from learning to avoid infeasible regions (fix included in this repo, rerun pending).
 - **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
 
 ## Usage
@@ -100,15 +103,15 @@ python -m autoresearch_automl.cli run --backend smac --trials 100 --seed 0
 # CMA-ES
 python -m autoresearch_automl.cli run --backend cma_es --trials 100 --seed 0
 
-# LLAMBO (requires vLLM running)
+# LLAMBO (Optuna) (requires vLLM running)
 export OPENAI_BASE_URL=http://127.0.0.1:8000/v1
 export OPENAI_API_KEY=dummy
 python -m autoresearch_automl.cli run --backend llambo --trials 100 --llm-model Qwen3.5-0.8B
 
-# LLAMBO Original (paper-faithful)
+# LLAMBO (Paper)
 python -m autoresearch_automl.cli run --backend llambo_original --trials 100 --llm-model Qwen3.5-0.8B
 
-# LLM Greedy
+# Karpathy Agent (14 HPs)
 python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-model Qwen3.5-0.8B
 ```
 
@@ -118,9 +121,9 @@ python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-mo
 
 Our baseline (Karpathy's default config) achieves val_bpb=1.008 on H200, while Karpathy reports ~0.998 on H100. Same code, same config, same `torch.compile` + FA3. The gap is entirely due to **GPU power throttling**: H200's HBM3e memory (4.8 TB/s) draws more power than H100's HBM3 (3.35 TB/s), leaving less of the shared 700W TDP for the SMs. Under sustained load, our H200 clocks down to ~1600 MHz (81% of max 1980 MHz), yielding 18% fewer training steps per 5-minute trial. Adjusting for actual clock speed, compute efficiency is identical (40.3% vs 39.8% MFU). This baseline offset does not affect HPO convergence.
 
-### OptunaHub LLAMBO vs Original Paper
+### LLAMBO (Optuna) vs LLAMBO (Paper)
 
-While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) in several ways that materially affect optimization quality. OptunaHub does great work making research accessible — these notes are meant to help users who need paper-faithful behavior.
+While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) (LLAMBO (Optuna)) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) (LLAMBO (Paper)) in several ways that materially affect optimization quality. OptunaHub does great work making research accessible — these notes are meant to help users who need paper-faithful behavior.
 
 **Key differences:**
 
@@ -132,7 +135,7 @@ While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](http
 
 **Impact on our experiments:** The categorical delegation was the most painful. Our `WINDOW_PATTERN` hyperparameter (attention pattern per layer) strongly affects VRAM usage and model quality, but the OptunaHub port samples it randomly — the LLM never sees or reasons about it. The binary labeling also loses information: the LLM can't distinguish a config scoring 0.99 from one scoring 1.50, they're both "good" or both "bad" depending on the threshold.
 
-We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_original/) of the paper's code (`--backend llambo_original`) alongside the OptunaHub version (`--backend llambo`) to quantify these differences. Both are included in our benchmark.
+We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_original/) of the paper's code (LLAMBO (Paper), `--backend llambo_original`) alongside the OptunaHub version (LLAMBO (Optuna), `--backend llambo`) to quantify these differences. Both are included in our benchmark.
 
 ## Related work
 
