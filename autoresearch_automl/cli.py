@@ -23,6 +23,7 @@ BACKEND_REGISTRY = {
     "dehb": "autoresearch_automl.backends.dehb_backend:DEHBBackend",
     "bohb": "autoresearch_automl.backends.bohb_backend:BOHBBackend",
     "cma_es": "autoresearch_automl.backends.cma_es_backend:CmaESBackend",
+    "centaur": "autoresearch_automl.backends.centaur_backend:CentaurBackend",
 }
 
 
@@ -96,9 +97,9 @@ def run(
     backend_kwargs = {}
     if backend == "optuna" and storage:
         backend_kwargs["storage"] = storage
-    if llm_model and backend in ("llm_greedy", "karpathy_agent", "llambo", "llambo_original"):
+    if llm_model and backend in ("llm_greedy", "karpathy_agent", "llambo", "llambo_original", "centaur"):
         backend_kwargs["model"] = llm_model
-    if backend in ("llambo", "llambo_original", "llm_greedy", "karpathy_agent"):
+    if backend in ("llambo", "llambo_original", "llm_greedy", "karpathy_agent", "centaur"):
         backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(backend, **backend_kwargs)
 
@@ -142,9 +143,9 @@ def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir:
 
     sc = get_scenario(scenario)
     backend_kwargs = {}
-    if llm_model and method in ("llm_greedy", "karpathy_agent", "llambo", "llambo_original"):
+    if llm_model and method in ("llm_greedy", "karpathy_agent", "llambo", "llambo_original", "centaur"):
         backend_kwargs["model"] = llm_model
-    if method in ("llambo", "llambo_original", "llm_greedy", "karpathy_agent"):
+    if method in ("llambo", "llambo_original", "llm_greedy", "karpathy_agent", "centaur"):
         backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(method, **backend_kwargs)
 

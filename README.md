@@ -16,6 +16,7 @@ We benchmark 7 HPO backends on Karpathy's autoresearch training task: single H20
 **Backends:**
 - **Classical:** Optuna TPE, Random Search, SMAC3, CMA-ES
 - **LLM-based:** LLAMBO (OptunaHub), LLAMBO Original (paper-faithful), LLM Greedy
+- **Hybrid:** Centaur (CMA-ES guided LLM optimization)
 
 LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on the same GPU as training. No API keys, no proprietary models, fully reproducible. Each condition runs 3 seeds.
 
@@ -27,29 +28,58 @@ LLM-based backends use self-hosted Qwen3.5 (0.8B and 27B) via vLLM, running on t
 
 ## Results
 
-### 0.8B: TPE vs LLAMBO vs LLM Greedy
+### All Methods
 
-TPE dominates with 0.8B — reaches ~0.978 by trial 40. LLAMBO (OptunaHub) and LLM Greedy plateau around 1.00 with high variance. LLAMBO 0.8B has a 70% failure rate due to random categorical sampling producing OOM configs.
+Convergence curves (mean ± std across available seeds). Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, LLM Greedy, Karpathy Agent), and hybrid (Centaur).
 
-![0.8B convergence](assets/exp2_0.8b_convergence.png)
+![All methods convergence](assets/exp2_all_convergence.png)
 
-### 27B: TPE vs LLAMBO vs LLM Greedy
+### 27B + Classical
 
-Scaling to 27B improves all LLM-based backends. LLAMBO Original 27B reaches ~0.989 — the best LLM method, only 1.3% behind TPE. LLM Greedy 27B is competitive at ~0.995 with a 99% success rate.
+27B LLM backends compared against classical methods. CMA-ES and TPE lead; Centaur is the best LLM-involving method.
 
-![27B convergence](assets/exp2_27b_convergence.png)
+![27B + Classical convergence](assets/exp2_27b_convergence.png)
 
-### LLM-Based vs Classical HPO
-
-Dashed lines are 0.8B, solid lines are 27B.
-
-![LLM-Based vs Classical HPO](assets/exp2_all_convergence.png)
-
-### Incumbent Traces (seed 0, 27B)
+### Incumbent Traces (seed 0)
 
 Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far).
 
 ![Incumbent Traces](assets/exp2_pareto_fronts.png)
+
+### Centaur: CMA-ES Guided LLM Optimization
+
+We introduce **Centaur**, a hybrid backend where CMA-ES acts as *critic* and an LLM acts as *actor*. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state — distribution mean, step-size sigma, top configs — and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [centaur.md](centaur.md) for the full algorithm and related work comparison.
+
+### Search Diversity Analysis
+
+To understand *why* some methods outperform others, we measure how each backend explores the 13-dimensional continuous HP space. All values are normalized to [0,1] within their bounds. Only successful (non-OOM) trials are included.
+
+**Metrics:**
+- **Spread** — mean per-HP standard deviation (higher = more diverse sampling across each dimension)
+- **Pairwise** — mean L2 distance between all config pairs (higher = configs are more different from each other)
+- **Dist→Default** — mean L2 distance from Karpathy's default config (higher = exploring further from the starting point)
+- **Step** — mean L2 distance between consecutive trials (higher = larger jumps between suggestions)
+- **Cells** — unique cells when discretizing each HP into 5 bins (higher = more coverage of the search space)
+
+| Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
+|--------|-------|----------|------|--------|----------|-------------|------|-------|
+| cma_es | 2 | **0.9795** | 0% | 0.138 | 0.697 | 0.889 | 0.561 | 220 |
+| optuna (TPE) | 2 | **0.9821** | 0% | 0.196 | 0.963 | 1.288 | 0.569 | 169 |
+| centaur (27B) | 1 | **0.9848** | 0% | 0.126 | 0.611 | 1.064 | 0.541 | 88 |
+| llambo_original (27B) | 3 | 0.9880 | 0% | 0.255 | 1.272 | 1.127 | 1.210 | 357 |
+| random | 2 | 0.9893 | 56% | 0.274 | 1.388 | 1.243 | 1.391 | 169 |
+| llambo (27B) | 3 | 0.9905 | 84% | 0.164 | 0.843 | 0.968 | 0.696 | 78 |
+| llm_greedy (27B) | 3 | 0.9930 | 1% | 0.020 | 0.101 | 0.249 | 0.059 | 14 |
+| smac | 2 | 1.0045 | 44% | 0.241 | 1.199 | 1.115 | 0.450 | 36 |
+
+**Observations:**
+
+- **LLM greedy has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
+- **LLAMBO (OptunaHub) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
+- **llambo_original is the most diverse method with 0% OOM** — spread 0.255, 357 unique cells — yet still underperforms CMA-ES and TPE.
+- **The top 3 methods (CMA-ES, TPE, Centaur) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
+- **SMAC has high spread (0.241) but only 36 unique cells** — it revisits similar configs while also producing 44% OOM.
+- **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
 
 ## Usage
 

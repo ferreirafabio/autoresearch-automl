@@ -110,15 +110,18 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
     """Exp2: 27B — all backends."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3"},
+        "cma_es": {"label": "CMA-ES", "color": "#00796B"},
+        "centaur_Qwen3_5_27B": {"label": "Centaur 27B", "color": "#D32F2F"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800"},
         "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0"},
         "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Original) 27B", "color": "#E91E63"},
+        "random": {"label": "Random", "color": "#607D8B"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Karpathy's Autoresearch: HPO Convergence (27B Optimizer)",
+        title="Karpathy's Autoresearch: HPO Convergence (27B + Classical)",
     )
 
 
@@ -126,18 +129,20 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
     """All backends on one plot."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
-        "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "--"},
-        "llambo": {"label": "LLAMBO (Optuna) 0.8B", "color": "#9C27B0", "linestyle": "-"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0", "linestyle": "--"},
-        "llambo_original": {"label": "LLAMBO (Orig) 0.8B", "color": "#E91E63", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "--"},
+        "cma_es": {"label": "CMA-ES", "color": "#00796B", "linestyle": "-"},
+        "centaur_Qwen3_5_27B": {"label": "Centaur 27B", "color": "#D32F2F", "linestyle": "-"},
+        "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
+        "smac": {"label": "SMAC", "color": "#795548", "linestyle": "-"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "-"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) 27B", "color": "#9C27B0", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent 27B", "color": "#4CAF50", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Karpathy's Autoresearch: LLM-Based vs Classical HPO",
+        title="Karpathy's Autoresearch: All HPO Methods",
     )
 
 
@@ -145,10 +150,10 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
     """Compare 0.8B vs 27B for each LLM backend."""
     backends = {
         "optuna": {"label": "TPE (Optuna)", "color": "#2196F3", "linestyle": "-"},
-        "llm_greedy": {"label": "LLM Greedy 0.8B", "color": "#FF9800", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "--"},
-        "llambo_original": {"label": "LLAMBO (Orig) 0.8B", "color": "#E91E63", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "--"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "LLM Greedy 27B", "color": "#FF9800", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Orig) 27B", "color": "#E91E63", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent 0.8B", "color": "#4CAF50", "linestyle": "--"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent 27B", "color": "#4CAF50", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
@@ -405,15 +410,17 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
 
     backends = [
         ("optuna", "TPE (Optuna)", "#2196F3"),
-        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) 27B", "#9C27B0"),
+        ("cma_es", "CMA-ES", "#00796B"),
+        ("centaur_Qwen3_5_27B", "Centaur 27B", "#D32F2F"),
         ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Original) 27B", "#E91E63"),
         ("llm_greedy_Qwen3_5_27B_nothink", "LLM Greedy 27B", "#FF9800"),
+        ("random", "Random", "#607D8B"),
     ]
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 
     for idx, (backend, name, color) in enumerate(backends):
-        row, col = divmod(idx, 2)
+        row, col = divmod(idx, 3)
         descs = all_descriptions.get(backend)
         plot_progress_subplot(axes[row, col], bench_dir, backend, name, color, descriptions=descs)
 
@@ -422,7 +429,7 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
     for ax in axes[:, 0]:
         ax.set_ylabel("val_bpb", fontsize=10)
 
-    fig.suptitle("Incumbent Traces", fontsize=15, y=0.98)
+    fig.suptitle("Incumbent Traces (seed 0)", fontsize=15, y=0.98)
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -434,7 +441,6 @@ if __name__ == "__main__":
     assets_dir = Path("/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl/assets")
     assets_dir.mkdir(exist_ok=True)
 
-    plot_exp2_0_8b(results_dir, assets_dir / "exp2_0.8b_convergence.png")
     plot_exp2_27b(results_dir, assets_dir / "exp2_27b_convergence.png")
     plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
     plot_exp2_model_size(results_dir, assets_dir / "exp2_model_size.png")
