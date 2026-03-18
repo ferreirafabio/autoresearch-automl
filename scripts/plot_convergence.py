@@ -44,8 +44,7 @@ def plot_convergence_multi(
     """Plot convergence with mean +/- std across seeds for multiple backends."""
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    TIME_BUDGET = 86400  # 24h in seconds
-    FINISHED_THRESHOLD = 0.80  # seed is "finished" if ≥80% of budget used
+    MIN_TRIALS = 100  # skip seeds with fewer trials
 
     max_trials = 0
     ranking = []  # (best_val, label, color)
@@ -56,9 +55,8 @@ def plot_convergence_multi(
             if not jsonl.exists():
                 continue
             trials = load_trials(jsonl)
-            total_time = sum(t.get("wall_time_seconds", 0) for t in trials)
-            if total_time < TIME_BUDGET * FINISHED_THRESHOLD:
-                continue  # skip unfinished seeds
+            if len(trials) < MIN_TRIALS:
+                continue
             curve = best_so_far(trials)
             seed_curves.append(curve)
 
