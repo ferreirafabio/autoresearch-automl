@@ -275,7 +275,8 @@ def plot_progress_single(
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=2, alpha=0.6, zorder=3, label="Running best")
 
-    # Annotate incumbents — Karpathy style
+    # Annotate incumbents with collision avoidance
+    placed = []
     prev_config = None
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if prev_config is None:
@@ -285,10 +286,22 @@ def plot_progress_single(
             if len(label) > 45:
                 label = label[:42] + "..."
         prev_config = config
+
+        dy, va, rot = 8, "bottom", 30
+        x_range = max(len(trials), 1)
+        for px, py, pdir in placed[-5:]:
+            x_close = abs(trial_i - px) < 0.10 * x_range
+            y_close = abs(val - py) < 0.004
+            if x_close and y_close and pdir == "above":
+                dy, va, rot = -8, "top", -30
+                break
+
+        direction = "above" if dy > 0 else "below"
+        placed.append((trial_i, val, direction))
         ax.annotate(
-            label, xy=(trial_i, val), xytext=(6, 6),
+            label, xy=(trial_i, val), xytext=(6, dy),
             textcoords="offset points", fontsize=8, color="#1a7a3a",
-            alpha=0.9, rotation=30, ha="left", va="bottom",
+            alpha=0.9, rotation=rot, ha="left", va=va,
             annotation_clip=True,
         )
 
@@ -382,6 +395,8 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
         for d in descriptions:
             desc_map[d["trial"]] = d["description"]
 
+    # Annotate with collision avoidance: alternate above/below when points are close
+    placed = []  # list of (x_data, y_data, direction) for collision checks
     prev_config = None
     for idx, (trial_i, val, config) in enumerate(incumbents):
         if trial_i in desc_map:
@@ -393,10 +408,24 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
         if len(label) > 35:
             label = label[:32] + "..."
         prev_config = config
+
+        # Default: above-right
+        dy, va, rot = 8, "bottom", 30
+        # Check collision with recent annotations (within 15% x-range and close y)
+        x_range = max(len(trials), 1)
+        for px, py, pdir in placed[-5:]:
+            x_close = abs(trial_i - px) < 0.10 * x_range
+            y_close = abs(val - py) < 0.004
+            if x_close and y_close and pdir == "above":
+                dy, va, rot = -8, "top", -30
+                break
+
+        direction = "above" if dy > 0 else "below"
+        placed.append((trial_i, val, direction))
         ax.annotate(
-            label, xy=(trial_i, val), xytext=(6, 6),
+            label, xy=(trial_i, val), xytext=(6, dy),
             textcoords="offset points", fontsize=5.5, color="#1a7a3a",
-            alpha=0.9, rotation=30, ha="left", va="bottom",
+            alpha=0.9, rotation=rot, ha="left", va=va,
             annotation_clip=True,
         )
 
@@ -424,18 +453,27 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
         ("centaur_Qwen3_5_27B", "Centaur [27B]", "#D32F2F"),
         ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#E91E63"),
         ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
+        ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#4CAF50"),
         ("random", "Random", "#607D8B"),
     ]
 
-    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    n_backends = len(backends)
+    ncols = 4
+    nrows = (n_backends + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols, figsize=(22, 5 * nrows))
+    axes_flat = axes.flatten()
 
     for idx, (backend, name, color) in enumerate(backends):
-        row, col = divmod(idx, 3)
         descs = all_descriptions.get(backend)
-        plot_progress_subplot(axes[row, col], bench_dir, backend, name, color, descriptions=descs)
+        plot_progress_subplot(axes_flat[idx], bench_dir, backend, name, color, descriptions=descs)
 
-    for ax in axes[1, :]:
-        ax.set_xlabel("Trial #", fontsize=10)
+    # Hide unused subplots
+    for idx in range(n_backends, len(axes_flat)):
+        axes_flat[idx].set_visible(False)
+
+    for ax in axes[-1, :]:
+        if ax.get_visible():
+            ax.set_xlabel("Trial #", fontsize=10)
     for ax in axes[:, 0]:
         ax.set_ylabel("val_bpb", fontsize=10)
 

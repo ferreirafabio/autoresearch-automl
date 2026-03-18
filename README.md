@@ -1,6 +1,6 @@
 # autoresearch-automl
 
-Systematic benchmark of classical (TPE, CMA-ES, SMAC), LLM-based ([LLAMBO](https://arxiv.org/abs/2402.03921), [Karpathy Agent](https://github.com/karpathy/autoresearch)), and hybrid (Centaur) HPO on a real GPU training task. Motivated by [Shwartz-Ziv's finding](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical HPO already beats LLM agents — we test whether that holds under fair conditions.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error — no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical AutoML (TPE + expert HPs) already beats it. We benchmark classical HPO methods (TPE, CMA-ES, SMAC), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and a hybrid (Centaur) — all under fair conditions — to find out which approach actually wins.
 
 ## Setup
 
