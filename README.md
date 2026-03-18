@@ -38,11 +38,11 @@ Convergence curves (mean ± std across available seeds). Includes classical meth
 
 ![All methods convergence](assets/exp2_all_convergence.png)
 
-### 27B + Classical
+### 0.8B vs 27B LLM Optimizer
 
-27B LLM backends compared against classical methods. CMA-ES and TPE lead; Centaur is the best LLM-involving method.
+Does LLM size matter for HPO? CMA-ES (best classical) shown as reference.
 
-![27B + Classical convergence](assets/exp2_27b_convergence.png)
+![Model size comparison](assets/exp2_model_size.png)
 
 ### Incumbent Traces (seed 0)
 

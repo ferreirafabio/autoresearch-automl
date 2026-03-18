@@ -172,19 +172,19 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
 
 
 def plot_exp2_model_size(results_dir: Path, output_path: Path):
-    """Compare 0.8B vs 27B for each LLM backend."""
+    """Compare 0.8B vs 27B LLM methods, with best classical as reference."""
     backends = {
-        "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+        "cma_es": {"label": "CMA-ES (best classical)", "color": "#00796B", "linestyle": "-"},
         "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
         "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Karpathy's Autoresearch: Does Optimizer LLM Size Matter?",
+        title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
     )
 
 
