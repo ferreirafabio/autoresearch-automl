@@ -59,16 +59,21 @@ def plot_convergence_multi(
         if not seed_curves:
             continue
 
-        # Align to shortest curve
-        min_len = min(len(c) for c in seed_curves)
-        max_trials = max(max_trials, min_len)
-        aligned = np.array([c[:min_len] for c in seed_curves])
+        # Align to longest curve (pad shorter ones with their last value)
+        max_len = max(len(c) for c in seed_curves)
+        max_trials = max(max_trials, max_len)
+        padded = []
+        for c in seed_curves:
+            if len(c) < max_len:
+                c = c + [c[-1]] * (max_len - len(c))
+            padded.append(c)
+        aligned = np.array([c[:max_len] for c in padded])
         aligned[aligned == float("inf")] = np.nan
 
         mean = np.nanmean(aligned, axis=0)
         std = np.nanstd(aligned, axis=0)
 
-        x = np.arange(min_len)
+        x = np.arange(max_len)
         best_val = np.nanmin(mean)
         line, = ax.plot(x, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"))
