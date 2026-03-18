@@ -1,4 +1,4 @@
-"""SMAC3 backend — Random Forest surrogate with multi-fidelity support."""
+"""SMAC3 backend — HyperparameterOptimizationFacade (Random Forest surrogate)."""
 
 from __future__ import annotations
 
@@ -13,11 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class SMACBackend(HPOBackend):
-    """SMAC3 HPO backend with RF surrogate.
-
-    Supports single-fidelity (BlackBoxFacade) and multi-fidelity
-    (MultiFidelityFacade with Successive Halving / Hyperband).
-    """
+"""SMAC3 HPO backend using HyperparameterOptimizationFacade (Random Forest surrogate)."""
 
     # Penalty for failed trials — must be finite (sklearn RF can't handle inf/NaN)
     FAILURE_COST = 100.0
@@ -59,7 +55,7 @@ class SMACBackend(HPOBackend):
             self._min_budget, self._max_budget = budget_range
 
         try:
-            from smac import MultiFidelityFacade, BlackBoxFacade, Scenario
+            from smac import HyperparameterOptimizationFacade, MultiFidelityFacade, Scenario
         except ImportError:
             raise ImportError(
                 "SMAC3 is required for SMACBackend. "
@@ -83,7 +79,7 @@ class SMACBackend(HPOBackend):
                 overwrite=True,
             )
         else:
-            self._facade = BlackBoxFacade(
+            self._facade = HyperparameterOptimizationFacade(
                 scenario=scenario,
                 target_function=lambda config, seed: {},  # placeholder
                 overwrite=True,
