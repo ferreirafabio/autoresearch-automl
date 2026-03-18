@@ -2,16 +2,32 @@
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error — no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that classical AutoML (TPE + expert HPs) already beats it. We benchmark classical HPO methods (TPE, CMA-ES, SMAC), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and a hybrid (Centaur) — all under fair conditions — to find out which approach actually wins.
 
+## Methods
+
+**Classical (fixed 14-HP search space):**
+- **TPE** — Tree-structured Parzen Estimator. [Optuna](https://github.com/optuna/optuna) implementation.
+- **CMA-ES** — Covariance Matrix Adaptation Evolution Strategy. [Optuna CMA sampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html).
+- **SMAC** — Sequential Model-based Algorithm Configuration with Random Forest surrogate. [SMAC3](https://github.com/automl/SMAC3).
+- **Random** — Uniform random sampling. [Optuna RandomSampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html).
+
+**LLM-based (fixed 14-HP search space):**
+- **LLAMBO (Optuna)** — LLM as surrogate + candidate generator inside Bayesian optimization. [OptunaHub port](https://hub.optuna.org/samplers/llambo/).
+- **LLAMBO (Paper)** — Paper-faithful reimplementation with continuous surrogate labels and full HP visibility. Based on [Ye et al., 2024](https://arxiv.org/abs/2402.03921), [original code](https://github.com/tennisonliu/LLAMBO).
+- **Karpathy Agent (14 HPs)** — LLM sees trial history and suggests the next config within the fixed search space. No surrogate model, pure LLM suggestion.
+
+**LLM-based (open, no fixed search space):**
+- **Karpathy Agent (Code)** — LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs. Based on [Karpathy's autoresearch](https://github.com/karpathy/autoresearch).
+
+**Hybrid (fixed 14-HP search space):**
+- **Centaur** — CMA-ES runs every trial as *critic* (learning covariance structure); on 30% of trials the LLM acts as *actor*, receiving CMA-ES state to make informed suggestions. See [centaur.md](centaur.md).
+
+All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
+
 ## Setup
 
-Single H200 GPU, 5 min/trial, 24h training-time budget, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via AST (no manual curation). LLM backends use self-hosted Qwen3.5 (0.8B/27B) via vLLM on the same GPU. 3 seeds per condition.
+Single H200 GPU, 5 min/trial, 24h training-time budget, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via AST (no manual curation). 3 seeds per condition.
 
-**Backends:**
-- **Classical:** TPE, CMA-ES, SMAC, Random
-- **LLM-based:** LLAMBO ([Optuna](https://hub.optuna.org/samplers/llambo/), [Paper](https://github.com/tennisonliu/LLAMBO)), Karpathy Agent (14 HPs), Karpathy Agent (Code)
-- **Hybrid:** Centaur (CMA-ES + LLM)
-
-**Fairness:** All methods capped to ~76 GB VRAM (matching LLM backends' available memory after vLLM). Budget counts GPU training time only (not LLM inference overhead). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
+**Fairness:** All methods capped to ~76 GB VRAM (matching LLM methods' available memory after vLLM). Budget counts GPU training time only (not LLM inference overhead). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
 
 ## Results
 
