@@ -86,11 +86,14 @@ def plot_convergence_multi(
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     ax.grid(True, alpha=0.3)
 
-    # Sorted monospace legend with right-aligned scores
+    # Sorted monospace legend with header and right-aligned best scores
     if ranking:
         ranking.sort(key=lambda r: r[0])
         max_name_len = max(len(r[2]) for r in ranking)
-        handles, labels = [], []
+        # Header row (invisible handle)
+        header_handle, = ax.plot([], [], color="none", marker="none", linestyle="none")
+        handles = [header_handle]
+        labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
         for val, handle, name in ranking:
             labels.append(f"{name.ljust(max_name_len + 2)}{val:.4f}")
             handles.append(handle)
