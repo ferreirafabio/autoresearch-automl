@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class SMACBackend(HPOBackend):
-"""SMAC3 HPO backend using HyperparameterOptimizationFacade (Random Forest surrogate)."""
+    """SMAC3 HPO backend using HyperparameterOptimizationFacade (Random Forest surrogate)."""
 
     # Penalty for failed trials — must be finite (sklearn RF can't handle inf/NaN)
     FAILURE_COST = 100.0
