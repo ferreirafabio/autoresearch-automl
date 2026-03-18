@@ -82,7 +82,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 - **LLAMBO (Optuna) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
 - **LLAMBO (Paper) is the most diverse method with 0% OOM** (spread 0.255, 357 unique cells), yet still underperforms CMA-ES and TPE.
 - **The top 3 methods (CMA-ES, TPE, Centaur) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
-- **SMAC has high spread (0.241) but only 36 unique cells.** It revisits similar configs while also producing 44% OOM. This is partly due to a bug where OOM trials were marked as `SUCCESS` instead of `MEMORYOUT`, preventing the GP surrogate from learning to avoid infeasible regions (fix included in this repo, rerun pending).
+- **SMAC has high spread (0.241) but only 36 unique cells.** Its GP surrogate + Expected Improvement acquisition keeps exploring OOM regions despite penalty costs, unlike TPE which directly models feasibility. Even after fixing a status bug (MEMORYOUT instead of SUCCESS), OOM rate remains ~60%.
 - **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
 
 ## Usage
