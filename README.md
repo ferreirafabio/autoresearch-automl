@@ -11,8 +11,8 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 - **Random:** Uniform random sampling ([Optuna RandomSampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html)).
 
 **LLM-based (fixed 14-HP search space):**
-- **LLAMBO (Optuna):** LLM as surrogate + candidate generator inside Bayesian optimization ([OptunaHub port](https://hub.optuna.org/samplers/llambo/)).
-- **LLAMBO (Paper):** Paper-faithful reimplementation with continuous surrogate labels and full HP visibility ([Ye et al., 2024](https://arxiv.org/abs/2402.03921), [original code](https://github.com/tennisonliu/LLAMBO)).
+- **LLAMBO (Optuna):** LLM as surrogate + candidate generator inside Bayesian optimization ([OptunaHub port](https://hub.optuna.org/samplers/llambo/)). The OptunaHub implementation has several issues: it uses binary surrogate labels (good/bad) instead of continuous values, delegates categorical HPs to random sampling, and hides failed trials from the surrogate (see [Details](#llambo-optuna-vs-llambo-paper)).
+- **LLAMBO (Paper):** Our reimplementation faithful to the original paper, fixing the above issues: continuous surrogate labels, all HPs visible to the LLM, failed trials included ([Ye et al., 2024](https://arxiv.org/abs/2402.03921), [original code](https://github.com/tennisonliu/LLAMBO)).
 - **Karpathy Agent (14 HPs):** LLM sees trial history and suggests the next config within the fixed search space. No surrogate model, pure LLM suggestion.
 
 **LLM-based (open, no fixed search space):**
