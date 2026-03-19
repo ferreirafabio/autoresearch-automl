@@ -105,7 +105,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 ## Search Space
 
-Classical HPO methods require a fixed search space. To avoid injecting human priors, we auto-extract hyperparameters from `train.py` via [AST](https://docs.python.org/3/library/ast.html) (Abstract Syntax Tree) parsing: the source code is parsed into a syntax tree, and every top-level `ALL_CAPS = literal` assignment is identified as a tunable HP. This yields 14 HPs (13 continuous/integer + 1 categorical):
+Classical, non-LLM-based methods work with search spaces. The quality of the search space greatly affects the results produced by these methods. To make the comparison with Karpathy's autoresearch fair, we need to eliminate human priors that we would otherwise encode into the search space. To do this, we automatically extract hyperparameters from `train.py` using [AST](https://docs.python.org/3/library/ast.html) (Abstract Syntax Tree) parsing: the source code is parsed into a syntax tree, and every top-level `ALL_CAPS = literal` assignment is identified as a tunable HP. We extract the following 14 hyperparameters to optimize (13 continuous/integer + 1 categorical):
 
 | HP | Type | Range | Log | Default |
 |----|------|-------|-----|---------|
