@@ -2,6 +2,44 @@
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search) and LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), all under fair conditions.
 
+## Table of Contents
+
+- [Search Space](#search-space)
+- [Methods](#methods)
+- [Setup](#setup)
+- [Results](#results)
+  - [All Methods](#all-methods)
+  - [0.8B vs 27B LLM Optimizer](#08b-vs-27b-llm-optimizer)
+  - [Incumbent Traces (seed 0)](#incumbent-traces-seed-0)
+  - [CMA-ES + LLM](#cma-es--llm-cma-es-guided-llm-optimization)
+  - [Search Diversity Analysis](#search-diversity-analysis)
+- [Usage](#usage)
+- [Related work](#related-work)
+- [Details](#details)
+- [Acknowledgements](#acknowledgements)
+
+## Search Space
+
+Classical HPO methods require a fixed search space. To avoid injecting human priors, we auto-extract hyperparameters from `train.py` via AST parsing ([`search_space.py`](autoresearch_automl/core/search_space.py)): every `ALL_CAPS = literal` assignment becomes a tunable HP. This yields 14 HPs (13 continuous/integer + 1 categorical):
+
+| HP | Type | Range | Log | Default |
+|----|------|-------|-----|---------|
+| DEPTH | int | 4 – 24 | | 8 |
+| ASPECT_RATIO | int | 32 – 128 | | 64 |
+| HEAD_DIM | int | 64 – 256 | yes | 128 |
+| DEVICE_BATCH_SIZE | int | 32 – 256 | yes | 128 |
+| TOTAL_BATCH_SIZE | int | 65 536 – 2 097 152 | yes | 524 288 |
+| EMBEDDING_LR | float | 0.01 – 2.0 | yes | 0.6 |
+| UNEMBEDDING_LR | float | 0.0005 – 0.05 | yes | 0.004 |
+| MATRIX_LR | float | 0.005 – 0.2 | yes | 0.04 |
+| SCALAR_LR | float | 0.05 – 2.0 | yes | 0.5 |
+| WEIGHT_DECAY | float | 0.0 – 0.5 | | 0.2 |
+| WARMUP_RATIO | float | 0.0 – 0.3 | | 0.0 |
+| WARMDOWN_RATIO | float | 0.1 – 0.8 | | 0.5 |
+| FINAL_LR_FRAC | float | 0.0 – 0.2 | | 0.0 |
+| WINDOW_PATTERN | categorical | SSSL, SSLL, SLSL, LLLL, SSSS, LSSL | | SSSL |
+
+Defaults are Karpathy's starting config (commit `b11d6f28`), not his final optimized values.
 
 ## Methods
 
@@ -56,7 +94,7 @@ We introduce **CMA-ES + LLM**, a hybrid backend where CMA-ES acts as *critic* an
 
 ### Search Diversity Analysis
 
-To understand *why* some methods outperform others, we measure how each backend explores the 13-dimensional continuous HP space. All values are normalized to [0,1] within their bounds. Only successful (non-OOM) trials are included.
+To understand *why* some methods outperform others, we measure how each backend explores the 14-dimensional HP space (WINDOW_PATTERN is categorical and excluded from distance metrics, leaving 13 continuous dimensions). All values are normalized to [0,1] within their bounds. Only successful (non-OOM) trials are included.
 
 **Metrics:**
 - **Spread:** mean per-HP standard deviation (higher = more diverse sampling across each dimension)
@@ -81,7 +119,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 - **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
 - **LLAMBO (Optuna) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
-- **LLAMBO (Paper) is the most diverse method with 0% OOM** (spread 0.255, 357 unique cells), yet still underperforms CMA-ES and TPE.
+- **LLAMBO (Paper) is the most diverse method with 0% OOM** (spread 0.255, 357 unique cells), yet still underperforms CMA-ES and TPE. Notably, LLAMBO (Paper) achieves higher coverage than Random Search (357 vs 169 unique cells) despite being model-based.
 - **The top 3 methods (CMA-ES, TPE, CMA-ES + LLM) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
 - **SMAC has high spread (0.241) but only 36 unique cells.** Its GP surrogate + Expected Improvement acquisition keeps exploring OOM regions despite penalty costs, unlike TPE which directly models feasibility. Even after fixing a status bug (MEMORYOUT instead of SUCCESS), OOM rate remains ~60%.
 - **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
@@ -144,3 +182,7 @@ While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](http
 **Impact on our experiments:** The categorical delegation was the most painful. Our `WINDOW_PATTERN` hyperparameter (attention pattern per layer) strongly affects VRAM usage and model quality, but the OptunaHub port samples it randomly — the LLM never sees or reasons about it. The binary labeling also loses information: the LLM can't distinguish a config scoring 0.99 from one scoring 1.50, they're both "good" or both "bad" depending on the threshold.
 
 We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_original/) of the paper's code (LLAMBO (Paper), `--backend llambo_original`) alongside the OptunaHub version (LLAMBO (Optuna), `--backend llambo`) to quantify these differences. Both are included in our benchmark.
+
+## Acknowledgements
+
+Thanks to Arjun Krishnakumar for feedback on presentation and narrative.
