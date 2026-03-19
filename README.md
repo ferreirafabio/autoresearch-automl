@@ -187,4 +187,4 @@ We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_origi
 
 ## Acknowledgements
 
-Thanks to Arjun Krishnakumar for feedback on presentation and narrative.
+Thanks to Arjun Krishnakumar and Arber Zela for his feedback.
