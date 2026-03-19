@@ -336,41 +336,14 @@ class CentaurBackend(HPOBackend):
                 native_params = self._to_native_types(t["params"])
                 lines.append(f"  {i}. val_bpb={t['value']:.4f}: {json.dumps(native_params)}")
 
-        # Format covariance matrix as top correlated/anti-correlated HP pairs
+        # Full covariance matrix (rows/cols = alphabetically sorted HP names)
         if cma_state.get("cov") is not None:
-            lines.append(self._format_covariance(cma_state["cov"]))
-
-        return "\n".join(lines)
-
-    def _format_covariance(self, cov: list[list[float]]) -> str:
-        """Format covariance matrix as top correlated HP pairs."""
-        import numpy as np
-
-        C = np.array(cov)
-        # HP names in alphabetical order (matches Optuna's IntersectionSearchSpace)
-        hp_names = sorted(self._optuna_mapping.keys())
-
-        if len(hp_names) != C.shape[0]:
-            return ""
-
-        # Convert to correlation matrix for interpretability
-        diag = np.sqrt(np.diag(C))
-        diag[diag == 0] = 1e-12
-        corr = C / np.outer(diag, diag)
-        np.fill_diagonal(corr, 0)  # ignore self-correlation
-
-        # Collect all off-diagonal pairs
-        pairs = []
-        for i in range(len(hp_names)):
-            for j in range(i + 1, len(hp_names)):
-                pairs.append((abs(corr[i, j]), corr[i, j], hp_names[i], hp_names[j]))
-
-        pairs.sort(reverse=True, key=lambda x: x[0])
-
-        lines = ["\nLearned HP correlations (from covariance matrix):"]
-        for _, r, hp_a, hp_b in pairs[:8]:
-            direction = "+" if r > 0 else "-"
-            lines.append(f"  {hp_a} <-> {hp_b}: r={r:+.2f} ({direction}correlated)")
+            import numpy as np
+            hp_names = sorted(self._optuna_mapping.keys())
+            C = np.array(cma_state["cov"])
+            if len(hp_names) == C.shape[0]:
+                lines.append(f"\nCovariance matrix (rows/cols: {', '.join(hp_names)}):")
+                lines.append(np.array2string(C, precision=4, suppress_small=True))
 
         return "\n".join(lines)
 
