@@ -136,7 +136,8 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
     backends = {
         "optuna": {"label": "TPE", "color": "#2196F3"},
         "cma_es": {"label": "CMA-ES", "color": "#00796B"},
-        "centaur_Qwen3_5_27B": {"label": "CMA-ES + LLM [27B]", "color": "#D32F2F"},
+        "centaur_Qwen3_5_27B": {"label": "CMA-ES + LLM (w/o C) [27B]", "color": "#D32F2F"},
+        "centaur_Qwen3_5_27B_withC": {"label": "CMA-ES + LLM [27B]", "color": "#E91E63"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800"},
         "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0"},
         "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4"},
@@ -156,7 +157,8 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
     backends = {
         "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "-"},
         "cma_es": {"label": "CMA-ES", "color": "#00796B", "linestyle": "-"},
-        "centaur_Qwen3_5_27B": {"label": "CMA-ES + LLM [27B]", "color": "#D32F2F", "linestyle": "-"},
+        "centaur_Qwen3_5_27B": {"label": "CMA-ES + LLM (w/o C) [27B]", "color": "#D32F2F", "linestyle": "-"},
+        "centaur_Qwen3_5_27B_withC": {"label": "CMA-ES + LLM [27B]", "color": "#E91E63", "linestyle": "-"},
         "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
         "smac": {"label": "SMAC", "color": "#8BC34A", "linestyle": "-"},
         "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},

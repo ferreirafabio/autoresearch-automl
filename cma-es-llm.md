@@ -4,32 +4,33 @@
 
 CMA-ES + LLM is a hybrid HPO algorithm that pairs CMA-ES (Covariance Matrix Adaptation Evolution Strategy) with an LLM.
 
-**CMA-ES** maintains a multivariate Gaussian over the search space — a mean vector (center of the promising region), a step-size sigma (search radius), and a covariance matrix (learned HP correlations). It runs on every trial, always updating its model of the landscape.
+**CMA-ES** maintains a multivariate Gaussian over the search space: a mean vector (center of the promising region), a step-size sigma (search radius), and a covariance matrix (learned HP correlations). It runs on every trial, always updating its model of the landscape.
 
 **The LLM** is called on a fraction of trials (controlled by `llm_ratio`, default 30%, after a `llm_warmup` of 10 pure CMA-ES trials). When called, the LLM sees:
 - CMA-ES's current mean (where CMA-ES thinks is promising)
 - CMA-ES's sigma (how focused/exploratory CMA-ES currently is)
+- CMA-ES's full covariance matrix C (14×14, which HPs co-vary in good regions)
 - CMA-ES's own next suggestion
 - The top-5 configs found so far
 - The last 20 trial results
 - The full search space with bounds
 
-The LLM uses this structured analysis plus its domain knowledge (e.g., transformer training dynamics, OOM-prone regions) to suggest a config. CMA-ES then **learns from the LLM's result** via its normal tell() cycle — the covariance matrix adapts to include LLM-chosen points.
+The LLM uses this structured analysis plus its domain knowledge (e.g., transformer training dynamics, OOM-prone regions) to suggest a config. CMA-ES then **learns from the LLM's result** via its normal tell() cycle, so the covariance matrix adapts to include LLM-chosen points.
 
 ### Algorithm
 
 ```
 1. Initialize CMA-ES with seed
 2. For each trial t:
-   a. CMA-ES proposes a config (always — maintains internal state)
+   a. CMA-ES proposes a config (always, maintains internal state)
    b. If t < warmup OR not an LLM turn: evaluate CMA-ES's config
    c. If LLM turn:
-      - Extract CMA-ES state (mean, sigma, top configs)
+      - Extract CMA-ES state (mean, sigma, covariance matrix, top configs)
       - Build prompt with CMA-ES analysis + history + search space
-      - LLM suggests config → clamp to bounds
+      - LLM suggests config, clamp to bounds
       - Override CMA-ES's trial params with LLM config
    d. Evaluate the config
-   e. Tell CMA-ES the result (always — it learns from ALL trials)
+   e. Tell CMA-ES the result (always, it learns from ALL trials)
 ```
 
 Key invariant: CMA-ES ask/tell runs on every trial. On LLM turns, CMA-ES proposes but the LLM overrides. CMA-ES still learns from the LLM's result, so its covariance adapts to the full trajectory.
@@ -43,7 +44,7 @@ LLAMBO replaces the **surrogate model** (normally a Gaussian Process) inside Bay
 - LLAMBO: LLM is a **component inside** BO (the surrogate). Classical math still makes the final decision.
 - CMA-ES + LLM: LLM and CMA-ES are **two separate decision-makers** taking turns. The LLM makes the final decision on its turns, informed by CMA-ES's state.
 
-Another key difference: LLAMBO's LLM sees the raw history and must implicitly learn the landscape. In CMA-ES + LLM, the LLM sees CMA-ES's **explicit landscape model** (mean, sigma, convergence state) — a structured summary that's naturally expressible in language.
+Another key difference: LLAMBO's LLM sees the raw history and must implicitly learn the landscape. In CMA-ES + LLM, the LLM sees CMA-ES's **explicit landscape model** (mean, sigma, covariance, convergence state), a structured summary that's naturally expressible in language.
 
 ### vs. SLLMBO (Mahammadli & Ertekin, 2024)
 
@@ -51,14 +52,14 @@ SLLMBO is the closest prior work. It's a hybrid of LLM + TPE (Tree-structured Pa
 
 Differences:
 - **Optimizer choice**: SLLMBO uses TPE (models each HP independently via kernel density estimation). CMA-ES + LLM uses CMA-ES (models joint HP distribution with full covariance). CMA-ES's state (mean vector, sigma, covariance) is far more interpretable to an LLM than TPE's density estimators.
-- **Information flow**: In SLLMBO the LLM doesn't see the optimizer's internal state — it just sees trial history. In CMA-ES + LLM, the LLM receives CMA-ES's mean, sigma, and top configs as structured guidance. This is the core insight: CMA-ES's Gaussian model translates naturally to language ("the center of the promising region is here, the search radius is X").
+- **Information flow**: In SLLMBO the LLM doesn't see the optimizer's internal state, it just sees trial history. In CMA-ES + LLM, the LLM receives CMA-ES's mean, sigma, covariance matrix, and top configs as structured guidance. This is the core insight: CMA-ES's Gaussian model translates naturally to language ("the center of the promising region is here, the search radius is X").
 - **Learning**: CMA-ES always learns from LLM trials (the override-then-tell mechanism), so its covariance matrix incorporates LLM-chosen points. The two methods co-adapt.
 
 ### vs. Pure LLM HPO (Zhang et al., 2023)
 
 Pure LLM approaches (like `llm_greedy` in this repo) prompt the LLM with history and ask for the next config. No traditional optimizer involved.
 
-- Pure LLM has domain knowledge but no optimization state — it can't track covariance structure or convergence across trials.
+- Pure LLM has domain knowledge but no optimization state. It can't track covariance structure or convergence across trials.
 - CMA-ES + LLM gives the LLM an optimization "advisor" that compensates for this: CMA-ES tracks the landscape, the LLM brings the domain knowledge.
 
 ### vs. LLaMA-ES (Kramer, ESANN 2024)
@@ -72,10 +73,11 @@ CMA-ES + LLM operates at the search-space level: the LLM directly suggests HP co
 CMA-ES's internal state is uniquely interpretable for LLM communication:
 - **Mean vector** → "CMA-ES thinks this region is promising" (a concrete config the LLM can read)
 - **Sigma** → "CMA-ES is exploring widely / converging tightly" (a single scalar)
+- **Covariance matrix C** → which HPs co-vary in good regions (14×14, with labeled rows/columns)
 
-We pass mean and sigma to the LLM, not the full covariance matrix C (which is 14×14 and hard to express in a prompt). The covariance still drives CMA-ES's sampling internally, but the LLM only needs the interpretable summary.
+We pass all three to the LLM. The covariance matrix is annotated with HP name mappings so the LLM can reason about learned HP relationships (e.g., DEPTH and DEVICE_BATCH_SIZE trading off).
 
-Compare with TPE (two separate density estimators — hard to summarize) or GP-BO (posterior mean + variance over the full space — high-dimensional, not concise). CMA-ES gives you a "center + search radius" story that fits naturally in a prompt.
+Compare with TPE (two separate density estimators, hard to summarize) or GP-BO (posterior mean + variance over the full space, high-dimensional, not concise). CMA-ES gives you a "center + search radius + learned correlations" story that fits naturally in a prompt.
 
 ## References
 

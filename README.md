@@ -37,7 +37,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 - **Karpathy Agent (Code):** LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs ([Karpathy's autoresearch](https://github.com/karpathy/autoresearch)).
 
 **Hybrid (fixed [14-HP search space](#search-space)):**
-- **CMA-ES + LLM:** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state — distribution mean, step-size sigma, top configs — and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md).
+- **CMA-ES + LLM:** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md).
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
 
@@ -69,7 +69,7 @@ Grey dots are all trials, colored dots are new bests, staircase is the incumbent
 
 ### CMA-ES + LLM: CMA-ES Guided LLM Optimization
 
-We introduce **CMA-ES + LLM**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state — distribution mean, step-size sigma, top configs — and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md) for the full algorithm and related work comparison.
+We introduce **CMA-ES + LLM**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md) for the full algorithm and related work comparison.
 
 ### Search Diversity Analysis
 
@@ -171,17 +171,17 @@ Our baseline (Karpathy's default config) achieves val_bpb=1.008 on H200, while K
 
 ### LLAMBO (Optuna) vs LLAMBO (Paper)
 
-While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) (LLAMBO (Optuna)) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) (LLAMBO (Paper)) in several ways that materially affect optimization quality. OptunaHub does great work making research accessible — these notes are meant to help users who need paper-faithful behavior.
+While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) (LLAMBO (Optuna)) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) (LLAMBO (Paper)) in several ways that materially affect optimization quality. OptunaHub does great work making research accessible; these notes are meant to help users who need paper-faithful behavior.
 
 **Key differences:**
 
 | Aspect | Original paper | OptunaHub port |
 |--------|---------------|----------------|
-| **Surrogate labels** | Actual metric values (`## 0.970 ##`) — LLM sees performance gradients | Binary 0/1 (top 20% threshold) — LLM only sees "good" vs "bad" |
+| **Surrogate labels** | Actual metric values (`## 0.970 ##`), LLM sees performance gradients | Binary 0/1 (top 20% threshold), LLM only sees "good" vs "bad" |
 | **Categorical HPs** | All HPs included in LLM prompts | Categoricals delegated to random sampling, invisible to LLM |
 | **Failed trials** | Visible to surrogate (can learn infeasible regions) | Marked as `TrialState.FAIL`, invisible to surrogate |
 
-**Impact on our experiments:** The categorical delegation was the most painful. Our `WINDOW_PATTERN` hyperparameter (attention pattern per layer) strongly affects VRAM usage and model quality, but the OptunaHub port samples it randomly — the LLM never sees or reasons about it. The binary labeling also loses information: the LLM can't distinguish a config scoring 0.99 from one scoring 1.50, they're both "good" or both "bad" depending on the threshold.
+**Impact on our experiments:** The categorical delegation was the most painful. Our `WINDOW_PATTERN` hyperparameter (attention pattern per layer) strongly affects VRAM usage and model quality, but the OptunaHub port samples it randomly, so the LLM never sees or reasons about it. The binary labeling also loses information: the LLM can't distinguish a config scoring 0.99 from one scoring 1.50, they're both "good" or both "bad" depending on the threshold.
 
 We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_original/) of the paper's code (LLAMBO (Paper), `--backend llambo_original`) alongside the OptunaHub version (LLAMBO (Optuna), `--backend llambo`) to quantify these differences. Both are included in our benchmark.
 
