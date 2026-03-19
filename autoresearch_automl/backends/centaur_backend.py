@@ -342,7 +342,13 @@ class CentaurBackend(HPOBackend):
             hp_names = sorted(self._optuna_mapping.keys())
             C = np.array(cma_state["cov"])
             if len(hp_names) == C.shape[0]:
-                lines.append(f"\nCovariance matrix (rows/cols: {', '.join(hp_names)}):")
+                lines.append(
+                    f"\nCMA-ES covariance matrix ({C.shape[0]}x{C.shape[0]}). "
+                    "This matrix describes how the hyperparameters co-vary in the learned search distribution. "
+                    "Positive off-diagonal entries mean those HPs tend to increase together in good regions; "
+                    "negative entries mean they trade off. "
+                    f"Row/column order: {', '.join(f'{i}={name}' for i, name in enumerate(hp_names))}."
+                )
                 lines.append(np.array2string(C, precision=4, suppress_small=True))
 
         return "\n".join(lines)
