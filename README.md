@@ -2,9 +2,10 @@
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search) and LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), all under fair conditions.
 
+![All methods convergence](assets/exp2_all_convergence.png)
+
 ## Table of Contents
 
-- [Search Space](#search-space)
 - [Methods](#methods)
 - [Setup](#setup)
 - [Results](#results)
@@ -13,43 +14,21 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
   - [Incumbent Traces (seed 0)](#incumbent-traces-seed-0)
   - [CMA-ES + LLM](#cma-es--llm-cma-es-guided-llm-optimization)
   - [Search Diversity Analysis](#search-diversity-analysis)
+- [Search Space](#search-space)
 - [Usage](#usage)
 - [Related work](#related-work)
 - [Details](#details)
 - [Acknowledgements](#acknowledgements)
 
-## Search Space
-
-Classical HPO methods require a fixed search space. To avoid injecting human priors, we auto-extract hyperparameters from `train.py` via AST parsing ([`search_space.py`](autoresearch_automl/core/search_space.py)): every `ALL_CAPS = literal` assignment becomes a tunable HP. This yields 14 HPs (13 continuous/integer + 1 categorical):
-
-| HP | Type | Range | Log | Default |
-|----|------|-------|-----|---------|
-| DEPTH | int | 4 – 24 | | 8 |
-| ASPECT_RATIO | int | 32 – 128 | | 64 |
-| HEAD_DIM | int | 64 – 256 | yes | 128 |
-| DEVICE_BATCH_SIZE | int | 32 – 256 | yes | 128 |
-| TOTAL_BATCH_SIZE | int | 65 536 – 2 097 152 | yes | 524 288 |
-| EMBEDDING_LR | float | 0.01 – 2.0 | yes | 0.6 |
-| UNEMBEDDING_LR | float | 0.0005 – 0.05 | yes | 0.004 |
-| MATRIX_LR | float | 0.005 – 0.2 | yes | 0.04 |
-| SCALAR_LR | float | 0.05 – 2.0 | yes | 0.5 |
-| WEIGHT_DECAY | float | 0.0 – 0.5 | | 0.2 |
-| WARMUP_RATIO | float | 0.0 – 0.3 | | 0.0 |
-| WARMDOWN_RATIO | float | 0.1 – 0.8 | | 0.5 |
-| FINAL_LR_FRAC | float | 0.0 – 0.2 | | 0.0 |
-| WINDOW_PATTERN | categorical | SSSL, SSLL, SLSL, LLLL, SSSS, LSSL | | SSSL |
-
-Defaults are Karpathy's starting config (commit `b11d6f28`), not his final optimized values.
-
 ## Methods
 
-**Classical (fixed 14-HP search space):**
+**Classical (fixed [14-HP search space](#search-space)):**
 - **TPE:** Tree-structured Parzen Estimator ([Optuna](https://github.com/optuna/optuna)).
 - **CMA-ES:** Covariance Matrix Adaptation Evolution Strategy ([Optuna CMA sampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html)).
 - **SMAC:** Sequential Model-based Algorithm Configuration with Random Forest surrogate ([SMAC3](https://github.com/automl/SMAC3)).
 - **Random:** Uniform random sampling ([Optuna RandomSampler](https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html)).
 
-**LLM-based (fixed 14-HP search space):**
+**LLM-based (fixed [14-HP search space](#search-space)):**
 - **LLAMBO (Optuna):** LLM as surrogate + candidate generator inside Bayesian optimization ([OptunaHub port](https://hub.optuna.org/samplers/llambo/)). The OptunaHub implementation has several issues: it uses binary surrogate labels (good/bad) instead of continuous values, delegates categorical HPs to random sampling, and hides failed trials from the surrogate (see [Details](#llambo-optuna-vs-llambo-paper)).
 - **LLAMBO (Paper):** Our reimplementation faithful to the original paper, fixing the above issues: continuous surrogate labels, all HPs visible to the LLM, failed trials included ([Ye et al., 2024](https://arxiv.org/abs/2402.03921), [original code](https://github.com/tennisonliu/LLAMBO)).
 - **Karpathy Agent (14 HPs):** LLM sees trial history and suggests the next config within the fixed search space. No surrogate model, pure LLM suggestion.
@@ -57,14 +36,14 @@ Defaults are Karpathy's starting config (commit `b11d6f28`), not his final optim
 **LLM-based (open, no fixed search space):**
 - **Karpathy Agent (Code):** LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs ([Karpathy's autoresearch](https://github.com/karpathy/autoresearch)).
 
-**Hybrid (fixed 14-HP search space):**
-- **CMA-ES + LLM:** CMA-ES as *critic* learns from 100% of trials (always refitting its covariance structure). On 30% of trials the LLM acts as *actor*, receiving CMA-ES internal state (mean, sigma, top configs) to make informed suggestions. The remaining 70% CMA-ES serves as the actor. See [centaur.md](centaur.md).
+**Hybrid (fixed [14-HP search space](#search-space)):**
+- **CMA-ES + LLM:** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state — distribution mean, step-size sigma, top configs — and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [centaur.md](centaur.md).
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
 
 ## Setup
 
-Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via AST (no manual curation). 3 seeds per condition.
+Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (no manual curation). 3 seeds per condition.
 
 **Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz-Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
 
@@ -90,7 +69,7 @@ Grey dots are all trials, colored dots are new bests, staircase is the incumbent
 
 ### CMA-ES + LLM: CMA-ES Guided LLM Optimization
 
-We introduce **CMA-ES + LLM**, a hybrid backend where CMA-ES acts as *critic* and an LLM acts as *actor*. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state — distribution mean, step-size sigma, top configs — and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [centaur.md](centaur.md) for the full algorithm and related work comparison.
+We introduce **CMA-ES + LLM**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state — distribution mean, step-size sigma, top configs — and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [centaur.md](centaur.md) for the full algorithm and related work comparison.
 
 ### Search Diversity Analysis
 
@@ -123,6 +102,29 @@ To understand *why* some methods outperform others, we measure how each backend 
 - **The top 3 methods (CMA-ES, TPE, CMA-ES + LLM) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
 - **SMAC has high spread (0.241) but only 36 unique cells.** Its GP surrogate + Expected Improvement acquisition keeps exploring OOM regions despite penalty costs, unlike TPE which directly models feasibility. Even after fixing a status bug (MEMORYOUT instead of SUCCESS), OOM rate remains ~60%.
 - **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
+
+## Search Space
+
+Classical HPO methods require a fixed search space. To avoid injecting human priors, we auto-extract hyperparameters from `train.py` via [AST](https://docs.python.org/3/library/ast.html) (Abstract Syntax Tree) parsing: the source code is parsed into a syntax tree, and every top-level `ALL_CAPS = literal` assignment is identified as a tunable HP. This yields 14 HPs (13 continuous/integer + 1 categorical):
+
+| HP | Type | Range | Log | Default |
+|----|------|-------|-----|---------|
+| DEPTH | int | 4 – 24 | | 8 |
+| ASPECT_RATIO | int | 32 – 128 | | 64 |
+| HEAD_DIM | int | 64 – 256 | yes | 128 |
+| DEVICE_BATCH_SIZE | int | 32 – 256 | yes | 128 |
+| TOTAL_BATCH_SIZE | int | 65 536 – 2 097 152 | yes | 524 288 |
+| EMBEDDING_LR | float | 0.01 – 2.0 | yes | 0.6 |
+| UNEMBEDDING_LR | float | 0.0005 – 0.05 | yes | 0.004 |
+| MATRIX_LR | float | 0.005 – 0.2 | yes | 0.04 |
+| SCALAR_LR | float | 0.05 – 2.0 | yes | 0.5 |
+| WEIGHT_DECAY | float | 0.0 – 0.5 | | 0.2 |
+| WARMUP_RATIO | float | 0.0 – 0.3 | | 0.0 |
+| WARMDOWN_RATIO | float | 0.1 – 0.8 | | 0.5 |
+| FINAL_LR_FRAC | float | 0.0 – 0.2 | | 0.0 |
+| WINDOW_PATTERN | categorical | SSSL, SSLL, SLSL, LLLL, SSSS, LSSL | | SSSL |
+
+Defaults are Karpathy's starting config (commit `b11d6f28`), not his final optimized values.
 
 ## Usage
 
