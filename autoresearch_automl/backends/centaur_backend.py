@@ -297,9 +297,15 @@ class CentaurBackend(HPOBackend):
                             for t in completed[:5]
                         ]
 
+                        # Covariance matrix C (indices = alphabetically sorted HP names)
+                        cov = None
+                        if hasattr(optimizer, "_C"):
+                            cov = optimizer._C.tolist()
+
                         return {
                             "mean_raw": mean,
                             "sigma": sigma,
+                            "cov": cov,
                             "top_trials": top_trials,
                             "n_trials": len(trials),
                         }
@@ -329,6 +335,42 @@ class CentaurBackend(HPOBackend):
             for i, t in enumerate(cma_state["top_trials"], 1):
                 native_params = self._to_native_types(t["params"])
                 lines.append(f"  {i}. val_bpb={t['value']:.4f}: {json.dumps(native_params)}")
+
+        # Format covariance matrix as top correlated/anti-correlated HP pairs
+        if cma_state.get("cov") is not None:
+            lines.append(self._format_covariance(cma_state["cov"]))
+
+        return "\n".join(lines)
+
+    def _format_covariance(self, cov: list[list[float]]) -> str:
+        """Format covariance matrix as top correlated HP pairs."""
+        import numpy as np
+
+        C = np.array(cov)
+        # HP names in alphabetical order (matches Optuna's IntersectionSearchSpace)
+        hp_names = sorted(self._optuna_mapping.keys())
+
+        if len(hp_names) != C.shape[0]:
+            return ""
+
+        # Convert to correlation matrix for interpretability
+        diag = np.sqrt(np.diag(C))
+        diag[diag == 0] = 1e-12
+        corr = C / np.outer(diag, diag)
+        np.fill_diagonal(corr, 0)  # ignore self-correlation
+
+        # Collect all off-diagonal pairs
+        pairs = []
+        for i in range(len(hp_names)):
+            for j in range(i + 1, len(hp_names)):
+                pairs.append((abs(corr[i, j]), corr[i, j], hp_names[i], hp_names[j]))
+
+        pairs.sort(reverse=True, key=lambda x: x[0])
+
+        lines = ["\nLearned HP correlations (from covariance matrix):"]
+        for _, r, hp_a, hp_b in pairs[:8]:
+            direction = "+" if r > 0 else "-"
+            lines.append(f"  {hp_a} <-> {hp_b}: r={r:+.2f} ({direction}correlated)")
 
         return "\n".join(lines)
 

@@ -8,20 +8,26 @@
 
 set -euo pipefail
 
-# Experiment 2: Centaur — CMA-ES guided LLM optimization
+# Experiment 2: CMA-ES + LLM — CMA-ES guided LLM optimization
 #
 # Usage:
 #   sbatch slurm/exp2_centaur.sh 0 Qwen3.5-0.8B
 #   sbatch slurm/exp2_centaur.sh 0 Qwen3.5-27B
+#   sbatch slurm/exp2_centaur.sh 0 Qwen3.5-27B withC   # append suffix to results dir
 
-SEED="${1:?Usage: sbatch exp2_centaur.sh <seed> <model_name>}"
-MODEL_NAME="${2:?Usage: sbatch exp2_centaur.sh <seed> <model_name>}"
+SEED="${1:?Usage: sbatch exp2_centaur.sh <seed> <model_name> [suffix]}"
+MODEL_NAME="${2:?Usage: sbatch exp2_centaur.sh <seed> <model_name> [suffix]}"
+SUFFIX="${3:-}"
 MODELS_BASE="/work/dlclarge1/ferreira-autoresearch-automl/models"
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 
 MODEL_TAG=$(echo "${MODEL_NAME}" | tr '.' '_' | tr '-' '_')
-RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/centaur_${MODEL_TAG}/seed_${SEED}"
+SUFFIX_TAG=""
+if [ -n "$SUFFIX" ]; then
+    SUFFIX_TAG="_${SUFFIX}"
+fi
+RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/centaur_${MODEL_TAG}${SUFFIX_TAG}/seed_${SEED}"
 TRIALS=9999
 VLLM_PORT=$((8100 + RANDOM % 900))
 
