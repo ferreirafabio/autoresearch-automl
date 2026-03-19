@@ -12,7 +12,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
   - [All Methods](#all-methods)
   - [0.8B vs 27B LLM Optimizer](#08b-vs-27b-llm-optimizer)
   - [Incumbent Traces (seed 0)](#incumbent-traces-seed-0)
-  - [CMA-ES + LLM](#cma-es--llm-cma-es-guided-llm-optimization)
+  - [Centaur (CMA-ES+LLM)](#centaur-cma-esllm-cma-es-guided-llm-optimization)
   - [Search Diversity Analysis](#search-diversity-analysis)
 - [Search Space](#search-space)
 - [Usage](#usage)
@@ -37,13 +37,13 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 - **Karpathy Agent (Code):** LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs ([Karpathy's autoresearch](https://github.com/karpathy/autoresearch)).
 
 **Hybrid (fixed [14-HP search space](#search-space)):**
-- **CMA-ES + LLM:** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md).
+- **Centaur (CMA-ES+LLM):** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md).
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
 
 ## Setup
 
-Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (no manual curation). 3 seeds per condition.
+Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP, no manual curation). See [Search Space](#search-space) for the full table. 3 seeds per condition.
 
 **Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz-Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
 
@@ -51,7 +51,7 @@ Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extrac
 
 ### All Methods
 
-Convergence curves (mean ± std across available seeds). Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent (14 HPs), Karpathy Agent (Code)), and hybrid (CMA-ES + LLM).
+Convergence curves (mean ± std across available seeds). Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent (14 HPs), Karpathy Agent (Code)), and hybrid (Centaur).
 
 ![All methods convergence](assets/exp2_all_convergence.png)
 
@@ -67,9 +67,9 @@ Grey dots are all trials, colored dots are new bests, staircase is the incumbent
 
 ![Incumbent Traces](assets/exp2_pareto_fronts.png)
 
-### CMA-ES + LLM: CMA-ES Guided LLM Optimization
+### Centaur (CMA-ES+LLM): CMA-ES Guided LLM Optimization
 
-We introduce **CMA-ES + LLM**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md) for the full algorithm and related work comparison.
+We introduce **Centaur (CMA-ES+LLM)**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md) for the full algorithm and related work comparison.
 
 ### Search Diversity Analysis
 
@@ -85,7 +85,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 | Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
 |--------|-------|----------|------|--------|----------|-------------|------|-------|
 | CMA-ES | 3 | **0.9833** | 16% | 0.138 | 0.697 | 0.889 | 0.561 | 220 |
-| CMA-ES + LLM [27B] | 3 | **0.9821** | 19% | 0.126 | 0.611 | 1.064 | 0.541 | 88 |
+| Centaur (CMA-ES+LLM) [27B] | 3 | **0.9821** | 19% | 0.126 | 0.611 | 1.064 | 0.541 | 88 |
 | TPE | 3 | **0.9840** | 10% | 0.196 | 0.963 | 1.288 | 0.569 | 169 |
 | LLAMBO (Paper) [27B] | 3 | 0.9880 | 48% | 0.255 | 1.272 | 1.127 | 1.210 | 357 |
 | Random | 3 | 0.9898 | 57% | 0.274 | 1.388 | 1.243 | 1.391 | 169 |
@@ -99,7 +99,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 - **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
 - **LLAMBO (Optuna) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
 - **LLAMBO (Paper) is the most diverse method with 0% OOM** (spread 0.255, 357 unique cells), yet still underperforms CMA-ES and TPE. Notably, LLAMBO (Paper) achieves higher coverage than Random Search (357 vs 169 unique cells) despite being model-based.
-- **The top 3 methods (CMA-ES, TPE, CMA-ES + LLM) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
+- **The top 3 methods (CMA-ES, TPE, Centaur) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
 - **SMAC has high spread (0.241) but only 36 unique cells.** Its GP surrogate + Expected Improvement acquisition keeps exploring OOM regions despite penalty costs, unlike TPE which directly models feasibility. Even after fixing a status bug (MEMORYOUT instead of SUCCESS), OOM rate remains ~60%.
 - **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
 

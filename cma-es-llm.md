@@ -1,8 +1,8 @@
-# CMA-ES + LLM: CMA-ES Guided LLM Optimization
+# Centaur (CMA-ES+LLM): CMA-ES Guided LLM Optimization
 
 ## How it works
 
-CMA-ES + LLM is a hybrid HPO algorithm that pairs CMA-ES (Covariance Matrix Adaptation Evolution Strategy) with an LLM.
+Centaur is a hybrid HPO algorithm that pairs CMA-ES (Covariance Matrix Adaptation Evolution Strategy) with an LLM.
 
 **CMA-ES** maintains a multivariate Gaussian over the search space: a mean vector (center of the promising region), a step-size sigma (search radius), and a covariance matrix (learned HP correlations). It runs on every trial, always updating its model of the landscape.
 
