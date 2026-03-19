@@ -37,7 +37,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 - **Karpathy Agent (Code):** LLM directly edits `train.py` source code each trial. Can change any constant, not just the 14 extracted HPs ([Karpathy's autoresearch](https://github.com/karpathy/autoresearch)).
 
 **Hybrid (fixed [14-HP search space](#search-space)):**
-- **Centaur (CMA-ES+LLM):** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md).
+- **Centaur (CMA-ES+LLM):** CMA-ES runs every trial, continuously learning the optimization landscape (covariance structure, convergence direction). On 30% of trials (after 10 warmup), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and suggests a config informed by both the learned landscape and transformer domain knowledge. CMA-ES always refits on all results, including LLM-suggested ones. See [centaur.md](centaur.md).
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU as training.
 
@@ -69,7 +69,7 @@ Grey dots are all trials, colored dots are new bests, staircase is the incumbent
 
 ### Centaur (CMA-ES+LLM): CMA-ES Guided LLM Optimization
 
-We introduce **Centaur (CMA-ES+LLM)**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [cma-es-llm.md](cma-es-llm.md) for the full algorithm and related work comparison.
+We introduce **Centaur (CMA-ES+LLM)**, a hybrid backend where CMA-ES is the primary optimizer that occasionally consults an LLM. CMA-ES runs every trial, learning the optimization landscape (covariance structure, convergence direction). On a fraction of trials (30%, after 10 warmup trials), the LLM receives CMA-ES's internal state (distribution mean, step-size sigma, covariance matrix, top configs) and uses it alongside transformer domain knowledge to suggest configs. CMA-ES learns from all results, including LLM-suggested ones. See [centaur.md](centaur.md) for the full algorithm and related work comparison.
 
 ### Search Diversity Analysis
 
