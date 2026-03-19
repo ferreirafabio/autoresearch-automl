@@ -70,11 +70,12 @@ CMA-ES + LLM operates at the search-space level: the LLM directly suggests HP co
 ### Why CMA-ES specifically (not TPE, GP-BO, etc.)
 
 CMA-ES's internal state is uniquely interpretable for LLM communication:
-- **Mean vector** → "CMA-ES thinks this region is promising" (a concrete config)
-- **Sigma** → "CMA-ES is exploring widely / converging tightly" (a single number)
-- **Covariance** → "depth and lr are correlated in the good region" (HP relationships)
+- **Mean vector** → "CMA-ES thinks this region is promising" (a concrete config the LLM can read)
+- **Sigma** → "CMA-ES is exploring widely / converging tightly" (a single scalar)
 
-Compare with TPE (two separate density estimators — hard to summarize) or GP-BO (posterior mean + variance over the full space — high-dimensional, not concise). CMA-ES gives you a "center + radius + direction" story that fits naturally in a prompt.
+We pass mean and sigma to the LLM, not the full covariance matrix C (which is 14×14 and hard to express in a prompt). The covariance still drives CMA-ES's sampling internally, but the LLM only needs the interpretable summary.
+
+Compare with TPE (two separate density estimators — hard to summarize) or GP-BO (posterior mean + variance over the full space — high-dimensional, not concise). CMA-ES gives you a "center + search radius" story that fits naturally in a prompt.
 
 ## References
 
