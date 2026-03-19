@@ -147,6 +147,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
         backends,
         output_path,
         title="Karpathy's Autoresearch: HPO Convergence (27B + Classical)",
+        xlim=(0, 300),
     )
 
 
@@ -168,6 +169,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         backends,
         output_path,
         title="Karpathy's Autoresearch: All HPO Methods",
+        xlim=(0, 300),
     )
 
 
@@ -185,6 +187,7 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
         backends,
         output_path,
         title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
+        xlim=(0, 300),
     )
 
 

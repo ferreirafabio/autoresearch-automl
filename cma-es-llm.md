@@ -1,8 +1,8 @@
-# Centaur: CMA-ES Guided LLM Optimization
+# CMA-ES + LLM: CMA-ES Guided LLM Optimization
 
-## What Centaur does
+## How it works
 
-Centaur is a hybrid HPO algorithm that pairs CMA-ES (Covariance Matrix Adaptation Evolution Strategy) as a **critic** with an LLM as an **actor**.
+CMA-ES + LLM is a hybrid HPO algorithm that pairs CMA-ES (Covariance Matrix Adaptation Evolution Strategy) with an LLM.
 
 **CMA-ES** maintains a multivariate Gaussian over the search space — a mean vector (center of the promising region), a step-size sigma (search radius), and a covariance matrix (learned HP correlations). It runs on every trial, always updating its model of the landscape.
 
@@ -34,38 +34,38 @@ The LLM uses this structured analysis plus its domain knowledge (e.g., transform
 
 Key invariant: CMA-ES ask/tell runs on every trial. On LLM turns, CMA-ES proposes but the LLM overrides. CMA-ES still learns from the LLM's result, so its covariance adapts to the full trajectory.
 
-## How Centaur contrasts with related work
+## How CMA-ES + LLM contrasts with related work
 
 ### vs. LLAMBO (Liu et al., ICLR 2024)
 
 LLAMBO replaces the **surrogate model** (normally a Gaussian Process) inside Bayesian Optimization with an LLM. The LLM predicts "config X will score ~0.98", and then a classical **acquisition function** (Expected Improvement) picks the best candidate from LLM-predicted scores.
 
 - LLAMBO: LLM is a **component inside** BO (the surrogate). Classical math still makes the final decision.
-- Centaur: LLM and CMA-ES are **two separate decision-makers** taking turns. The LLM makes the final decision on its turns, informed by CMA-ES's state.
+- CMA-ES + LLM: LLM and CMA-ES are **two separate decision-makers** taking turns. The LLM makes the final decision on its turns, informed by CMA-ES's state.
 
-Another key difference: LLAMBO's LLM sees the raw history and must implicitly learn the landscape. Centaur's LLM sees CMA-ES's **explicit landscape model** (mean, sigma, convergence state) — a structured summary that's naturally expressible in language.
+Another key difference: LLAMBO's LLM sees the raw history and must implicitly learn the landscape. In CMA-ES + LLM, the LLM sees CMA-ES's **explicit landscape model** (mean, sigma, convergence state) — a structured summary that's naturally expressible in language.
 
 ### vs. SLLMBO (Mahammadli & Ertekin, 2024)
 
 SLLMBO is the closest prior work. It's a hybrid of LLM + TPE (Tree-structured Parzen Estimator). Both propose candidates, and the framework selects between them.
 
 Differences:
-- **Optimizer choice**: SLLMBO uses TPE (models each HP independently via kernel density estimation). Centaur uses CMA-ES (models joint HP distribution with full covariance). CMA-ES's state (mean vector, sigma, covariance) is far more interpretable to an LLM than TPE's density estimators.
-- **Information flow**: In SLLMBO the LLM doesn't see the optimizer's internal state — it just sees trial history. In Centaur, the LLM receives CMA-ES's mean, sigma, and top configs as structured guidance. This is the core insight: CMA-ES's Gaussian model translates naturally to language ("the center of the promising region is here, the search radius is X").
-- **Learning**: In Centaur, CMA-ES always learns from LLM trials (the override-then-tell mechanism), so its covariance matrix incorporates LLM-chosen points. The two methods co-adapt.
+- **Optimizer choice**: SLLMBO uses TPE (models each HP independently via kernel density estimation). CMA-ES + LLM uses CMA-ES (models joint HP distribution with full covariance). CMA-ES's state (mean vector, sigma, covariance) is far more interpretable to an LLM than TPE's density estimators.
+- **Information flow**: In SLLMBO the LLM doesn't see the optimizer's internal state — it just sees trial history. In CMA-ES + LLM, the LLM receives CMA-ES's mean, sigma, and top configs as structured guidance. This is the core insight: CMA-ES's Gaussian model translates naturally to language ("the center of the promising region is here, the search radius is X").
+- **Learning**: CMA-ES always learns from LLM trials (the override-then-tell mechanism), so its covariance matrix incorporates LLM-chosen points. The two methods co-adapt.
 
 ### vs. Pure LLM HPO (Zhang et al., 2023)
 
 Pure LLM approaches (like `llm_greedy` in this repo) prompt the LLM with history and ask for the next config. No traditional optimizer involved.
 
 - Pure LLM has domain knowledge but no optimization state — it can't track covariance structure or convergence across trials.
-- Centaur gives the LLM an optimization "advisor" that compensates for this: CMA-ES tracks the landscape, the LLM brings the domain knowledge.
+- CMA-ES + LLM gives the LLM an optimization "advisor" that compensates for this: CMA-ES tracks the landscape, the LLM brings the domain knowledge.
 
 ### vs. LLaMA-ES (Kramer, ESANN 2024)
 
 LLaMA-ES uses an LLM to tune CMA-ES's **own hyperparameters** (rankmu, rankone). It's meta-level: the LLM optimizes the optimizer itself, not the search space.
 
-Centaur operates at the search-space level: the LLM directly suggests HP configs, guided by CMA-ES's landscape model.
+CMA-ES + LLM operates at the search-space level: the LLM directly suggests HP configs, guided by CMA-ES's landscape model.
 
 ### Why CMA-ES specifically (not TPE, GP-BO, etc.)
 
@@ -82,4 +82,3 @@ Compare with TPE (two separate density estimators — hard to summarize) or GP-B
 - SLLMBO: Mahammadli & Ertekin, "Sequential Large Language Model-Based Hyperparameter Optimization", 2024. [arXiv:2410.20302](https://arxiv.org/abs/2410.20302)
 - LLM for HPO: Zhang et al., "Using Large Language Models for Hyperparameter Optimization", 2023. [arXiv:2312.04528](https://arxiv.org/abs/2312.04528)
 - LLaMA-ES: Kramer, "LLaMA Tunes CMA-ES", ESANN 2024. [PDF](https://www.esann.org/sites/default/files/proceedings/2024/ES2024-136.pdf)
-- Centaur chess: Kasparov's Advanced Chess (1998) — human+engine hybrid outperforms either alone.
