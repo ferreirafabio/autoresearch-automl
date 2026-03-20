@@ -6,7 +6,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 
 ![Old convergence (inconsistent)](assets/exp2_old_convergence.png)
 
-**New results (consistent baselines, ~0.991):** Re-runs in progress. Only methods with completed seeds shown.
+**New results (consistent baselines, ~0.991):** Re-runs in progress. Classical methods (TPE, CMA-ES, SMAC, Random) and Centaur shown; 27B LLM methods pending.
 
 ![HPO Convergence](assets/exp2_27b_walltime.png)
 

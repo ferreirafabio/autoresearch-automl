@@ -54,7 +54,7 @@ def plot_convergence_walltime(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence (wall-time)",
-    ylim: tuple[float, float] = (0.970, 1.012),
+    ylim: tuple[float, float] = (0.973, 0.996),
     xlim_hours: tuple[float, float] | None = None,
 ):
     """Plot convergence with x-axis = cumulative training wall-time (hours)."""
@@ -130,7 +130,7 @@ def plot_convergence_multi(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence",
-    ylim: tuple[float, float] = (0.970, 1.012),
+    ylim: tuple[float, float] = (0.973, 0.996),
     xlim: tuple[int, int] | None = None,
 ):
     """Plot convergence with mean +/- std across seeds for multiple backends."""
@@ -454,7 +454,7 @@ def plot_progress_single(
     ax.set_xlabel("Trial #", fontsize=12)
     ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.970, 1.012)
+    ax.set_ylim(0.973, 0.996)
     ax.legend(fontsize=10, loc="upper right")
     ax.grid(True, alpha=0.2)
 
@@ -557,7 +557,7 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
                  fontsize=9)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.970, 1.012)
+    ax.set_ylim(0.973, 0.996)
     ax.grid(True, alpha=0.2)
 
     if texts:
