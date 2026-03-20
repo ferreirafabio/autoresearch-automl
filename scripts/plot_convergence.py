@@ -33,12 +33,104 @@ def best_so_far(trials: list[dict]) -> list[float]:
     return curve
 
 
+def cumulative_walltime(trials: list[dict]) -> tuple[list[float], list[float]]:
+    """Return (cumulative_training_hours, incumbent_val_bpb) for wall-time plots."""
+    cum_time = 0.0
+    best = float("inf")
+    times = []
+    values = []
+    for t in trials:
+        wt = t.get("wall_time_seconds") or 0.0
+        cum_time += wt
+        if t["success"] and t["val_bpb"] is not None:
+            best = min(best, t["val_bpb"])
+        times.append(cum_time / 3600)  # convert to hours
+        values.append(best)
+    return times, values
+
+
+def plot_convergence_walltime(
+    results_dir: Path,
+    backends: dict[str, dict],
+    output_path: Path,
+    title: str = "Convergence (wall-time)",
+    ylim: tuple[float, float] = (0.970, 1.012),
+    xlim_hours: tuple[float, float] | None = None,
+):
+    """Plot convergence with x-axis = cumulative training wall-time (hours)."""
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    MIN_TRIALS = 100
+    INTERP_HOURS = np.linspace(0, 24, 1000)  # interpolate to common time grid
+
+    max_time = 0.0
+    ranking = []
+    for backend_dir, style in backends.items():
+        seed_interps = []
+        for seed in range(3):
+            jsonl = results_dir / backend_dir / f"seed_{seed}" / "trials.jsonl"
+            if not jsonl.exists():
+                continue
+            trials = load_trials(jsonl)
+            if len(trials) < MIN_TRIALS:
+                continue
+            times, values = cumulative_walltime(trials)
+            if not times or values[0] == float("inf"):
+                continue
+            max_time = max(max_time, times[-1])
+            # Interpolate onto common grid (forward-fill)
+            interped = np.interp(INTERP_HOURS, times, values,
+                                 left=np.nan, right=values[-1])
+            seed_interps.append(interped)
+
+        if not seed_interps:
+            continue
+
+        aligned = np.array(seed_interps)
+        mean = np.nanmean(aligned, axis=0)
+        std = np.nanstd(aligned, axis=0)
+
+        best_val = np.nanmin(mean)
+        line, = ax.plot(INTERP_HOURS, mean, color=style["color"], linewidth=2,
+                        linestyle=style.get("linestyle", "-"))
+        ax.fill_between(INTERP_HOURS, mean - std, mean + std,
+                        color=style["color"], alpha=0.12)
+        ranking.append((best_val, line, style["label"]))
+
+    ax.set_xlabel("Cumulative training time (hours)", fontsize=12)
+    ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
+    ax.set_title(title, fontsize=13)
+    ax.set_ylim(*ylim)
+    if xlim_hours:
+        ax.set_xlim(*xlim_hours)
+    else:
+        ax.set_xlim(0, min(max_time, 24))
+    ax.grid(True, alpha=0.3)
+
+    if ranking:
+        ranking.sort(key=lambda r: r[0])
+        max_name_len = max(len(r[2]) for r in ranking)
+        header_handle, = ax.plot([], [], color="none", marker="none", linestyle="none")
+        handles = [header_handle]
+        labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
+        for val, handle, name in ranking:
+            labels.append(f"{name.ljust(max_name_len + 2)}{val:.4f}")
+            handles.append(handle)
+        ax.legend(handles, labels, fontsize=8, loc="upper right",
+                  prop={"family": "monospace", "size": 8})
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {output_path}")
+
+
 def plot_convergence_multi(
     results_dir: Path,
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence",
-    ylim: tuple[float, float] = (0.975, 1.012),
+    ylim: tuple[float, float] = (0.970, 1.012),
     xlim: tuple[int, int] | None = None,
 ):
     """Plot convergence with mean +/- std across seeds for multiple backends."""
@@ -131,44 +223,67 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
     )
 
 
+BACKENDS_27B = {
+    "optuna": {"label": "TPE", "color": "#2196F3"},
+    "cma_es": {"label": "CMA-ES", "color": "#00796B"},
+    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#D32F2F"},
+    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FF9800"},
+    "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},
+    "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},
+    "random": {"label": "Random", "color": "#607D8B"},
+}
+
+BACKENDS_ALL = {
+    "cma_es": {"label": "CMA-ES (classical)", "color": "#00796B", "linestyle": "-"},
+    "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
+    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#D32F2F", "linestyle": "--"},
+    "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
+    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
+    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
+}
+
+
 def plot_exp2_27b(results_dir: Path, output_path: Path):
     """Exp2: 27B — all backends (27B only, no model size tag)."""
-    backends = {
-        "optuna": {"label": "TPE", "color": "#2196F3"},
-        "cma_es": {"label": "CMA-ES", "color": "#00796B"},
-        "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#D32F2F"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FF9800"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},
-        "random": {"label": "Random", "color": "#607D8B"},
-    }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
-        backends,
+        BACKENDS_27B,
+        output_path,
+        title="Karpathy's Autoresearch: HPO Convergence (by trial)",
+        xlim=(0, 300),
+    )
+
+
+def plot_exp2_27b_walltime(results_dir: Path, output_path: Path):
+    """Exp2: 27B — wall-time x-axis (primary plot)."""
+    plot_convergence_walltime(
+        results_dir / "exp2_benchmark",
+        BACKENDS_27B,
         output_path,
         title="Karpathy's Autoresearch: HPO Convergence",
-        xlim=(0, 300),
     )
 
 
 def plot_exp2_all(results_dir: Path, output_path: Path):
     """0.8B vs 27B comparison for all LLM methods, with classical references."""
-    backends = {
-        "cma_es": {"label": "CMA-ES (classical)", "color": "#00796B", "linestyle": "-"},
-        "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
-        "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#D32F2F", "linestyle": "--"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
-        "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
-    }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
-        backends,
+        BACKENDS_ALL,
+        output_path,
+        title="Karpathy's Autoresearch: 0.8B vs 27B (by trial)",
+        xlim=(0, 300),
+    )
+
+
+def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
+    """0.8B vs 27B comparison — wall-time x-axis (primary plot)."""
+    plot_convergence_walltime(
+        results_dir / "exp2_benchmark",
+        BACKENDS_ALL,
         output_path,
         title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
-        xlim=(0, 300),
     )
 
 
@@ -338,7 +453,7 @@ def plot_progress_single(
     ax.set_xlabel("Trial #", fontsize=12)
     ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.975, 1.012)
+    ax.set_ylim(0.970, 1.012)
     ax.legend(fontsize=10, loc="upper right")
     ax.grid(True, alpha=0.2)
 
@@ -441,7 +556,7 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
                  fontsize=9)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.975, 1.012)
+    ax.set_ylim(0.970, 1.012)
     ax.grid(True, alpha=0.2)
 
     if texts:
@@ -526,6 +641,10 @@ if __name__ == "__main__":
     assets_dir = Path("/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl/assets")
     assets_dir.mkdir(exist_ok=True)
 
+    # Primary plots: wall-time x-axis
+    plot_exp2_27b_walltime(results_dir, assets_dir / "exp2_27b_walltime.png")
+    plot_exp2_all_walltime(results_dir, assets_dir / "exp2_all_walltime.png")
+    # Secondary plots: trial-number x-axis (appendix)
     plot_exp2_27b(results_dir, assets_dir / "exp2_27b_convergence.png")
     plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
     plot_exp2_model_size(results_dir, assets_dir / "exp2_model_size.png")
