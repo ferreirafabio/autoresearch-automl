@@ -2,13 +2,13 @@
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search) and LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), all under fair conditions.
 
+**Old results (inconsistent baselines, GPU throttled):** All methods started at different val_bpb (~1.005–1.011) due to H200 power throttling (~1300K vs ~1750K tok/s). These results are **not comparable** — re-running with consistent hardware below.
+
+![Old convergence (inconsistent)](assets/exp2_old_convergence.png)
+
+**New results (consistent baselines, ~0.991):** Re-runs in progress. Only methods with completed seeds shown.
+
 ![HPO Convergence](assets/exp2_27b_walltime.png)
-
-### Baseline Calibration
-
-Trial 0 (Karpathy's starting config) across all methods. Old runs (Mar 16-17) had ~30% lower GPU throughput due to H200 power throttling, making results incomparable. All current runs use consistent hardware conditions.
-
-![Baseline comparison](assets/baseline_comparison.png)
 
 ## Table of Contents
 
