@@ -211,3 +211,108 @@ class TestCMAStateExtraction:
         if state is not None:
             assert "sigma" in state
             assert "top_trials" in state
+
+    def test_extracts_full_state_after_enough_trials(self):
+        """After sufficient ask/tell cycles, CMA-ES state should be extractable.
+
+        This is the key regression test for the split-key bug: Optuna's CmaEsSampler
+        splits the pickled optimizer across cma:optimizer:0, cma:optimizer:1, etc.
+        The fix concatenates all parts before unpickling.
+        """
+        backend = _make_backend(llm_warmup=9999)  # no LLM, pure CMA
+        import random
+        rng = random.Random(42)
+
+        # Run enough ask/tell cycles to get CMA-ES optimizer initialized
+        # CMA-ES typically needs n_dim + 1 trials minimum (we have 3 dims)
+        for i in range(30):
+            config, budget = backend.suggest()
+            # Simulate varying quality results
+            val_bpb = 1.0 + rng.gauss(0, 0.1)
+            backend.tell(config, budget, {"val_bpb": val_bpb})
+
+        state = backend._extract_cma_state()
+        assert state is not None, (
+            "_extract_cma_state() returned None after 30 trials — "
+            "the split-key concatenation is likely broken"
+        )
+        assert "mean_raw" in state
+        assert "sigma" in state
+        assert isinstance(state["sigma"], float)
+        assert state["sigma"] > 0
+        assert "cov" in state  # covariance matrix should be present
+        assert "top_trials" in state
+        assert len(state["top_trials"]) > 0
+        assert state["n_trials"] == 30
+
+        # Verify mean has correct dimensionality (3 HPs: lr, depth, wd)
+        assert len(state["mean_raw"]) == 3
+
+        # Verify covariance matrix is square and correct size
+        if state["cov"] is not None:
+            import numpy as np
+            C = np.array(state["cov"])
+            assert C.shape == (3, 3), f"Expected 3x3 covariance, got {C.shape}"
+
+    def test_format_cma_analysis_shows_state(self):
+        """After enough trials, the formatted analysis should show sigma and top configs."""
+        backend = _make_backend(llm_warmup=9999)
+        import random
+        rng = random.Random(42)
+
+        for i in range(30):
+            config, budget = backend.suggest()
+            val_bpb = 1.0 + rng.gauss(0, 0.1)
+            backend.tell(config, budget, {"val_bpb": val_bpb})
+
+        state = backend._extract_cma_state()
+        cma_config = {"lr": 0.01, "depth": 8, "wd": 0.1}
+        analysis = backend._format_cma_analysis(state, cma_config)
+
+        # Should NOT contain the fallback "still initializing" message
+        assert "still initializing" not in analysis, (
+            "Analysis says 'still initializing' after 30 trials — state extraction failed"
+        )
+        # Should contain actual analysis
+        assert "sigma=" in analysis
+        assert "Top 5" in analysis
+        assert "covariance matrix" in analysis.lower()
+
+    def test_covariance_shown_with_categorical_hps(self):
+        """Covariance matrix must appear even when search space has categoricals.
+
+        Regression test: CMA-ES only handles continuous HPs (N), so C is NxN.
+        The format code must use only continuous HP names (not all HPs) when
+        checking len(hp_names) == C.shape[0].
+        """
+        from ConfigSpace import Categorical
+
+        cs = ConfigurationSpace(seed=42)
+        cs.add(Float("lr", bounds=(1e-5, 1.0), log=True, default=0.01))
+        cs.add(Integer("depth", bounds=(4, 24), default=8))
+        cs.add(Float("wd", bounds=(0.0, 0.5), default=0.1))
+        cs.add(Categorical("pattern", items=["A", "B", "C"], default="A"))
+
+        backend = CentaurBackend(model="test", log_dir=None, llm_ratio=0.0, llm_warmup=9999)
+        backend.configure(space=cs, objectives=["val_bpb"], budget_range=(60, 300), seed=0)
+
+        import random
+        rng = random.Random(42)
+        for _ in range(30):
+            config, budget = backend.suggest()
+            backend.tell(config, budget, {"val_bpb": 1.0 + rng.gauss(0, 0.1)})
+
+        state = backend._extract_cma_state()
+        assert state is not None
+        # C should be 3x3 (3 continuous HPs, excluding categorical)
+        if state["cov"] is not None:
+            import numpy as np
+            C = np.array(state["cov"])
+            assert C.shape == (3, 3), f"Expected 3x3, got {C.shape}"
+
+        cma_config = {"lr": 0.01, "depth": 8, "wd": 0.1, "pattern": "A"}
+        analysis = backend._format_cma_analysis(state, cma_config)
+        assert "covariance matrix" in analysis.lower(), (
+            "Covariance matrix missing from analysis — "
+            "likely hp_names count includes categoricals but C only has continuous dims"
+        )

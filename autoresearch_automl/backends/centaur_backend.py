@@ -278,37 +278,45 @@ class CentaurBackend(HPOBackend):
             if not trials:
                 return None
 
-            # Find the CMA optimizer object in system attrs
+            # Find the CMA optimizer object by concatenating split parts.
+            # Optuna's CmaEsSampler splits the pickled optimizer across multiple
+            # system_attrs keys: cma:optimizer:0, cma:optimizer:1, ...
             for trial in reversed(trials):
+                parts = {}
                 for key, val in trial.system_attrs.items():
-                    if "cma:" in key and "optimizer" in key:
-                        optimizer = pickle.loads(bytes.fromhex(val))
-                        mean = optimizer._mean.tolist()
-                        sigma = float(optimizer._sigma)
+                    if key.startswith("cma:optimizer:"):
+                        idx = int(key.split(":")[-1])
+                        parts[idx] = val
+                if not parts:
+                    continue
+                combined = "".join(parts[i] for i in sorted(parts.keys()))
+                optimizer = pickle.loads(bytes.fromhex(combined))
+                mean = optimizer._mean.tolist()
+                sigma = float(optimizer._sigma)
 
-                        # Get top completed trials
-                        completed = [
-                            t for t in trials
-                            if t.state == optuna.trial.TrialState.COMPLETE
-                        ]
-                        completed.sort(key=lambda t: t.value if t.value is not None else float("inf"))
-                        top_trials = [
-                            {"params": t.params, "value": t.value}
-                            for t in completed[:5]
-                        ]
+                # Get top completed trials
+                completed = [
+                    t for t in trials
+                    if t.state == optuna.trial.TrialState.COMPLETE
+                ]
+                completed.sort(key=lambda t: t.value if t.value is not None else float("inf"))
+                top_trials = [
+                    {"params": t.params, "value": t.value}
+                    for t in completed[:5]
+                ]
 
-                        # Covariance matrix C (indices = alphabetically sorted HP names)
-                        cov = None
-                        if hasattr(optimizer, "_C"):
-                            cov = optimizer._C.tolist()
+                # Covariance matrix C (indices = alphabetically sorted HP names)
+                cov = None
+                if hasattr(optimizer, "_C"):
+                    cov = optimizer._C.tolist()
 
-                        return {
-                            "mean_raw": mean,
-                            "sigma": sigma,
-                            "cov": cov,
-                            "top_trials": top_trials,
-                            "n_trials": len(trials),
-                        }
+                return {
+                    "mean_raw": mean,
+                    "sigma": sigma,
+                    "cov": cov,
+                    "top_trials": top_trials,
+                    "n_trials": len(trials),
+                }
             return None
         except Exception as e:
             logger.debug("Could not extract CMA state: %s", e)
@@ -336,10 +344,14 @@ class CentaurBackend(HPOBackend):
                 native_params = self._to_native_types(t["params"])
                 lines.append(f"  {i}. val_bpb={t['value']:.4f}: {json.dumps(native_params)}")
 
-        # Full covariance matrix (rows/cols = alphabetically sorted HP names)
+        # Full covariance matrix (rows/cols = alphabetically sorted continuous HP names)
         if cma_state.get("cov") is not None:
             import numpy as np
-            hp_names = sorted(self._optuna_mapping.keys())
+            # CMA-ES only handles continuous HPs; categoricals are sampled independently
+            hp_names = sorted(
+                name for name, m in self._optuna_mapping.items()
+                if m["method"] != "suggest_categorical"
+            )
             C = np.array(cma_state["cov"])
             if len(hp_names) == C.shape[0]:
                 lines.append(
