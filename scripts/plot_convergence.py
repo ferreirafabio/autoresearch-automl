@@ -132,45 +132,42 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
 
 
 def plot_exp2_27b(results_dir: Path, output_path: Path):
-    """Exp2: 27B — all backends."""
+    """Exp2: 27B — all backends (27B only, no model size tag)."""
     backends = {
         "optuna": {"label": "TPE", "color": "#2196F3"},
         "cma_es": {"label": "CMA-ES", "color": "#00796B"},
-        "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM) [27B]", "color": "#D32F2F"},
-        "centaur_Qwen3_5_0_8B": {"label": "Centaur (CMA-ES+LLM) [0.8B]", "color": "#E91E63"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4"},
+        "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#D32F2F"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FF9800"},
+        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},
+        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},
         "random": {"label": "Random", "color": "#607D8B"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Karpathy's Autoresearch: HPO Convergence (27B + Classical)",
+        title="Karpathy's Autoresearch: HPO Convergence",
         xlim=(0, 300),
     )
 
 
 def plot_exp2_all(results_dir: Path, output_path: Path):
-    """All backends on one plot."""
+    """0.8B vs 27B comparison for all LLM methods, with classical references."""
     backends = {
-        "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "-"},
-        "cma_es": {"label": "CMA-ES", "color": "#00796B", "linestyle": "-"},
-        "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM) [27B]", "color": "#D32F2F", "linestyle": "-"},
-        "centaur_Qwen3_5_0_8B": {"label": "Centaur (CMA-ES+LLM) [0.8B]", "color": "#E91E63", "linestyle": "--"},
-        "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
-        "smac": {"label": "SMAC", "color": "#8BC34A", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
-        "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0", "linestyle": "-"},
+        "cma_es": {"label": "CMA-ES (classical)", "color": "#00796B", "linestyle": "-"},
+        "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
+        "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#D32F2F", "linestyle": "--"},
         "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+        "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
+        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
         "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
     }
     plot_convergence_multi(
         results_dir / "exp2_benchmark",
         backends,
         output_path,
-        title="Karpathy's Autoresearch: All HPO Methods",
+        title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
         xlim=(0, 300),
     )
 
@@ -465,7 +462,8 @@ def plot_progress_combined(results_dir: Path, output_path: Path):
     backends = [
         ("optuna", "TPE", "#2196F3"),
         ("cma_es", "CMA-ES", "#00796B"),
-        ("centaur_Qwen3_5_27B", "Centaur (CMA-ES+LLM) [27B]", "#D32F2F"),
+        ("centaur_Qwen3_5_27B", "Centaur [27B]", "#D32F2F"),
+        ("centaur_Qwen3_5_0_8B", "Centaur [0.8B]", "#E91E63"),
         ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
         ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
         ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
