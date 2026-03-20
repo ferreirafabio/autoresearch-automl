@@ -116,7 +116,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--api-base", default="http://127.0.0.1:8000/v1")
     parser.add_argument("--model", default="Qwen/Qwen3.5-0.8B")
-    parser.add_argument("--results-dir", default="/work/dlclarge1/ferreira-autoresearch-automl/results")
+    parser.add_argument("--results-dir", default=str(Path(__file__).resolve().parent.parent.parent / "results"))
     parser.add_argument("--output", default="assets/incumbent_descriptions.json")
     args = parser.parse_args()
 

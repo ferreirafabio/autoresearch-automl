@@ -638,8 +638,8 @@ def plot_progress_llm(results_dir: Path, output_path: Path):
 
 
 if __name__ == "__main__":
-    results_dir = Path("/work/dlclarge1/ferreira-autoresearch-automl/results")
-    assets_dir = Path("/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl/assets")
+    results_dir = Path(__file__).resolve().parent.parent.parent / "results"
+    assets_dir = Path(__file__).resolve().parent.parent / "assets"
     assets_dir.mkdir(exist_ok=True)
 
     # Primary plots: wall-time x-axis

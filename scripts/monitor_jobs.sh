@@ -2,7 +2,7 @@
 # Monitor exp2 job progress: check running jobs and training time status
 set -euo pipefail
 
-PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 echo "=== $(date) ==="
