@@ -2,7 +2,7 @@
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search) and LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), all under fair conditions.
 
-![All methods convergence](assets/exp2_all_convergence.png)
+![HPO Convergence](assets/exp2_27b_convergence.png)
 
 ## Table of Contents
 
@@ -11,7 +11,7 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 - [Results](#results)
   - [All Methods](#all-methods)
   - [0.8B vs 27B LLM Optimizer](#08b-vs-27b-llm-optimizer)
-  - [Incumbent Traces (seed 0)](#incumbent-traces-seed-0)
+  - [Incumbent Traces](#incumbent-traces)
   - [Centaur (CMA-ES+LLM)](#centaur-cma-esllm-cma-es-guided-llm-optimization)
   - [Search Diversity Analysis](#search-diversity-analysis)
 - [Search Space](#search-space)
@@ -45,27 +45,33 @@ All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU 
 
 Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP, no manual curation). See [Search Space](#search-space) for the full table. 3 seeds per condition.
 
-**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz-Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions.
+**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz-Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions. Results are trimmed to 300 trials, as no meaningful improvement occurs beyond that point.
 
 ## Results
 
 ### All Methods
 
-Convergence curves (mean ± std across available seeds). Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent (14 HPs), Karpathy Agent (Code)), and hybrid (Centaur).
+Convergence curves (mean ± std across available seeds). All LLM methods use Qwen3.5-27B. Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent), and hybrid (Centaur).
 
-![All methods convergence](assets/exp2_all_convergence.png)
+![HPO Convergence](assets/exp2_27b_convergence.png)
 
 ### 0.8B vs 27B LLM Optimizer
 
-Does LLM size matter for HPO? CMA-ES (best classical) shown as reference.
+Does LLM size matter for HPO? CMA-ES (best classical) shown as reference. Solid lines = 27B, dashed = 0.8B.
 
-![Model size comparison](assets/exp2_model_size.png)
+![Model size comparison](assets/exp2_all_convergence.png)
 
-### Incumbent Traces (seed 0)
+### Incumbent Traces
 
-Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far).
+Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far). Each panel shows the best seed for that method.
 
-![Incumbent Traces](assets/exp2_pareto_fronts.png)
+**Classical + Hybrid:**
+
+![Incumbent Traces — Classical + Hybrid](assets/exp2_incumbents_classical.png)
+
+**LLM-based:**
+
+![Incumbent Traces — LLM-based](assets/exp2_incumbents_llm.png)
 
 ### Centaur (CMA-ES+LLM): CMA-ES Guided LLM Optimization
 
