@@ -4,6 +4,12 @@ Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM 
 
 ![HPO Convergence](assets/exp2_27b_walltime.png)
 
+### Baseline Calibration
+
+Trial 0 (Karpathy's starting config) across all methods. Old runs (Mar 16-17) had ~30% lower GPU throughput due to H200 power throttling, making results incomparable. All current runs use consistent hardware conditions.
+
+![Baseline comparison](assets/baseline_comparison.png)
+
 ## Table of Contents
 
 - [Methods](#methods)
