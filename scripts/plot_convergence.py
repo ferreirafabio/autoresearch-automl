@@ -227,7 +227,7 @@ BACKENDS_27B = {
     "optuna": {"label": "TPE", "color": "#2196F3"},
     "cma_es": {"label": "CMA-ES", "color": "#00796B"},
     "smac": {"label": "SMAC", "color": "#8BC34A"},
-    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#D32F2F"},
+    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},
     "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FF9800"},
     "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},
@@ -236,13 +236,13 @@ BACKENDS_27B = {
 
 BACKENDS_ALL = {
     "optuna": {"label": "TPE (best classical)", "color": "#2196F3", "linestyle": "-"},
-    "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
-    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#D32F2F", "linestyle": "--"},
+    "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#E91E63", "linestyle": "-"},
+    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#AB47BC", "linestyle": "--"},
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
-    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
+    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#80DEEA", "linestyle": "--"},
     "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FF9800", "linestyle": "-"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
-    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
+    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#BCAAA4", "linestyle": "--"},
 }
 
 
@@ -616,8 +616,8 @@ def plot_progress_classical(results_dir: Path, output_path: Path):
     backends = [
         ("optuna", "TPE", "#2196F3"),
         ("cma_es", "CMA-ES", "#00796B"),
-        ("centaur_Qwen3_5_27B", "Centaur [27B]", "#D32F2F"),
-        ("centaur_Qwen3_5_0_8B", "Centaur [0.8B]", "#E91E63"),
+        ("centaur_Qwen3_5_27B", "Centaur [27B]", "#E91E63"),
+        ("centaur_Qwen3_5_0_8B", "Centaur [0.8B]", "#AB47BC"),
         ("random", "Random", "#607D8B"),
     ]
     _plot_incumbent_grid(bench_dir, backends, output_path,
