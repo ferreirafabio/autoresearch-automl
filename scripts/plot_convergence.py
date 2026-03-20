@@ -226,6 +226,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
 BACKENDS_27B = {
     "optuna": {"label": "TPE", "color": "#2196F3"},
     "cma_es": {"label": "CMA-ES", "color": "#00796B"},
+    "smac": {"label": "SMAC", "color": "#8BC34A"},
     "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#D32F2F"},
     "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FF9800"},
     "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},
@@ -234,7 +235,7 @@ BACKENDS_27B = {
 }
 
 BACKENDS_ALL = {
-    "cma_es": {"label": "CMA-ES (classical)", "color": "#00796B", "linestyle": "-"},
+    "optuna": {"label": "TPE (best classical)", "color": "#2196F3", "linestyle": "-"},
     "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#D32F2F", "linestyle": "-"},
     "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#D32F2F", "linestyle": "--"},
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
