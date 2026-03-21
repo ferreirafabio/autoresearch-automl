@@ -51,7 +51,7 @@ Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extrac
 
 ### All Methods
 
-Convergence curves (mean ± std across available seeds) by trial number (sample efficiency view). All LLM methods use Qwen3.5-27B. Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent), and hybrid (Centaur).
+We show two views of the same data. The **wall-time plot** (above) is the primary comparison: x-axis is cumulative training time, so methods are compared on equal compute. The **trial-number plot** (below) shows sample efficiency — how quickly each method finds good configurations per trial. These look different because LLM-based methods spend additional real time on inference between trials, compressing their curves in the wall-time view. A method that looks competitive per-trial may fall behind in wall-time if its trials are slow.
 
 ![HPO Convergence (by trial)](assets/exp2_27b_convergence.png)
 
