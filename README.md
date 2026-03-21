@@ -51,17 +51,21 @@ Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extrac
 
 ### All Methods
 
-We show two views of the same data. The **wall-time plot** (above) is the primary comparison: x-axis is cumulative training time, so methods are compared on equal compute. The **trial-number plot** (below) shows sample efficiency — how quickly each method finds good configurations per trial. These look different because LLM-based methods spend additional real time on inference between trials, compressing their curves in the wall-time view. A method that looks competitive per-trial may fall behind in wall-time if its trials are slow.
+The wall-time plot above shows convergence against cumulative training time, which is our primary comparison: all methods receive the same 24-hour training budget, and LLM inference overhead is not counted against it. The trial-number plot below shows sample efficiency — how many evaluations each method needs. These views can look quite different because LLM-based methods spend additional real time on inference between trials, compressing their wall-time curves even when they are competitive per trial.
 
 ![HPO Convergence (by trial)](assets/exp2_27b_convergence.png)
 
+### Key Observations
+
+We observe that classical HPO methods consistently outperform pure LLM-based approaches on this benchmark. The top five methods by mean best val_bpb are all classical or hybrid: Centaur [0.8B], Centaur [27B], CMA-ES, TPE, and SMAC. The gap between CMA-ES and the best pure LLM method (Karpathy Agent Code [27B]) is substantial. Perhaps most strikingly, several pure LLM methods — including Karpathy Agent (14 HPs) and LLAMBO (Optuna) [27B] — perform worse than random search within the fixed search space. This suggests that, at least for this task, LLMs used as standalone HP optimizers can actually hurt optimization compared to uniform random sampling.
+
+Model size plays a nuanced role. For free-form code editing, a larger LLM clearly helps: Karpathy Agent (Code) [27B] significantly outperforms its 0.8B counterpart, as the bigger model produces more coherent and architecturally sound code modifications. However, when the search space is restricted to 14 fixed hyperparameters, scaling up the LLM from 0.8B to 27B provides no measurable benefit — Karpathy Agent (14 HPs) [27B] performs comparably to its 0.8B version. This indicates that the bottleneck in fixed-HP optimization is not the LLM's reasoning capacity but rather the optimization strategy itself.
+
+The most promising result comes from the hybrid approach. Centaur combines CMA-ES with an LLM that receives the optimizer's internal state (covariance matrix, step size, top configurations) and occasionally suggests informed perturbations. Notably, Centaur [0.8B] outperforms both CMA-ES alone and Centaur [27B], demonstrating that a small, inexpensive LLM is sufficient when paired with a strong classical optimizer. The classical method handles the heavy lifting of landscape modeling, while the LLM contributes lightweight, informed nudges rather than deep reasoning. This points to a practical recipe: rather than replacing classical HPO with expensive LLM calls, augmenting a proven optimizer with a cheap LLM yields the best results.
+
 ### 0.8B vs 27B LLM Optimizer
 
-Does LLM size matter for HPO? CMA-ES (best classical) shown as reference. Solid lines = 27B, dashed = 0.8B.
-
-![Model size comparison (wall-time)](assets/exp2_all_walltime.png)
-
-Same data by trial number:
+Does LLM size matter for HPO? Solid lines = 27B, dashed = 0.8B.
 
 ![Model size comparison (by trial)](assets/exp2_all_convergence.png)
 
