@@ -98,24 +98,25 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 | Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
 |--------|-------|----------|------|--------|----------|-------------|------|-------|
-| CMA-ES | 3 | **0.9833** | 16% | 0.138 | 0.697 | 0.889 | 0.561 | 220 |
-| Centaur (CMA-ES+LLM) [27B] | 3 | **0.9821** | 19% | 0.126 | 0.611 | 1.064 | 0.541 | 88 |
-| TPE | 3 | **0.9840** | 10% | 0.196 | 0.963 | 1.288 | 0.569 | 169 |
-| LLAMBO (Paper) [27B] | 3 | 0.9880 | 48% | 0.255 | 1.272 | 1.127 | 1.210 | 357 |
-| Random | 3 | 0.9898 | 57% | 0.274 | 1.388 | 1.243 | 1.391 | 169 |
-| LLAMBO (Optuna) [27B] | 3 | 0.9903 | 79% | 0.164 | 0.843 | 0.968 | 0.696 | 78 |
-| Karpathy Agent (14 HPs) [27B] | 3 | 0.9930 | 1% | 0.020 | 0.101 | 0.249 | 0.059 | 14 |
-| Karpathy Agent (Code) [27B] | 2 | 0.9936 | 11% | - | - | - | - | - |
-| SMAC | 3 | 1.0015 | 48% | 0.241 | 1.199 | 1.115 | 0.450 | 36 |
+| Centaur [0.8B] | 2 | **0.9770** | 16% | 0.141 | 0.686 | 0.636 | 0.489 | 210 |
+| Centaur [27B] | 2 | **0.9784** | 19% | 0.126 | 0.608 | 0.572 | 0.465 | 157 |
+| CMA-ES | 3 | **0.9785** | 13% | 0.157 | 0.782 | 0.935 | 0.571 | 722 |
+| TPE | 3 | **0.9792** | 15% | 0.195 | 0.995 | 0.974 | 0.455 | 335 |
+| SMAC | 3 | **0.9796** | 31% | 0.231 | 1.171 | 0.901 | 0.350 | 224 |
+| Karpathy Agent (Code) [27B] | 2 | 0.9832 | 9% | - | - | - | - | - |
+| Random | 3 | 0.9873 | 56% | 0.273 | 1.377 | 1.242 | 1.376 | 485 |
+| LLAMBO (Paper) [27B] | 2 | 0.9890 | 45% | 0.245 | 1.211 | 1.048 | 1.169 | 266 |
+| Karpathy Agent (14 HPs) [27B] | 2 | 0.9905 | 0% | 0.029 | 0.177 | 0.242 | 0.058 | 22 |
+| LLAMBO (Optuna) [27B] | 2 | 0.9909 | 58% | 0.235 | 1.158 | 1.105 | 0.999 | 298 |
 
 **Observations:**
 
-- **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.020 (14x less than random), only 14 unique grid cells, dist→default 0.249. It makes minimal changes between trials (step 0.059).
-- **LLAMBO (Optuna) has 84% OOM rate** (up to 93% for seed 2), due to random categorical sampling of DEPTH.
-- **LLAMBO (Paper) is the most diverse method with 0% OOM** (spread 0.255, 357 unique cells), yet still underperforms CMA-ES and TPE. Notably, LLAMBO (Paper) achieves higher coverage than Random Search (357 vs 169 unique cells) despite being model-based.
-- **The top 3 methods (CMA-ES, TPE, Centaur) all have 0% OOM and moderate diversity** (spread 0.12–0.20).
-- **SMAC has high spread (0.241) but only 36 unique cells.** Its GP surrogate + Expected Improvement acquisition keeps exploring OOM regions despite penalty costs, unlike TPE which directly models feasibility. Even after fixing a status bug (MEMORYOUT instead of SUCCESS), OOM rate remains ~60%.
-- **Performance correlates more with OOM rate than with diversity.** All 0%-OOM methods outperform all high-OOM methods, suggesting that on this task, learning to avoid infeasible regions may matter more than LLM domain knowledge or search diversity.
+- **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.029 (9x less than random), only 22 unique grid cells, dist→default 0.242. The LLM makes minimal changes between trials (step 0.058), suggesting it converges to a narrow region early and fails to explore.
+- **LLAMBO (Optuna) has a 58% OOM rate**, largely due to delegating the categorical HP (WINDOW_PATTERN) to random sampling, which causes the LLM surrogate to miss structure in the search space.
+- **LLAMBO (Paper) is one of the most diverse methods** (spread 0.245, 266 unique cells), yet still underperforms all classical methods. High diversity alone does not guarantee good performance.
+- **The top 5 methods (Centaur, CMA-ES, TPE, SMAC) all have moderate diversity and low OOM rates** (spread 0.13–0.23, OOM 13–31%).
+- **SMAC improved significantly after the facade fix** (RF instead of GP surrogate). OOM rate dropped from ~60% to 31%, and avg best improved from 1.0015 to 0.9796, making it competitive with TPE.
+- **Performance correlates more with OOM avoidance than with diversity.** Methods that learn to stay within feasible VRAM regions consistently outperform those that explore broadly but waste trials on OOM configurations.
 
 ## Search Space
 
