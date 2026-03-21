@@ -556,13 +556,20 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     n_fail = sum(1 for t in trials if not t.get("success", False))
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
                  fontsize=9)
-    ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.973, 0.996)
+    ax.set_xlim(0, 300)
+    # Auto y-axis: zoom to incumbent range with padding, ignore outliers
+    if inc_y:
+        ymin = min(inc_y)
+        # Use baseline (first successful trial) as upper bound
+        ymax = inc_y[0] if inc_y else 0.996
+        margin = (ymax - ymin) * 0.3 or 0.002
+        ax.set_ylim(ymin - margin, ymax + margin * 0.5)
     ax.grid(True, alpha=0.2)
 
     if texts:
         adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color="#1a7a3a", alpha=0.4, lw=0.5),
-                    force_points=(0.5, 0.8), force_text=(0.5, 0.8), expand=(1.2, 1.4))
+                    force_points=(1.0, 1.5), force_text=(1.0, 1.5), expand=(1.5, 1.8),
+                    iterations=200)
 
 
 def _best_seed(bench_dir: Path, backend_name: str) -> int:
