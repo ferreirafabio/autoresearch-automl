@@ -51,11 +51,7 @@ Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extrac
 
 ### All Methods
 
-Convergence curves (mean ± std across available seeds) by cumulative training wall-time. All LLM methods use Qwen3.5-27B. Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent), and hybrid (Centaur).
-
-![HPO Convergence (wall-time)](assets/exp2_27b_walltime.png)
-
-Same data by trial number (sample efficiency view):
+Convergence curves (mean ± std across available seeds) by trial number (sample efficiency view). All LLM methods use Qwen3.5-27B. Includes classical methods (TPE, CMA-ES, Random, SMAC), LLM-based (LLAMBO, Karpathy Agent), and hybrid (Centaur).
 
 ![HPO Convergence (by trial)](assets/exp2_27b_convergence.png)
 
