@@ -14,7 +14,7 @@
 | num_params_M | 50.3 |
 | depth | 8 |
 | GPU | NVIDIA H200 |
-| node | dlc2gpu18 |
+| node | NVIDIA H200 |
 
 Default hyperparameters from train.py (DEPTH=8, ASPECT_RATIO=64, MATRIX_LR=0.04, WEIGHT_DECAY=0.2, etc.)
 
@@ -83,8 +83,8 @@ _Planned after Experiment 1 validates the pipeline._
 
 ## Hardware
 
-- **Training GPU**: NVIDIA H200 (141GB HBM3e) via `alldlc2_gpu-h200`
+- **Training GPU**: NVIDIA H200 (141GB HBM3e)
 - **LLM Serving**: vLLM on H200, bf16
-- **Data prep**: L40S via `alldlc2_gpu-l40s`
+- **Data prep**: L40S
 - **Dataset**: karpathy/climbmix-400b-shuffle (10 train shards + 1 val shard)
 - **Time budget**: 300s (5 min) per trial

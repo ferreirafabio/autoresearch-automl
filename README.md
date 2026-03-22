@@ -1,7 +1,7 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
 <h3 align="center">When AutoML Meets autoresearch: Classical HPO, LLM Agents, and Hybrid Methods for Language Model Training</h3>
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search) and LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), all under fair conditions.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under fair conditions.
 
 ![HPO Convergence](assets/exp2_27b_walltime.png)
 
@@ -58,15 +58,19 @@ The wall-time plot above shows convergence against cumulative training time, whi
 
 ### Key Observations
 
-We observe that classical HPO methods consistently outperform pure LLM-based approaches on this benchmark. The top five methods by mean best val_bpb are all classical or hybrid: Centaur [0.8B], Centaur [27B], CMA-ES, TPE, and SMAC. The gap between CMA-ES and the best pure LLM method (Karpathy Agent Code [27B]) is substantial. Perhaps most strikingly, several pure LLM methods — including Karpathy Agent (14 HPs) and LLAMBO (Optuna) [27B] — perform worse than random search within the fixed search space. This suggests that, at least for this task, LLMs used as standalone HP optimizers can actually hurt optimization compared to uniform random sampling.
+We observe that classical HPO methods consistently outperform pure LLM-based approaches on this benchmark. The top five methods by mean best val_bpb are all classical or hybrid: Centaur [0.8B] (0.9766), Centaur [27B] and TPE (both 0.9768), Karpathy Agent (Code) [27B] (0.9781), and CMA-ES (0.9791). The gap between these top methods and the best pure LLM method within a fixed search space (LLAMBO (Paper) [27B] at 0.9890) is substantial. Perhaps most strikingly, several pure LLM methods — including Karpathy Agent (14 HPs) and LLAMBO (Optuna) [27B] — perform worse than random search within the fixed search space. This suggests that, at least for this task, LLMs used as standalone HP optimizers can actually hurt optimization compared to uniform random sampling.
 
-Model size plays a nuanced role. For free-form code editing, a larger LLM clearly helps: Karpathy Agent (Code) [27B] significantly outperforms its 0.8B counterpart, as the bigger model produces more coherent and architecturally sound code modifications. However, when the search space is restricted to 14 fixed hyperparameters, scaling up the LLM from 0.8B to 27B provides no measurable benefit — Karpathy Agent (14 HPs) [27B] performs comparably to its 0.8B version. This indicates that the bottleneck in fixed-HP optimization is not the LLM's reasoning capacity but rather the optimization strategy itself.
+Model size plays a nuanced role. For free-form code editing, a larger LLM clearly helps: Karpathy Agent (Code) [27B] significantly outperforms its 0.8B counterpart (0.9781 vs 0.9911), as the bigger model produces more coherent and architecturally sound code modifications. However, when the search space is restricted to 14 fixed hyperparameters, scaling up the LLM from 0.8B to 27B provides no measurable benefit — Karpathy Agent (14 HPs) [27B] performs comparably to its 0.8B version. This indicates that the bottleneck in fixed-HP optimization is not the LLM's reasoning capacity but rather the optimization strategy itself.
 
 The most promising result comes from the hybrid approach. Centaur combines CMA-ES with an LLM that receives the optimizer's internal state (covariance matrix, step size, top configurations) and occasionally suggests informed perturbations. Notably, Centaur [0.8B] outperforms both CMA-ES alone and Centaur [27B], demonstrating that a small, inexpensive LLM is sufficient when paired with a strong classical optimizer. The classical method handles the heavy lifting of landscape modeling, while the LLM contributes lightweight, informed nudges rather than deep reasoning. This points to a practical recipe: rather than replacing classical HPO with expensive LLM calls, augmenting a proven optimizer with a cheap LLM yields the best results.
 
 ### 0.8B vs 27B LLM Optimizer
 
 Does LLM size matter for HPO? Solid lines = 27B, dashed = 0.8B.
+
+![Model size comparison (wall-time)](assets/exp2_all_walltime.png)
+
+Trial-number view (sample efficiency):
 
 ![Model size comparison (by trial)](assets/exp2_all_convergence.png)
 
@@ -99,24 +103,24 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 | Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
 |--------|-------|----------|------|--------|----------|-------------|------|-------|
-| Centaur [0.8B] | 2 | **0.9770** | 16% | 0.141 | 0.686 | 0.636 | 0.489 | 210 |
-| Centaur [27B] | 2 | **0.9784** | 19% | 0.126 | 0.608 | 0.572 | 0.465 | 157 |
-| CMA-ES | 3 | **0.9785** | 13% | 0.157 | 0.782 | 0.935 | 0.571 | 722 |
-| TPE | 3 | **0.9792** | 15% | 0.195 | 0.995 | 0.974 | 0.455 | 335 |
-| SMAC | 3 | **0.9796** | 31% | 0.231 | 1.171 | 0.901 | 0.350 | 224 |
-| Karpathy Agent (Code) [27B] | 2 | 0.9832 | 9% | - | - | - | - | - |
-| Random | 3 | 0.9873 | 56% | 0.273 | 1.377 | 1.242 | 1.376 | 485 |
-| LLAMBO (Paper) [27B] | 2 | 0.9890 | 45% | 0.245 | 1.211 | 1.048 | 1.169 | 266 |
-| Karpathy Agent (14 HPs) [27B] | 2 | 0.9905 | 0% | 0.029 | 0.177 | 0.242 | 0.058 | 22 |
-| LLAMBO (Optuna) [27B] | 2 | 0.9909 | 58% | 0.235 | 1.158 | 1.105 | 0.999 | 298 |
+| Centaur [0.8B] | 3 | **0.9766** | 13% | 0.132 | 0.646 | 0.548 | 0.372 | 314 |
+| Centaur [27B] | 3 | **0.9768** | 14% | 0.114 | 0.547 | 0.506 | 0.328 | 291 |
+| TPE | 3 | **0.9768** | 11% | 0.197 | 0.999 | 0.938 | 0.413 | 494 |
+| Karpathy Agent (Code) [27B] | 2 | **0.9781** | 11% | - | - | - | - | - |
+| CMA-ES | 3 | **0.9791** | 15% | 0.156 | 0.785 | 0.925 | 0.581 | 717 |
+| SMAC | 3 | **0.9803** | 32% | 0.239 | 1.198 | 0.935 | 0.373 | 195 |
+| LLAMBO (Paper) [27B] | 2 | 0.9890 | 43% | 0.240 | 1.183 | 1.018 | 1.139 | 234 |
+| Random | 3 | 0.9890 | 56% | 0.274 | 1.386 | 1.250 | 1.392 | 289 |
+| Karpathy Agent (14 HPs) [27B] | 2 | 0.9905 | 0% | 0.028 | 0.171 | 0.240 | 0.057 | 24 |
+| LLAMBO (Optuna) [27B] | 2 | 0.9911 | 60% | 0.218 | 1.059 | 1.062 | 0.880 | 208 |
 
 **Observations:**
 
-- **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.029 (9x less than random), only 22 unique grid cells, dist→default 0.242. The LLM makes minimal changes between trials (step 0.058), suggesting it converges to a narrow region early and fails to explore.
-- **LLAMBO (Optuna) has a 58% OOM rate**, largely due to delegating the categorical HP (WINDOW_PATTERN) to random sampling, which causes the LLM surrogate to miss structure in the search space.
-- **LLAMBO (Paper) is one of the most diverse methods** (spread 0.245, 266 unique cells), yet still underperforms all classical methods. High diversity alone does not guarantee good performance.
-- **The top 5 methods (Centaur, CMA-ES, TPE, SMAC) all have moderate diversity and low OOM rates** (spread 0.13–0.23, OOM 13–31%).
-- **SMAC improved significantly after the facade fix** (RF instead of GP surrogate). OOM rate dropped from ~60% to 31%, and avg best improved from 1.0015 to 0.9796, making it competitive with TPE.
+- **Karpathy Agent (14 HPs) has the lowest diversity by all metrics.** Spread 0.028 (10x less than random), only 24 unique grid cells, dist→default 0.240. The LLM makes minimal changes between trials (step 0.057), suggesting it converges to a narrow region early and fails to explore.
+- **LLAMBO (Optuna) has a 60% OOM rate**, largely due to delegating the categorical HP (WINDOW_PATTERN) to random sampling, which causes the LLM surrogate to miss structure in the search space.
+- **LLAMBO (Paper) is one of the most diverse methods** (spread 0.240, 234 unique cells), yet still underperforms all classical methods. High diversity alone does not guarantee good performance.
+- **The top 6 methods (Centaur, TPE, Karpathy Agent Code, CMA-ES, SMAC) all have OOM rates at or below 15%**, except SMAC at 32%.
+- **SMAC improved significantly after the facade fix** (RF instead of GP surrogate). OOM rate dropped from ~60% to 32%, and avg best improved from 1.0015 to 0.9803.
 - **Performance correlates more with OOM avoidance than with diversity.** Methods that learn to stay within feasible VRAM regions consistently outperform those that explore broadly but waste trials on OOM configurations.
 
 ## Search Space
@@ -171,6 +175,12 @@ python -m autoresearch_automl.cli run --backend llambo_original --trials 100 --l
 
 # Karpathy Agent (14 HPs)
 python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-model Qwen3.5-0.8B
+
+# Karpathy Agent (Code) — edits train.py directly
+python -m autoresearch_automl.cli run --backend karpathy_agent --trials 100 --llm-model Qwen3.5-0.8B
+
+# Centaur (CMA-ES+LLM)
+python -m autoresearch_automl.cli run --backend centaur --trials 100 --llm-model Qwen3.5-0.8B
 ```
 
 ## Related work
@@ -181,9 +191,9 @@ python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-mo
 
 ## Details
 
-### H200 vs H100 baseline offset
+### H200 vs H100 baseline
 
-Our baseline (Karpathy's default config) achieves val_bpb=1.008 on H200, while Karpathy reports ~0.998 on H100. Same code, same config, same `torch.compile` + FA3. The gap is entirely due to **GPU power throttling**: H200's HBM3e memory (4.8 TB/s) draws more power than H100's HBM3 (3.35 TB/s), leaving less of the shared 700W TDP for the SMs. Under sustained load, our H200 clocks down to ~1600 MHz (81% of max 1980 MHz), yielding 18% fewer training steps per 5-minute trial. Adjusting for actual clock speed, compute efficiency is identical (40.3% vs 39.8% MFU). This baseline offset does not affect HPO convergence.
+Our baseline (Karpathy's default config) achieves val_bpb ≈ 0.991 on H200 at full clock speed (~1750K tokens/s), comparable to Karpathy's ~0.998 on H100. Early runs showed a higher baseline of ~1.008 due to GPU power throttling: under sustained load, some H200 nodes clocked down to ~1600 MHz (81% of max 1980 MHz), yielding fewer training steps per 5-minute trial. All results reported here use non-throttled H200s. The remaining gap to Karpathy's H100 result reflects minor hardware differences, not a systematic bias.
 
 ### LLAMBO (Optuna) vs LLAMBO (Paper)
 
