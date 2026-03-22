@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Cluster-specific files
+slurm/
+RESULTS.md
+experiments/EXPERIMENTS.md
+scripts/monitor_jobs.sh
