@@ -61,6 +61,8 @@ def plot_convergence_walltime(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100
+    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
+    BUDGET_SECONDS = 86400
     INTERP_HOURS = np.linspace(0, 24, 1000)  # interpolate to common time grid
 
     max_time = 0.0
@@ -76,6 +78,10 @@ def plot_convergence_walltime(
                 continue
             times, values = cumulative_walltime(trials)
             if not times or values[0] == float("inf"):
+                continue
+            # Skip seeds that haven't finished their budget
+            total_train_s = sum(t.get("wall_time_seconds") or 0.0 for t in trials)
+            if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
                 continue
             max_time = max(max_time, times[-1])
             # Interpolate onto common grid (forward-fill)
@@ -137,6 +143,8 @@ def plot_convergence_multi(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100  # skip seeds with fewer trials
+    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
+    BUDGET_SECONDS = 86400
 
     max_trials = 0
     ranking = []  # (best_val, label, color)
@@ -148,6 +156,9 @@ def plot_convergence_multi(
                 continue
             trials = load_trials(jsonl)
             if len(trials) < MIN_TRIALS:
+                continue
+            total_train_s = sum(t.get("wall_time_seconds") or 0.0 for t in trials)
+            if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
                 continue
             curve = best_so_far(trials)
             seed_curves.append(curve)
