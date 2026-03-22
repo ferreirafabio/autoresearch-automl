@@ -239,6 +239,7 @@ BACKENDS_27B = {
     "cma_es": {"label": "CMA-ES", "color": "#2E7D32"},        # dark green
     "smac": {"label": "SMAC", "color": "#F57C00"},             # dark orange
     "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},  # pink
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#795548"},  # brown
     "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
     "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},  # purple
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
