@@ -54,7 +54,7 @@ def plot_convergence_walltime(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence (wall-time)",
-    ylim: tuple[float, float] = (0.973, 0.996),
+    ylim: tuple[float, float] = (0.973, 0.999),
     xlim_hours: tuple[float, float] | None = None,
 ):
     """Plot convergence with x-axis = cumulative training wall-time (hours)."""
@@ -136,7 +136,7 @@ def plot_convergence_multi(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence",
-    ylim: tuple[float, float] = (0.973, 0.996),
+    ylim: tuple[float, float] = (0.973, 0.999),
     xlim: tuple[int, int] | None = None,
 ):
     """Plot convergence with mean +/- std across seeds for multiple backends."""
@@ -252,6 +252,7 @@ BACKENDS_ALL = {
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
     "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
     "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#D32F2F", "linestyle": "-"},
+    "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#D32F2F", "linestyle": "--"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
     "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
 }
@@ -465,7 +466,7 @@ def plot_progress_single(
     ax.set_xlabel("Trial #", fontsize=12)
     ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
     ax.set_xlim(0, len(trials))
-    ax.set_ylim(0.973, 0.996)
+    ax.set_ylim(0.973, 0.999)
     ax.legend(fontsize=10, loc="upper right")
     ax.grid(True, alpha=0.2)
 
@@ -639,7 +640,7 @@ def plot_progress_classical(results_dir: Path, output_path: Path):
         ("random", "Random", "#607D8B"),
     ]
     _plot_incumbent_grid(bench_dir, backends, output_path,
-                         "Incumbent Traces — Classical + Hybrid (seed 0)")
+                         "Incumbent Traces — Classical + Hybrid (best seed)")
 
 
 def plot_progress_llm(results_dir: Path, output_path: Path):
@@ -652,7 +653,7 @@ def plot_progress_llm(results_dir: Path, output_path: Path):
         ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
     ]
     _plot_incumbent_grid(bench_dir, backends, output_path,
-                         "Incumbent Traces — LLM-based (seed 0)")
+                         "Incumbent Traces — LLM-based (best seed)")
 
 
 if __name__ == "__main__":
