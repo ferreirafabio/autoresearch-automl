@@ -54,7 +54,7 @@ def plot_convergence_walltime(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence (wall-time)",
-    ylim: tuple[float, float] = (0.973, 0.999),
+    ylim: tuple[float, float] = (0.973, 1.001),
     xlim_hours: tuple[float, float] | None = None,
 ):
     """Plot convergence with x-axis = cumulative training wall-time (hours)."""
@@ -136,7 +136,7 @@ def plot_convergence_multi(
     backends: dict[str, dict],
     output_path: Path,
     title: str = "Convergence",
-    ylim: tuple[float, float] = (0.973, 0.999),
+    ylim: tuple[float, float] = (0.973, 1.001),
     xlim: tuple[int, int] | None = None,
 ):
     """Plot convergence with mean +/- std across seeds for multiple backends."""
@@ -239,7 +239,7 @@ BACKENDS_27B = {
     "cma_es": {"label": "CMA-ES", "color": "#2E7D32"},        # dark green
     "smac": {"label": "SMAC", "color": "#F57C00"},             # dark orange
     "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},  # pink
-    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#D32F2F"},  # red
+    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
     "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},  # purple
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
     "random": {"label": "Random", "color": "#607D8B"},         # grey
@@ -251,8 +251,8 @@ BACKENDS_ALL = {
     "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--"},
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
     "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
-    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#D32F2F", "linestyle": "-"},
-    "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#D32F2F", "linestyle": "--"},
+    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
+    "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
     "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
 }
