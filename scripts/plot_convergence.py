@@ -84,9 +84,9 @@ def plot_convergence_walltime(
             if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
                 continue
             max_time = max(max_time, times[-1])
-            # Interpolate onto common grid (forward-fill)
+            # Interpolate onto common grid (no fill beyond seed's data)
             interped = np.interp(INTERP_HOURS, times, values,
-                                 left=np.nan, right=values[-1])
+                                 left=np.nan, right=np.nan)
             seed_interps.append(interped)
 
         if not seed_interps:
