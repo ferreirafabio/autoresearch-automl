@@ -1,12 +1,12 @@
-# Comparison: Our Work vs. Shwartz-Ziv (2025)
+# Comparison: Our Work vs. Shwartz Ziv (2025)
 
 ## Reference
 
-Ravid Shwartz-Ziv, ["Do LLM Coding agents fool us?"](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/), LinkedIn, 2025.
+Ravid Shwartz Ziv, ["Do LLM Coding agents fool us?"](https://www.linkedin.com/feed/update/urn:li:activity:7437556522240536576/), LinkedIn, 2025.
 
-## Shwartz-Ziv's Experiment
+## Shwartz Ziv's Experiment
 
-Shwartz-Ziv compared Karpathy's LLM agent approach against Optuna TPE on nanochat:
+Shwartz Ziv compared Karpathy's LLM agent approach against Optuna TPE on nanochat:
 
 - **Methods**: LLM agent vs. Optuna TPE (2 methods)
 - **Search space**: 8 hand-picked HPs (expert-selected) and 23 HPs (Claude-selected)
@@ -29,7 +29,7 @@ We extend this line of inquiry with a systematic multi-backend benchmark:
 
 ## Key Differences
 
-| Dimension | Shwartz-Ziv | Ours |
+| Dimension | Shwartz Ziv | Ours |
 |-----------|-------------|------|
 | Backends compared | 2 (agent, TPE) | 7 (random, TPE, SMAC, DEHB, BOHB, LLM greedy, LLAMBO) |
 | LLM as variable | No | Yes — model size comparison (0.8B vs 9B) |
@@ -43,7 +43,7 @@ We extend this line of inquiry with a systematic multi-backend benchmark:
 
 ### 1. Systematic Multi-Backend Benchmark
 
-Shwartz-Ziv's comparison is binary: LLM agent vs. TPE. We benchmark across the major families of HPO methods (random, model-based BO, evolutionary, multi-fidelity, LLM-based), enabling a more complete picture of where LLM-based HPO sits relative to established methods.
+Shwartz Ziv's comparison is binary: LLM agent vs. TPE. We benchmark across the major families of HPO methods (random, model-based BO, evolutionary, multi-fidelity, LLM-based), enabling a more complete picture of where LLM-based HPO sits relative to established methods.
 
 ### 2. LLM Model Size as Experimental Variable
 
@@ -55,7 +55,7 @@ By using self-hosted open-source LLMs (Qwen3.5) rather than proprietary APIs, ou
 
 ### 4. Automated Search Space Construction
 
-Shwartz-Ziv's key advantage was expert HP selection (8 HPs chosen by a domain expert). Our search space is extracted automatically from the training script — testing whether the framework can work without manual HP curation. This matters for new domains (e.g., code generation, RL) where practitioners may lack deep tuning expertise.
+Shwartz Ziv's key advantage was expert HP selection (8 HPs chosen by a domain expert). Our search space is extracted automatically from the training script — testing whether the framework can work without manual HP curation. This matters for new domains (e.g., code generation, RL) where practitioners may lack deep tuning expertise.
 
 ### 5. Failure-Aware Optimization
 
@@ -67,6 +67,6 @@ Can an LLM provide "informed choices" without a human expert? LLAMBO is the most
 
 ## Open Questions
 
-- **Trial budget**: Shwartz-Ziv ran ~80 trials; we start with 30. At 5 min/trial, 100+ trials are feasible within a 12h window. More trials would reveal whether LLM-based methods catch up or diverge further from classical methods.
+- **Trial budget**: Shwartz Ziv ran ~80 trials; we start with 30. At 5 min/trial, 100+ trials are feasible within a 12h window. More trials would reveal whether LLM-based methods catch up or diverge further from classical methods.
 - **Compute cost**: LLM-based suggestions add inference overhead (vLLM serving cost + latency). Is the improvement worth the extra compute vs. running more TPE trials in the same wall-clock time?
 - **Generalization**: Both experiments test on transformer pretraining. The real promise of LLM-assisted HPO is on problems where domain knowledge is scarce. Testing on diverse tasks would strengthen or weaken the case for LLM-based approaches.

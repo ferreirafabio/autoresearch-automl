@@ -1,7 +1,7 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
 <h3 align="center">When AutoML Meets autoresearch: Classical HPO, LLM Agents, and Hybrid Methods for Language Model Training</h3>
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz-Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz-Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under fair conditions.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under fair conditions.
 
 ![HPO Convergence](assets/exp2_27b_walltime.png)
 
@@ -46,7 +46,7 @@ All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU 
 
 Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP, no manual curation). See [Search Space](#search-space) for the full table. 3 seeds per condition.
 
-**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz-Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions. Results are trimmed to 300 trials, as no meaningful improvement occurs beyond that point.
+**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions. Results are trimmed to 300 trials, as no meaningful improvement occurs beyond that point.
 
 ## Results
 
@@ -186,7 +186,7 @@ python -m autoresearch_automl.cli run --backend centaur --trials 100 --llm-model
 ## Related work
 
 - [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) for the training task and the idea of LLM-driven experimentation
-- [Ravid Shwartz-Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) for showing that expert HP selection beats blind LLM search
+- [Ravid Shwartz Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) for showing that expert HP selection beats blind LLM search
 - [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) for using LLMs as surrogate models in Bayesian optimization
 
 ## Details
@@ -213,4 +213,4 @@ We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_origi
 
 ## Acknowledgements
 
-Thanks to Arjun Krishnakumar and Arber Zela for their feedback.
+Thanks to Arjun Krishnakumar, Arber Zela, and Lucca Wobbe for their feedback.
