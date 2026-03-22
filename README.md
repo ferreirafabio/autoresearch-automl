@@ -58,7 +58,9 @@ The wall-time plot above shows convergence against cumulative training time, whi
 
 ### Key Observations
 
-We observe that classical HPO methods consistently outperform pure LLM-based approaches on this benchmark. The top five methods by mean best val_bpb are all classical or hybrid: Centaur [0.8B] (0.9766), Centaur [27B] and TPE (both 0.9768), Karpathy Agent (Code) [27B] (0.9781), and CMA-ES (0.9791). The gap between these top methods and the best pure LLM method within a fixed search space (LLAMBO (Paper) [27B] at 0.9890) is substantial. Perhaps most strikingly, several pure LLM methods — including Karpathy Agent (14 HPs) and LLAMBO (Optuna) [27B] — perform worse than random search within the fixed search space. This suggests that, at least for this task, LLMs used as standalone HP optimizers can actually hurt optimization compared to uniform random sampling.
+We observe that classical HPO methods consistently outperform pure LLM-based approaches within a fixed search space. The top methods by mean best val_bpb are: Centaur [0.8B] (0.9766), Centaur [27B] and TPE (both 0.9768), Karpathy Agent (Code) [27B] (0.9781), and CMA-ES (0.9791). Karpathy Agent (Code) operates outside the fixed search space by editing source code directly, making it the only LLM method competitive with classical approaches. The gap to the best pure LLM method within the fixed search space (LLAMBO (Paper) [27B] at 0.9890) is substantial. Perhaps most strikingly, several pure LLM methods — including Karpathy Agent (14 HPs) and LLAMBO (Optuna) [27B] — perform worse than random search within the fixed search space. This suggests that, at least for this task, LLMs used as standalone HP optimizers can actually hurt optimization compared to uniform random sampling.
+
+It is worth noting that all our LLM methods use open-weight models (Qwen3.5 0.8B and 27B). With stronger frontier models, code-editing methods like Karpathy Agent (Code) and LLM-based surrogate methods may improve significantly and potentially outperform some classical methods, especially on tasks where domain knowledge and code-level modifications matter more.
 
 Model size plays a nuanced role. For free-form code editing, a larger LLM clearly helps: Karpathy Agent (Code) [27B] significantly outperforms its 0.8B counterpart (0.9781 vs 0.9911), as the bigger model produces more coherent and architecturally sound code modifications. However, when the search space is restricted to 14 fixed hyperparameters, scaling up the LLM from 0.8B to 27B provides no measurable benefit — Karpathy Agent (14 HPs) [27B] performs comparably to its 0.8B version. This indicates that the bottleneck in fixed-HP optimization is not the LLM's reasoning capacity but rather the optimization strategy itself.
 
@@ -106,13 +108,13 @@ To understand *why* some methods outperform others, we measure how each backend 
 | Centaur [0.8B] | 3 | **0.9766** | 13% | 0.132 | 0.646 | 0.548 | 0.372 | 314 |
 | Centaur [27B] | 3 | **0.9768** | 14% | 0.114 | 0.547 | 0.506 | 0.328 | 291 |
 | TPE | 3 | **0.9768** | 11% | 0.197 | 0.999 | 0.938 | 0.413 | 494 |
-| Karpathy Agent (Code) [27B] | 2 | **0.9781** | 11% | - | - | - | - | - |
+| Karpathy Agent (Code) [27B] | 3 | **0.9781** | 11% | - | - | - | - | - |
 | CMA-ES | 3 | **0.9791** | 15% | 0.156 | 0.785 | 0.925 | 0.581 | 717 |
 | SMAC | 3 | **0.9803** | 32% | 0.239 | 1.198 | 0.935 | 0.373 | 195 |
-| LLAMBO (Paper) [27B] | 2 | 0.9890 | 43% | 0.240 | 1.183 | 1.018 | 1.139 | 234 |
+| LLAMBO (Paper) [27B] | 3 | 0.9890 | 43% | 0.240 | 1.183 | 1.018 | 1.139 | 234 |
 | Random | 3 | 0.9890 | 56% | 0.274 | 1.386 | 1.250 | 1.392 | 289 |
-| Karpathy Agent (14 HPs) [27B] | 2 | 0.9905 | 0% | 0.028 | 0.171 | 0.240 | 0.057 | 24 |
-| LLAMBO (Optuna) [27B] | 2 | 0.9911 | 60% | 0.218 | 1.059 | 1.062 | 0.880 | 208 |
+| Karpathy Agent (14 HPs) [27B] | 3 | 0.9905 | 0% | 0.028 | 0.171 | 0.240 | 0.057 | 24 |
+| LLAMBO (Optuna) [27B] | 3 | 0.9911 | 60% | 0.218 | 1.059 | 1.062 | 0.880 | 208 |
 
 **Observations:**
 
