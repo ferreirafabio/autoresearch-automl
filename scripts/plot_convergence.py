@@ -603,6 +603,84 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
                     iterations=200)
 
 
+def plot_progress_subplot_trials(ax, bench_dir, backend_name, display_name, color, descriptions=None, seed=0, max_trials=250):
+    """Draw a single Pareto-front progress plot on the given axes (trial number x-axis)."""
+    jsonl = bench_dir / backend_name / f"seed_{seed}" / "trials.jsonl"
+    if not jsonl.exists():
+        ax.set_title(f"{display_name}\n(no data)", fontsize=10)
+        return
+
+    trials = load_trials(jsonl)[:max_trials]
+    if not trials:
+        return
+
+    val_bpbs = []
+    for t in trials:
+        val_bpbs.append(t["val_bpb"] if t["success"] and t["val_bpb"] is not None else None)
+
+    success_x = [i for i, v in enumerate(val_bpbs) if v is not None]
+    success_y = [v for v in val_bpbs if v is not None]
+
+    best = float("inf")
+    incumbents = []
+    disc_x, disc_y = [], []
+    for i, v in zip(success_x, success_y):
+        if v < best:
+            best = v
+            incumbents.append((i, v, trials[i]["config"]))
+        else:
+            disc_x.append(i)
+            disc_y.append(v)
+
+    ax.scatter(disc_x, disc_y, c="#cccccc", s=8, alpha=0.4, zorder=2)
+
+    inc_x = [p[0] for p in incumbents]
+    inc_y = [p[1] for p in incumbents]
+    ax.scatter(inc_x, inc_y, c=color, s=30, zorder=4,
+               edgecolors="black", linewidths=0.5)
+
+    curve = best_so_far(trials)
+    valid_curve = [(i, v) for i, v in enumerate(curve) if v < float("inf")]
+    if valid_curve:
+        stair_x, stair_y = zip(*valid_curve)
+        ax.step(stair_x, stair_y, where="post", color=color,
+                linewidth=1.5, alpha=0.6, zorder=3)
+
+    desc_map = {}
+    if descriptions:
+        for d in descriptions:
+            if d["trial"] < max_trials:
+                desc_map[d["trial"]] = d["description"]
+
+    texts = []
+    prev_config = None
+    for idx, (trial_i, val, config) in enumerate(incumbents):
+        if trial_i in desc_map:
+            label = desc_map[trial_i]
+        elif prev_config is None:
+            label = "baseline"
+        else:
+            label = _config_diff(prev_config, config)
+        prev_config = config
+        texts.append(ax.text(trial_i, val, label, fontsize=5.5, color="#1a7a3a", alpha=0.9))
+
+    n_fail = sum(1 for t in trials if not t.get("success", False))
+    ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
+                 fontsize=9)
+    ax.set_xlim(0, max_trials)
+    if inc_y:
+        ymin = min(inc_y)
+        ymax = inc_y[0] if inc_y else 0.996
+        margin = (ymax - ymin) * 0.3 or 0.002
+        ax.set_ylim(ymin - margin, ymax + margin * 0.5)
+    ax.grid(True, alpha=0.2)
+
+    if texts:
+        adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color="#1a7a3a", alpha=0.4, lw=0.5),
+                    force_points=(1.0, 1.5), force_text=(1.0, 1.5), expand=(1.5, 1.8),
+                    iterations=200)
+
+
 def _best_seed(bench_dir: Path, backend_name: str) -> int:
     """Find the seed with the best final val_bpb for a backend."""
     best_val, best_seed = float("inf"), 0
@@ -648,31 +726,77 @@ def _plot_incumbent_grid(bench_dir, backends, output_path, title):
     print(f"Saved {output_path}")
 
 
+def _plot_incumbent_grid_trials(bench_dir, backends, output_path, title, max_trials=250):
+    """Shared helper: draw a 1-row grid of incumbent trace subplots by trial number."""
+    desc_path = Path(__file__).parent.parent / "assets" / "incumbent_descriptions.json"
+    all_descriptions = {}
+    if desc_path.exists():
+        all_descriptions = json.loads(desc_path.read_text())
+
+    n = len(backends)
+    fig, axes = plt.subplots(1, n, figsize=(6.5 * n, 5.5))
+    if n == 1:
+        axes = [axes]
+
+    for idx, (backend, name, color) in enumerate(backends):
+        seed = _best_seed(bench_dir, backend)
+        descs = all_descriptions.get(backend)
+        plot_progress_subplot_trials(
+            axes[idx], bench_dir, backend, f"{name} (seed {seed})", color,
+            descriptions=descs, seed=seed, max_trials=max_trials,
+        )
+        axes[idx].set_xlabel("Trial #", fontsize=10)
+    axes[0].set_ylabel("val_bpb", fontsize=10)
+
+    fig.suptitle(title, fontsize=14, y=0.98)
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {output_path}")
+
+
+INCUMBENT_CLASSICAL = [
+    ("optuna", "TPE", "#2196F3"),
+    ("cma_es", "CMA-ES", "#2E7D32"),
+    ("centaur_Qwen3_5_27B", "Centaur [27B]", "#E91E63"),
+    ("centaur_Qwen3_5_0_8B", "Centaur [0.8B]", "#E91E63"),
+    ("random", "Random", "#607D8B"),
+]
+
+INCUMBENT_LLM = [
+    ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
+    ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) [27B]", "#9C27B0"),
+    ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
+    ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
+]
+
+
 def plot_progress_classical(results_dir: Path, output_path: Path):
-    """Incumbent traces: classical + hybrid methods."""
+    """Incumbent traces: classical + hybrid methods (wall-time)."""
     bench_dir = results_dir / "exp2_benchmark"
-    backends = [
-        ("optuna", "TPE", "#2196F3"),
-        ("cma_es", "CMA-ES", "#2E7D32"),
-        ("centaur_Qwen3_5_27B", "Centaur [27B]", "#E91E63"),
-        ("centaur_Qwen3_5_0_8B", "Centaur [0.8B]", "#E91E63"),
-        ("random", "Random", "#607D8B"),
-    ]
-    _plot_incumbent_grid(bench_dir, backends, output_path,
+    _plot_incumbent_grid(bench_dir, INCUMBENT_CLASSICAL, output_path,
                          "Incumbent Traces — Classical + Hybrid (best seed)")
 
 
 def plot_progress_llm(results_dir: Path, output_path: Path):
-    """Incumbent traces: LLM-based methods."""
+    """Incumbent traces: LLM-based methods (wall-time)."""
     bench_dir = results_dir / "exp2_benchmark"
-    backends = [
-        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
-        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) [27B]", "#9C27B0"),
-        ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
-        ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
-    ]
-    _plot_incumbent_grid(bench_dir, backends, output_path,
+    _plot_incumbent_grid(bench_dir, INCUMBENT_LLM, output_path,
                          "Incumbent Traces — LLM-based (best seed)")
+
+
+def plot_progress_classical_trials(results_dir: Path, output_path: Path):
+    """Incumbent traces: classical + hybrid methods (by trial, capped at 250)."""
+    bench_dir = results_dir / "exp2_benchmark"
+    _plot_incumbent_grid_trials(bench_dir, INCUMBENT_CLASSICAL, output_path,
+                                "Incumbent Traces — Classical + Hybrid (best seed, by trial)")
+
+
+def plot_progress_llm_trials(results_dir: Path, output_path: Path):
+    """Incumbent traces: LLM-based methods (by trial, capped at 250)."""
+    bench_dir = results_dir / "exp2_benchmark"
+    _plot_incumbent_grid_trials(bench_dir, INCUMBENT_LLM, output_path,
+                                "Incumbent Traces — LLM-based (best seed, by trial)")
 
 
 if __name__ == "__main__":
@@ -690,3 +814,6 @@ if __name__ == "__main__":
     plot_progress(results_dir, assets_dir)
     plot_progress_classical(results_dir, assets_dir / "exp2_incumbents_classical.png")
     plot_progress_llm(results_dir, assets_dir / "exp2_incumbents_llm.png")
+    # Trial-number versions (appendix)
+    plot_progress_classical_trials(results_dir, assets_dir / "exp2_incumbents_classical_trials.png")
+    plot_progress_llm_trials(results_dir, assets_dir / "exp2_incumbents_llm_trials.png")
