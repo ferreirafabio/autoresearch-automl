@@ -211,3 +211,4 @@ slurm/
 RESULTS.md
 experiments/EXPERIMENTS.md
 scripts/monitor_jobs.sh
+smac3_output/
