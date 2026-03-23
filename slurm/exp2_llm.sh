@@ -17,21 +17,21 @@ set -euo pipefail
 
 BACKEND="${1:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name] [nothink]}"
 SEED="${2:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name] [nothink]}"
-MODELS_BASE="/home/zelaa/autoresearch-automl-private/models"
+MODELS_BASE="/work/dlclarge1/ferreira-autoresearch-automl/models"
 MODEL_NAME="${3:-Qwen3.5-0.8B}"
 THINKING_OVERRIDE="${4:-}"  # pass "nothink" to force thinking off
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
-PROJECT_DIR="/home/zelaa/autoresearch-automl-private"
+PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 # Include model name in results dir when non-default model is specified
 if [ "${MODEL_NAME}" = "Qwen3.5-0.8B" ]; then
-    RESULTS_DIR="/home/zelaa/autoresearch-automl-private/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
+    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
 else
     MODEL_TAG=$(echo "${MODEL_NAME}" | tr '.' '_' | tr '-' '_')
     NOTHINK_SUFFIX=""
     if [ "${THINKING_OVERRIDE}" = "nothink" ]; then
         NOTHINK_SUFFIX="_nothink"
     fi
-    RESULTS_DIR="/home/zelaa/autoresearch-automl-private/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
+    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
 fi
 TRIALS=9999
 VLLM_PORT=$((8100 + RANDOM % 900))

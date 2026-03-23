@@ -3,7 +3,7 @@
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
 #SBATCH --time=24:00:00
-#SBATCH --output=/home/zelaa/autoresearch-automl-private/logs/exp2_%x_%j.log
+#SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
 set -euo pipefail
@@ -20,16 +20,16 @@ SEED="${1:?Usage: sbatch exp2_centaur.sh <seed> <model_name> [suffix] [llm_ratio
 MODEL_NAME="${2:?Usage: sbatch exp2_centaur.sh <seed> <model_name> [suffix] [llm_ratio]}"
 SUFFIX="${3:-}"
 LLM_RATIO="${4:-0.3}"
-MODELS_BASE="/home/zelaa/autoresearch-automl-private/models"
+MODELS_BASE="/work/dlclarge1/ferreira-autoresearch-automl/models"
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
-PROJECT_DIR="/home/zelaa/autoresearch-automl-private"
+PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 
 MODEL_TAG=$(echo "${MODEL_NAME}" | tr '.' '_' | tr '-' '_')
 SUFFIX_TAG=""
 if [ -n "$SUFFIX" ]; then
     SUFFIX_TAG="_${SUFFIX}"
 fi
-RESULTS_DIR="/home/zelaa/autoresearch-automl-private/results/exp2_benchmark/centaur_${MODEL_TAG}${SUFFIX_TAG}/seed_${SEED}"
+RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/centaur_${MODEL_TAG}${SUFFIX_TAG}/seed_${SEED}"
 TRIALS=9999
 VLLM_PORT=$((8100 + RANDOM % 900))
 
