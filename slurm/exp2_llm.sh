@@ -3,7 +3,7 @@
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
 #SBATCH --time=24:00:00
-#SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
+#SBATCH --output=/home/zelaa/autoresearch-automl-private/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
 set -euo pipefail
@@ -17,21 +17,21 @@ set -euo pipefail
 
 BACKEND="${1:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name] [nothink]}"
 SEED="${2:?Usage: sbatch exp2_llm.sh <backend> <seed> [model_name] [nothink]}"
-MODELS_BASE="/work/dlclarge1/ferreira-autoresearch-automl/models"
+MODELS_BASE="/home/zelaa/autoresearch-automl-private/models"
 MODEL_NAME="${3:-Qwen3.5-0.8B}"
 THINKING_OVERRIDE="${4:-}"  # pass "nothink" to force thinking off
 MODEL_DIR="${MODELS_BASE}/${MODEL_NAME}"
-PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
+PROJECT_DIR="/home/zelaa/autoresearch-automl-private"
 # Include model name in results dir when non-default model is specified
 if [ "${MODEL_NAME}" = "Qwen3.5-0.8B" ]; then
-    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
+    RESULTS_DIR="/home/zelaa/autoresearch-automl-private/results/exp2_benchmark/${BACKEND}/seed_${SEED}"
 else
     MODEL_TAG=$(echo "${MODEL_NAME}" | tr '.' '_' | tr '-' '_')
     NOTHINK_SUFFIX=""
     if [ "${THINKING_OVERRIDE}" = "nothink" ]; then
         NOTHINK_SUFFIX="_nothink"
     fi
-    RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
+    RESULTS_DIR="/home/zelaa/autoresearch-automl-private/results/exp2_benchmark/${BACKEND}_${MODEL_TAG}${NOTHINK_SUFFIX}/seed_${SEED}"
 fi
 TRIALS=9999
 VLLM_PORT=$((8100 + RANDOM % 900))
@@ -43,7 +43,9 @@ VLLM_PORT=$((8100 + RANDOM % 900))
 VLLM_EXTRA_ARGS=""
 # Thinking disabled for all models — thinking traces waste tokens on structured HP output
 ENABLE_THINKING="false"
+USE_GEMINI_API="false"
 case "${MODEL_NAME}" in
+    gemini-2.5-flash) USE_GEMINI_API="true"; AVAILABLE_VRAM="~140GB" ;;
     Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB" ;;
     Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB" ;;
     Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB"; VLLM_EXTRA_ARGS="--enable-prefix-caching" ;;
@@ -53,9 +55,19 @@ case "${MODEL_NAME}" in
     *)             VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~120GB" ;;
 esac
 
-if [ ! -d "$MODEL_DIR" ]; then
-    echo "Error: Model not found at $MODEL_DIR"
-    exit 1
+if [ "$USE_GEMINI_API" = "true" ]; then
+    if [ -z "${GEMINI_API_KEY:-}" ]; then
+        echo "Error: GEMINI_API_KEY environment variable is not set."
+        echo "       Get a key at https://aistudio.google.com/apikey and export it before submitting."
+        exit 1
+    fi
+    LLM_MODEL_ARG="gemini-2.5-flash"
+else
+    if [ ! -d "$MODEL_DIR" ]; then
+        echo "Error: Model not found at $MODEL_DIR"
+        exit 1
+    fi
+    LLM_MODEL_ARG="$MODEL_DIR"
 fi
 
 source "${PROJECT_DIR}/.venv/bin/activate"
@@ -79,55 +91,62 @@ echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
 
-# Start vLLM server in background
-REASONING_ARGS=""
-if [ "$ENABLE_THINKING" = "true" ]; then
-    REASONING_ARGS="--reasoning-parser qwen3 --default-chat-template-kwargs {\"enable_thinking\":true}"
-else
-    # Explicitly disable thinking for models that support it (Qwen3.5-9B+)
-    # Without this, large models still "think" in plain text inside content
-    REASONING_ARGS="--default-chat-template-kwargs {\"enable_thinking\":false}"
-fi
-
-echo "Starting vLLM server (port ${VLLM_PORT}, gpu_util=${VLLM_GPU_UTIL}, thinking=${ENABLE_THINKING})..."
-vllm serve "$MODEL_DIR" \
-    --host 127.0.0.1 --port $VLLM_PORT \
-    --tensor-parallel-size 1 \
-    --dtype bfloat16 \
-    --max-model-len 32768 \
-    --gpu-memory-utilization $VLLM_GPU_UTIL \
-    $REASONING_ARGS \
-    $VLLM_EXTRA_ARGS &
-VLLM_PID=$!
-
-# Wait for vLLM to be ready
-echo "Waiting for vLLM server to start..."
-for i in $(seq 1 600); do
-    STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
-    if [ "$STATUS" = "200" ]; then
-        echo "vLLM server ready after ${i}s"
-        break
+if [ "$USE_GEMINI_API" = "false" ]; then
+    # Start vLLM server in background
+    REASONING_ARGS=""
+    if [ "$ENABLE_THINKING" = "true" ]; then
+        REASONING_ARGS="--reasoning-parser qwen3 --default-chat-template-kwargs {\"enable_thinking\":true}"
+    else
+        # Explicitly disable thinking for models that support it (Qwen3.5-9B+)
+        # Without this, large models still "think" in plain text inside content
+        REASONING_ARGS="--default-chat-template-kwargs {\"enable_thinking\":false}"
     fi
-    if ! kill -0 $VLLM_PID 2>/dev/null; then
-        echo "vLLM server died unexpectedly"
+
+    echo "Starting vLLM server (port ${VLLM_PORT}, gpu_util=${VLLM_GPU_UTIL}, thinking=${ENABLE_THINKING})..."
+    vllm serve "$MODEL_DIR" \
+        --host 127.0.0.1 --port $VLLM_PORT \
+        --tensor-parallel-size 1 \
+        --dtype bfloat16 \
+        --max-model-len 32768 \
+        --gpu-memory-utilization $VLLM_GPU_UTIL \
+        $REASONING_ARGS \
+        $VLLM_EXTRA_ARGS &
+    VLLM_PID=$!
+
+    # Wait for vLLM to be ready
+    echo "Waiting for vLLM server to start..."
+    for i in $(seq 1 600); do
+        STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
+        if [ "$STATUS" = "200" ]; then
+            echo "vLLM server ready after ${i}s"
+            break
+        fi
+        if ! kill -0 $VLLM_PID 2>/dev/null; then
+            echo "vLLM server died unexpectedly"
+            exit 1
+        fi
+        sleep 1
+    done
+
+    STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
+    if [ "$STATUS" != "200" ]; then
+        echo "vLLM server failed to start within 600s (status: $STATUS)"
+        kill $VLLM_PID 2>/dev/null
         exit 1
     fi
-    sleep 1
-done
 
-STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
-if [ "$STATUS" != "200" ]; then
-    echo "vLLM server failed to start within 600s (status: $STATUS)"
-    kill $VLLM_PID 2>/dev/null
-    exit 1
+    export OPENAI_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1"
+    export OPENAI_API_KEY="dummy"
+    # Cap training subprocess to ~76GB (matches 27B vLLM gpu_util=0.45)
+    export CUDA_MEM_FRACTION=0.543
+else
+    # Gemini API — no local server needed, full GPU is free for training
+    export OPENAI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
+    export OPENAI_API_KEY="${GEMINI_API_KEY}"
 fi
 
 # Run HPO
-export OPENAI_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1"
-export OPENAI_API_KEY="dummy"
 export AVAILABLE_VRAM="${AVAILABLE_VRAM}"
-# Cap training subprocess to ~76GB (matches 27B vLLM gpu_util=0.45)
-export CUDA_MEM_FRACTION=0.543
 
 echo ""
 echo "Starting HPO with ${BACKEND} backend..."
@@ -136,7 +155,7 @@ python -m autoresearch_automl.cli run \
     --trials $TRIALS \
     --budget-max 300 \
     --seed "$SEED" \
-    --llm-model "$MODEL_DIR" \
+    --llm-model "$LLM_MODEL_ARG" \
     --results-dir "$RESULTS_DIR" \
     --resume \
     --time-budget 86400
@@ -147,5 +166,7 @@ echo "Experiment 2 complete: ${BACKEND} seed ${SEED}"
 echo "=============================================="
 
 # Cleanup vLLM
-kill $VLLM_PID 2>/dev/null
-wait $VLLM_PID 2>/dev/null || true
+if [ "$USE_GEMINI_API" = "false" ]; then
+    kill $VLLM_PID 2>/dev/null
+    wait $VLLM_PID 2>/dev/null || true
+fi
