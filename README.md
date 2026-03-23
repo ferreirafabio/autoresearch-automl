@@ -175,7 +175,7 @@ python -m autoresearch_automl.cli run --backend llambo --trials 100 --llm-model 
 # LLAMBO (Paper)
 python -m autoresearch_automl.cli run --backend llambo_original --trials 100 --llm-model Qwen3.5-0.8B
 
-# Karpathy Agent (14 HPs)
+# Karpathy Agent (14 HPs) — LLM suggests configs within fixed search space
 python -m autoresearch_automl.cli run --backend llm_greedy --trials 100 --llm-model Qwen3.5-0.8B
 
 # Karpathy Agent (Code) — edits train.py directly

@@ -1,10 +1,10 @@
-"""Compute search diversity metrics for exp2_benchmark results."""
+"""Compute search diversity metrics for benchmark results."""
 
 import json
 import numpy as np
 from pathlib import Path
 
-RESULTS = Path(__file__).resolve().parent.parent.parent / "results" / "exp2_benchmark"
+RESULTS = Path(__file__).resolve().parent.parent.parent / "results" / "exp2_benchmark" 
 
 # Search space bounds (for normalization to [0,1])
 BOUNDS = {

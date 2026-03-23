@@ -122,7 +122,7 @@ def main():
 
     client = OpenAI(base_url=args.api_base, api_key="dummy")
     results_dir = Path(args.results_dir)
-    bench_dir = results_dir / "exp2_benchmark"
+    bench_dir = results_dir 
 
     backends = [
         "optuna",
