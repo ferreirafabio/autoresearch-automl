@@ -94,7 +94,15 @@ def main():
             jsonl = RESULTS / backend_dir / f"seed_{seed}" / "trials.jsonl"
             if not jsonl.exists():
                 continue
-            trials = load_trials(jsonl)
+            # Cap trials at 24h training budget
+            raw_trials = load_trials(jsonl)
+            trials = []
+            cum_s = 0.0
+            for t in raw_trials:
+                cum_s += t.get("wall_time_seconds") or 0.0
+                if cum_s > BUDGET_SECONDS:
+                    break
+                trials.append(t)
             if len(trials) < 100:
                 continue
 

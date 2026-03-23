@@ -1,7 +1,7 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
 <h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization? A Benchmark on <i>autoresearch</i></h3>
 
-Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under fair conditions.
+Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under the same budgets and constraints.
 
 ![HPO Convergence](assets/exp2_27b_walltime.png)
 
@@ -46,7 +46,7 @@ All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) via vLLM on the same GPU 
 
 Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP, no manual curation). See [Search Space](#search-space) for the full table. 3 seeds per condition.
 
-**Fairness:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions. Results are trimmed to 300 trials, as no meaningful improvement occurs beyond that point.
+**Setup:** All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz Ziv's experiments). Failed trials reported as `val_bpb=100.0` so samplers learn to avoid OOM regions. Results are trimmed to 300 trials, as no meaningful improvement occurs beyond that point.
 
 ## Results
 
@@ -64,7 +64,7 @@ It is worth noting that all our LLM methods use open-weight models (Qwen3.5 0.8B
 
 Model size plays a nuanced role. For free-form code editing, a larger LLM clearly helps: Karpathy Agent (Code) [27B] significantly outperforms its 0.8B counterpart (0.9781 vs 0.9911), as the bigger model produces more coherent and architecturally sound code modifications. However, when the search space is restricted to 14 fixed hyperparameters, scaling up the LLM from 0.8B to 27B provides no measurable benefit — Karpathy Agent (14 HPs) [27B] performs comparably to its 0.8B version. This indicates that the bottleneck in fixed-HP optimization is not the LLM's reasoning capacity but rather the optimization strategy itself.
 
-The most promising result comes from the hybrid approach. Centaur combines CMA-ES with an LLM that receives the optimizer's internal state (covariance matrix, step size, top configurations) and occasionally suggests informed perturbations. Notably, Centaur [0.8B] outperforms both CMA-ES alone and Centaur [27B], demonstrating that a small, inexpensive LLM is sufficient when paired with a strong classical optimizer. The classical method handles the heavy lifting of landscape modeling, while the LLM contributes lightweight, informed nudges rather than deep reasoning. This points to a practical recipe: rather than replacing classical HPO with expensive LLM calls, augmenting a proven optimizer with a cheap LLM yields the best results.
+LLM-based methods generally converge more slowly than classical methods in wall-clock time. The most promising result comes from the hybrid approach: Centaur combines CMA-ES with an LLM that receives the optimizer's internal state and occasionally suggests informed perturbations. By using the LLM on only 30% of trials, Centaur preserves the fast convergence of CMA-ES while benefiting from occasional LLM-informed suggestions. Notably, Centaur [0.8B] outperforms both CMA-ES alone and Centaur [27B], demonstrating that a small, inexpensive LLM is sufficient when paired with a strong classical optimizer.
 
 ### 0.8B vs 27B LLM Optimizer
 
@@ -105,16 +105,16 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 | Method | Seeds | Avg Best | OOM% | Spread | Pairwise | Dist→Default | Step | Cells |
 |--------|-------|----------|------|--------|----------|-------------|------|-------|
-| Centaur [0.8B] | 3 | **0.9766** | 13% | 0.132 | 0.646 | 0.548 | 0.372 | 314 |
-| Centaur [27B] | 3 | **0.9768** | 14% | 0.114 | 0.547 | 0.506 | 0.328 | 291 |
+| Centaur [27B] | 3 | **0.9765** | 14% | 0.113 | 0.542 | 0.502 | 0.324 | 293 |
+| Centaur [0.8B] | 3 | **0.9766** | 13% | 0.131 | 0.642 | 0.543 | 0.368 | 317 |
 | TPE | 3 | **0.9768** | 11% | 0.197 | 0.999 | 0.938 | 0.413 | 494 |
-| Karpathy Agent (Code) [27B] | 3 | **0.9781** | 11% | - | - | - | - | - |
+| Karpathy Agent (Code) [27B] | 2 | **0.9781** | 11% | - | - | - | - | - |
 | CMA-ES | 3 | **0.9791** | 15% | 0.156 | 0.785 | 0.925 | 0.581 | 717 |
 | SMAC | 3 | **0.9803** | 32% | 0.239 | 1.198 | 0.935 | 0.373 | 195 |
-| LLAMBO (Paper) [27B] | 3 | 0.9890 | 43% | 0.240 | 1.183 | 1.018 | 1.139 | 234 |
+| LLAMBO (Paper) [27B] | 3 | 0.9862 | 43% | 0.242 | 1.201 | 1.016 | 1.153 | 327 |
 | Random | 3 | 0.9890 | 56% | 0.274 | 1.386 | 1.250 | 1.392 | 289 |
-| Karpathy Agent (14 HPs) [27B] | 3 | 0.9905 | 0% | 0.028 | 0.171 | 0.240 | 0.057 | 24 |
-| LLAMBO (Optuna) [27B] | 3 | 0.9911 | 60% | 0.218 | 1.059 | 1.062 | 0.880 | 208 |
+| LLAMBO (Optuna) [27B] | 3 | 0.9896 | 65% | 0.205 | 0.992 | 1.027 | 0.805 | 268 |
+| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 | 1% | 0.035 | 0.225 | 0.228 | 0.057 | 29 |
 
 **Observations:**
 
@@ -127,7 +127,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 
 ## Search Space
 
-Classical, non-LLM-based methods work with search spaces. The quality of the search space greatly affects the results produced by these methods. To make the comparison with Karpathy's autoresearch fair, we need to eliminate human priors that we would otherwise encode into the search space. To do this, we automatically extract hyperparameters from `train.py` using [AST](https://docs.python.org/3/library/ast.html) (Abstract Syntax Tree) parsing: the source code is parsed into a syntax tree, and every top-level `ALL_CAPS = literal` assignment is identified as a tunable HP. We extract the following 14 hyperparameters to optimize (13 continuous/integer + 1 categorical):
+Classical, non-LLM-based methods work with search spaces. The quality of the search space greatly affects the results produced by these methods. To reduce human priors in the search space, we automatically extract hyperparameters rather than curating them manually. To do this, we automatically extract hyperparameters from `train.py` using [AST](https://docs.python.org/3/library/ast.html) (Abstract Syntax Tree) parsing: the source code is parsed into a syntax tree, and every top-level `ALL_CAPS = literal` assignment is identified as a tunable HP. We extract the following 14 hyperparameters to optimize (13 continuous/integer + 1 categorical):
 
 | HP | Type | Range | Log | Default |
 |----|------|-------|-----|---------|

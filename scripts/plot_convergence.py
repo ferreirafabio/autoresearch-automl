@@ -22,6 +22,18 @@ def load_trials(jsonl_path: Path) -> list[dict]:
     return trials
 
 
+def cap_trials_at_budget(trials: list[dict], budget_hours: float = 24.0) -> list[dict]:
+    """Return only trials within the training time budget."""
+    cum = 0.0
+    capped = []
+    for t in trials:
+        cum += (t.get("wall_time_seconds") or 0.0) / 3600
+        if cum > budget_hours:
+            break
+        capped.append(t)
+    return capped
+
+
 def best_so_far(trials: list[dict]) -> list[float]:
     """Compute incumbent (best val_bpb so far) at each trial."""
     best = float("inf")
@@ -33,8 +45,11 @@ def best_so_far(trials: list[dict]) -> list[float]:
     return curve
 
 
-def cumulative_walltime(trials: list[dict]) -> tuple[list[float], list[float]]:
-    """Return (cumulative_training_hours, incumbent_val_bpb) for wall-time plots."""
+def cumulative_walltime(trials: list[dict], cap_hours: float = 24.0) -> tuple[list[float], list[float]]:
+    """Return (cumulative_training_hours, incumbent_val_bpb) for wall-time plots.
+
+    Trials beyond cap_hours of cumulative training time are excluded.
+    """
     cum_time = 0.0
     best = float("inf")
     times = []
@@ -42,9 +57,11 @@ def cumulative_walltime(trials: list[dict]) -> tuple[list[float], list[float]]:
     for t in trials:
         wt = t.get("wall_time_seconds") or 0.0
         cum_time += wt
+        if cum_time / 3600 > cap_hours:
+            break
         if t["success"] and t["val_bpb"] is not None:
             best = min(best, t["val_bpb"])
-        times.append(cum_time / 3600)  # convert to hours
+        times.append(cum_time / 3600)
         values.append(best)
     return times, values
 
@@ -61,7 +78,7 @@ def plot_convergence_walltime(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100
-    MIN_BUDGET_FRAC = 0.99  # only include seeds that reached 99% of 24h budget
+    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
     BUDGET_SECONDS = 86400
     INTERP_HOURS = np.linspace(0, 24, 1000)  # interpolate to common time grid
 
@@ -84,9 +101,10 @@ def plot_convergence_walltime(
             if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
                 continue
             max_time = max(max_time, times[-1])
-            # Interpolate onto common grid (no fill beyond seed's data)
+            # Interpolate onto common grid; forward-fill last value for seeds
+            # that passed the budget filter but end slightly before 24h
             interped = np.interp(INTERP_HOURS, times, values,
-                                 left=np.nan, right=np.nan)
+                                 left=np.nan, right=values[-1])
             seed_interps.append(interped)
 
         if not seed_interps:
@@ -143,7 +161,7 @@ def plot_convergence_multi(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100  # skip seeds with fewer trials
-    MIN_BUDGET_FRAC = 0.99  # only include seeds that reached 99% of 24h budget
+    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
     BUDGET_SECONDS = 86400
 
     max_trials = 0
@@ -154,7 +172,7 @@ def plot_convergence_multi(
             jsonl = results_dir / backend_dir / f"seed_{seed}" / "trials.jsonl"
             if not jsonl.exists():
                 continue
-            trials = load_trials(jsonl)
+            trials = cap_trials_at_budget(load_trials(jsonl))
             if len(trials) < MIN_TRIALS:
                 continue
             total_train_s = sum(t.get("wall_time_seconds") or 0.0 for t in trials)
