@@ -61,7 +61,7 @@ def plot_convergence_walltime(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100
-    MIN_BUDGET_FRAC = 0.70  # only include seeds that reached 70% of 24h budget
+    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
     BUDGET_SECONDS = 86400
     INTERP_HOURS = np.linspace(0, 24, 1000)  # interpolate to common time grid
 
@@ -143,7 +143,7 @@ def plot_convergence_multi(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100  # skip seeds with fewer trials
-    MIN_BUDGET_FRAC = 0.70  # only include seeds that reached 70% of 24h budget
+    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
     BUDGET_SECONDS = 86400
 
     max_trials = 0
@@ -248,6 +248,7 @@ BACKENDS_27B = {
 
 BACKENDS_ALL = {
     "optuna": {"label": "TPE (best classical)", "color": "#2196F3", "linestyle": "-"},
+    "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
     "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#E91E63", "linestyle": "-"},
     "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--"},
     "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
