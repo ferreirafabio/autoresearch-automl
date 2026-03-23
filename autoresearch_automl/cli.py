@@ -61,6 +61,7 @@ def main(verbose: bool):
 @click.option("--gpu", type=int, default=None, help="GPU device index")
 @click.option("--storage", default=None, help="Optuna storage URL for parallel execution")
 @click.option("--llm-model", default=None, help="LLM model name for LLM-based backends (e.g. Qwen/Qwen3.5-9B)")
+@click.option("--llm-ratio", default=None, type=float, help="Fraction of trials where LLM overrides CMA-ES (Centaur only, 0.3 if not set)")
 @click.option("--resume/--no-resume", default=True, help="Auto-resume from existing trials.jsonl (default: on)")
 @click.option("--time-budget", default=86400.0, help="Training-time budget in seconds (sum of wall_time_seconds). Default: 86400 (24h). 0 to disable.")
 def run(
@@ -76,6 +77,7 @@ def run(
     gpu: int | None,
     storage: str | None,
     llm_model: str | None,
+    llm_ratio: float | None,
     resume: bool,
     time_budget: float,
 ):
@@ -99,6 +101,8 @@ def run(
         backend_kwargs["model"] = llm_model
     if backend in ("llambo", "llambo_original", "karpathy_agent_hps", "karpathy_agent", "centaur"):
         backend_kwargs["log_dir"] = Path(results_dir)
+    if llm_ratio is not None and backend == "centaur":
+        backend_kwargs["llm_ratio"] = llm_ratio
     hpo_backend = _load_backend(backend, **backend_kwargs)
 
     train_py_path = Path(train_py)

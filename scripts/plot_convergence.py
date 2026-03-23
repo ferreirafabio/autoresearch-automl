@@ -253,6 +253,8 @@ BACKENDS_ALL = {
     "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--"},
     "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
     "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
+    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0", "linestyle": "-"},
+    "llambo": {"label": "LLAMBO (Optuna) [0.8B]", "color": "#9C27B0", "linestyle": "--"},
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
     "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
