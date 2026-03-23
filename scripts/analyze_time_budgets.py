@@ -4,7 +4,7 @@
 import json
 from pathlib import Path
 
-RESULTS_DIR = Path(__file__).resolve().parent.parent.parent / "results" / "exp2_benchmark" 
+RESULTS_DIR = Path(__file__).resolve().parent.parent / "results" 
 BUDGET_24H = 86400.0  # 24 hours in seconds
 
 BACKENDS = [
@@ -12,9 +12,9 @@ BACKENDS = [
     "random",
     "smac",
     "cma_es",
-    "llambo_Qwen3_5_27B_nothink",
-    "llambo_original_Qwen3_5_27B_nothink",
-    "llm_greedy_Qwen3_5_27B_nothink",
+    "llambo_Qwen3_5_27B",
+    "llambo_original_Qwen3_5_27B",
+    "llm_greedy_Qwen3_5_27B",
 ]
 SEEDS = [0, 1, 2]
 

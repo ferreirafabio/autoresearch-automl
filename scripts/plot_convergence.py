@@ -227,7 +227,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
         "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FF9800"},
     }
     plot_convergence_multi(
-        results_dir / "exp2_benchmark",
+        results_dir,
         backends,
         output_path,
         title="Karpathy's Autoresearch: HPO Convergence (0.8B Optimizer)",
@@ -240,9 +240,9 @@ BACKENDS_27B = {
     "smac": {"label": "SMAC", "color": "#F57C00"},             # dark orange
     "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},  # pink
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#795548"},  # brown
-    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
-    "llambo_Qwen3_5_27B_nothink": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},  # purple
-    "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
+    "llm_greedy_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
+    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},  # purple
+    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
     "random": {"label": "Random", "color": "#607D8B"},         # grey
 }
 
@@ -251,9 +251,9 @@ BACKENDS_ALL = {
     "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
     "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#E91E63", "linestyle": "-"},
     "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--"},
-    "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
     "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
-    "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
+    "llm_greedy_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
     "llm_greedy": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
     "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
@@ -263,7 +263,7 @@ BACKENDS_ALL = {
 def plot_exp2_27b(results_dir: Path, output_path: Path):
     """Exp2: 27B — all backends (27B only, no model size tag)."""
     plot_convergence_multi(
-        results_dir / "exp2_benchmark",
+        results_dir,
         BACKENDS_27B,
         output_path,
         title="Karpathy's Autoresearch: HPO Convergence (by trial)",
@@ -274,7 +274,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
 def plot_exp2_27b_walltime(results_dir: Path, output_path: Path):
     """Exp2: 27B — wall-time x-axis (primary plot)."""
     plot_convergence_walltime(
-        results_dir / "exp2_benchmark",
+        results_dir,
         BACKENDS_27B,
         output_path,
         title="Karpathy's Autoresearch: HPO Convergence",
@@ -284,7 +284,7 @@ def plot_exp2_27b_walltime(results_dir: Path, output_path: Path):
 def plot_exp2_all(results_dir: Path, output_path: Path):
     """0.8B vs 27B comparison for all LLM methods, with classical references."""
     plot_convergence_multi(
-        results_dir / "exp2_benchmark",
+        results_dir,
         BACKENDS_ALL,
         output_path,
         title="Karpathy's Autoresearch: 0.8B vs 27B (by trial)",
@@ -295,7 +295,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
 def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
     """0.8B vs 27B comparison — wall-time x-axis (primary plot)."""
     plot_convergence_walltime(
-        results_dir / "exp2_benchmark",
+        results_dir,
         BACKENDS_ALL,
         output_path,
         title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
@@ -308,11 +308,11 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
         "cma_es": {"label": "CMA-ES (best classical)", "color": "#2E7D32", "linestyle": "-"},
         "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
         "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
-        "llambo_original_Qwen3_5_27B_nothink": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
-        "llm_greedy_Qwen3_5_27B_nothink": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#D32F2F", "linestyle": "-"},
+        "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
+        "llm_greedy_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#D32F2F", "linestyle": "-"},
     }
     plot_convergence_multi(
-        results_dir / "exp2_benchmark",
+        results_dir,
         backends,
         output_path,
         title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
@@ -484,16 +484,16 @@ def plot_progress_single(
 
 def plot_progress(results_dir: Path, assets_dir: Path):
     """Generate per-backend Karpathy-style progress plots."""
-    bench_dir = results_dir / "exp2_benchmark"
+    bench_dir = results_dir
 
     backends_to_plot = [
         ("optuna", "TPE", "#2196F3"),
         ("llm_greedy", "Karpathy Agent (14 HPs) [0.8B]", "#FF9800"),
-        ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
+        ("llm_greedy_Qwen3_5_27B", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
         ("llambo_original", "LLAMBO (Paper) [0.8B]", "#00BCD4"),
-        ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
+        ("llambo_original_Qwen3_5_27B", "LLAMBO (Paper) [27B]", "#00BCD4"),
         ("llambo", "LLAMBO (Optuna) [0.8B]", "#9C27B0"),
-        ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) [27B]", "#9C27B0"),
+        ("llambo_Qwen3_5_27B", "LLAMBO (Optuna) [27B]", "#9C27B0"),
     ]
 
     for backend_name, display_name, color in backends_to_plot:
@@ -769,43 +769,43 @@ INCUMBENT_CLASSICAL = [
 ]
 
 INCUMBENT_LLM = [
-    ("llambo_original_Qwen3_5_27B_nothink", "LLAMBO (Paper) [27B]", "#00BCD4"),
-    ("llambo_Qwen3_5_27B_nothink", "LLAMBO (Optuna) [27B]", "#9C27B0"),
-    ("llm_greedy_Qwen3_5_27B_nothink", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
+    ("llambo_original_Qwen3_5_27B", "LLAMBO (Paper) [27B]", "#00BCD4"),
+    ("llambo_Qwen3_5_27B", "LLAMBO (Optuna) [27B]", "#9C27B0"),
+    ("llm_greedy_Qwen3_5_27B", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
     ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
 ]
 
 
 def plot_progress_classical(results_dir: Path, output_path: Path):
     """Incumbent traces: classical + hybrid methods (wall-time)."""
-    bench_dir = results_dir / "exp2_benchmark"
+    bench_dir = results_dir
     _plot_incumbent_grid(bench_dir, INCUMBENT_CLASSICAL, output_path,
                          "Incumbent Traces — Classical + Hybrid (best seed)")
 
 
 def plot_progress_llm(results_dir: Path, output_path: Path):
     """Incumbent traces: LLM-based methods (wall-time)."""
-    bench_dir = results_dir / "exp2_benchmark"
+    bench_dir = results_dir
     _plot_incumbent_grid(bench_dir, INCUMBENT_LLM, output_path,
                          "Incumbent Traces — LLM-based (best seed)")
 
 
 def plot_progress_classical_trials(results_dir: Path, output_path: Path):
     """Incumbent traces: classical + hybrid methods (by trial, capped at 250)."""
-    bench_dir = results_dir / "exp2_benchmark"
+    bench_dir = results_dir
     _plot_incumbent_grid_trials(bench_dir, INCUMBENT_CLASSICAL, output_path,
                                 "Incumbent Traces — Classical + Hybrid (best seed, by trial)")
 
 
 def plot_progress_llm_trials(results_dir: Path, output_path: Path):
     """Incumbent traces: LLM-based methods (by trial, capped at 250)."""
-    bench_dir = results_dir / "exp2_benchmark"
+    bench_dir = results_dir
     _plot_incumbent_grid_trials(bench_dir, INCUMBENT_LLM, output_path,
                                 "Incumbent Traces — LLM-based (best seed, by trial)")
 
 
 if __name__ == "__main__":
-    results_dir = Path(__file__).resolve().parent.parent.parent / "results"
+    results_dir = Path(__file__).resolve().parent.parent / "results"
     assets_dir = Path(__file__).resolve().parent.parent / "assets"
     assets_dir.mkdir(exist_ok=True)
 

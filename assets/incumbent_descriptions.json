@@ -36,7 +36,7 @@
       "description": "2\u00d7 unemb LR, emb LR 0.78\u21920.53 +7"
     }
   ],
-  "llambo_Qwen3_5_27B_nothink": [
+  "llambo_Qwen3_5_27B": [
     {
       "trial": 0,
       "val_bpb": 1.009143,
@@ -53,7 +53,7 @@
       "description": "mat LR 0.048\u21920.017, \u00bd emb LR +7"
     }
   ],
-  "llambo_original_Qwen3_5_27B_nothink": [
+  "llambo_original_Qwen3_5_27B": [
     {
       "trial": 0,
       "val_bpb": 1.009244,
@@ -75,7 +75,7 @@
       "description": "WP SSSS\u2192LLLL, 2\u00d7 dev batch +11"
     }
   ],
-  "llm_greedy_Qwen3_5_27B_nothink": [
+  "llm_greedy_Qwen3_5_27B": [
     {
       "trial": 0,
       "val_bpb": 1.008888,

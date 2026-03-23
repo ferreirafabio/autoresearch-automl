@@ -4,7 +4,7 @@ import json
 import numpy as np
 from pathlib import Path
 
-RESULTS = Path(__file__).resolve().parent.parent.parent / "results" / "exp2_benchmark" 
+RESULTS = Path(__file__).resolve().parent.parent / "results" 
 
 # Search space bounds (for normalization to [0,1])
 BOUNDS = {
@@ -42,11 +42,11 @@ BACKENDS = {
     "karpathy_agent_Qwen3_5_27B": "Karpathy Agent (Code) [27B]",
     "karpathy_agent_Qwen3_5_0_8B": "Karpathy Agent (Code) [0.8B]",
     "random": "Random",
-    "llambo_original_Qwen3_5_27B_nothink": "LLAMBO (Paper) [27B]",
+    "llambo_original_Qwen3_5_27B": "LLAMBO (Paper) [27B]",
     "llambo_original": "LLAMBO (Paper) [0.8B]",
-    "llm_greedy_Qwen3_5_27B_nothink": "Karpathy Agent (14 HPs) [27B]",
+    "llm_greedy_Qwen3_5_27B": "Karpathy Agent (14 HPs) [27B]",
     "llm_greedy": "Karpathy Agent (14 HPs) [0.8B]",
-    "llambo_Qwen3_5_27B_nothink": "LLAMBO (Optuna) [27B]",
+    "llambo_Qwen3_5_27B": "LLAMBO (Optuna) [27B]",
     "llambo": "LLAMBO (Optuna) [0.8B]",
 }
 
