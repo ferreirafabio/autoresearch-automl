@@ -127,6 +127,8 @@ else
     # Gemini API — no local server needed, full GPU is free for training
     export OPENAI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
     export OPENAI_API_KEY="${GEMINI_API_KEY}"
+    # Cap training to ~76GB for fair comparison (same as vLLM-based methods)
+    export CUDA_MEM_FRACTION=0.543
 fi
 
 # Run HPO
