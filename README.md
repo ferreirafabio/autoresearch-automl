@@ -1,5 +1,5 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
-<h3 align="center">When AutoML Meets autoresearch: Classical HPO, LLM Agents, and Hybrid Methods for Language Model Training</h3>
+<h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization? A Benchmark on <i>autoresearch</i></h3>
 
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under fair conditions.
 
@@ -217,13 +217,10 @@ We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_origi
 
 ```bibtex
 @misc{ferreira2026autoresearchautoml,
-    title={When AutoML Meets autoresearch: Classical HPO, LLM Agents, and Hybrid Methods for Language Model Training},
+    title={Can LLMs Beat Classical Hyperparameter Optimization? A Benchmark on autoresearch},
     author={Fabio Ferreira and Lucca Wobbe and Arjun Krishnakumar and Arber Zela},
     year={2026},
     howpublished={\url{https://github.com/ferreirafabio/autoresearch-automl}},
 }
 ```
 
-## Acknowledgements
-
-Thanks to Arjun Krishnakumar, Arber Zela, and Lucca Wobbe for their feedback.
