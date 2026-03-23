@@ -505,7 +505,7 @@ def plot_progress(results_dir: Path, assets_dir: Path):
 
 
 def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, descriptions=None, seed=0):
-    """Draw a single Pareto-front progress plot on the given axes."""
+    """Draw a single Pareto-front progress plot on the given axes (wall-time x-axis)."""
     jsonl = bench_dir / backend_name / f"seed_{seed}" / "trials.jsonl"
     if not jsonl.exists():
         ax.set_title(f"{display_name}\n(no data)", fontsize=10)
@@ -515,22 +515,30 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     if not trials:
         return
 
+    # Compute cumulative wall-time in hours for each trial
+    cum_hours = []
+    cum = 0.0
+    for t in trials:
+        cum += (t.get("wall_time_seconds") or 0.0) / 3600
+        cum_hours.append(cum)
+
     val_bpbs = []
     for t in trials:
         val_bpbs.append(t["val_bpb"] if t["success"] and t["val_bpb"] is not None else None)
 
-    success_x = [i for i, v in enumerate(val_bpbs) if v is not None]
+    success_x = [cum_hours[i] for i, v in enumerate(val_bpbs) if v is not None]
     success_y = [v for v in val_bpbs if v is not None]
 
     best = float("inf")
     incumbents = []
     disc_x, disc_y = [], []
-    for i, v in zip(success_x, success_y):
+    for x, v, i in zip(success_x, success_y,
+                        [i for i, v in enumerate(val_bpbs) if v is not None]):
         if v < best:
             best = v
-            incumbents.append((i, v, trials[i]["config"]))
+            incumbents.append((x, v, trials[i]["config"]))
         else:
-            disc_x.append(i)
+            disc_x.append(x)
             disc_y.append(v)
 
     ax.scatter(disc_x, disc_y, c="#cccccc", s=8, alpha=0.4, zorder=2)
@@ -540,15 +548,19 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     ax.scatter(inc_x, inc_y, c=color, s=30, zorder=4,
                edgecolors="black", linewidths=0.5)
 
-    curve = best_so_far(trials)
-    valid_curve = [(i, v) for i, v in enumerate(curve) if v < float("inf")]
-    if valid_curve:
-        stair_x, stair_y = zip(*valid_curve)
+    # Staircase incumbent curve using wall-time
+    best = float("inf")
+    stair_x, stair_y = [], []
+    for i, t in enumerate(trials):
+        if t["success"] and t["val_bpb"] is not None:
+            best = min(best, t["val_bpb"])
+            stair_x.append(cum_hours[i])
+            stair_y.append(best)
+    if stair_x:
         ax.step(stair_x, stair_y, where="post", color=color,
                 linewidth=1.5, alpha=0.6, zorder=3)
 
     # Annotate incumbents — use LLM descriptions if available, else auto-diff
-    # descriptions: dict mapping trial_idx -> description string
     desc_map = {}
     if descriptions:
         for d in descriptions:
@@ -557,24 +569,29 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     # Build labels for adjustText
     texts = []
     prev_config = None
-    for idx, (trial_i, val, config) in enumerate(incumbents):
-        if trial_i in desc_map:
+    for idx, (x_val, val, config) in enumerate(incumbents):
+        # Try to find trial index for description lookup
+        trial_i = None
+        for ti, t in enumerate(trials):
+            if cum_hours[ti] == x_val and t.get("val_bpb") == val:
+                trial_i = ti
+                break
+        if trial_i is not None and trial_i in desc_map:
             label = desc_map[trial_i]
         elif prev_config is None:
             label = "baseline"
         else:
             label = _config_diff(prev_config, config)
         prev_config = config
-        texts.append(ax.text(trial_i, val, label, fontsize=5.5, color="#1a7a3a", alpha=0.9))
+        texts.append(ax.text(x_val, val, label, fontsize=5.5, color="#1a7a3a", alpha=0.9))
 
     n_fail = sum(1 for t in trials if not t.get("success", False))
     ax.set_title(f"{display_name}\n{len(trials)} trials, {len(incumbents)} impr., {n_fail} fail",
                  fontsize=9)
-    ax.set_xlim(0, 300)
+    ax.set_xlim(0, 24)
     # Auto y-axis: zoom to incumbent range with padding, ignore outliers
     if inc_y:
         ymin = min(inc_y)
-        # Use baseline (first successful trial) as upper bound
         ymax = inc_y[0] if inc_y else 0.996
         margin = (ymax - ymin) * 0.3 or 0.002
         ax.set_ylim(ymin - margin, ymax + margin * 0.5)
@@ -621,7 +638,7 @@ def _plot_incumbent_grid(bench_dir, backends, output_path, title):
             axes[idx], bench_dir, backend, f"{name} (seed {seed})", color,
             descriptions=descs, seed=seed,
         )
-        axes[idx].set_xlabel("Trial #", fontsize=10)
+        axes[idx].set_xlabel("Cumulative training time (hours)", fontsize=10)
     axes[0].set_ylabel("val_bpb", fontsize=10)
 
     fig.suptitle(title, fontsize=14, y=0.98)
