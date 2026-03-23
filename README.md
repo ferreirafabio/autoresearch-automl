@@ -213,6 +213,17 @@ While integrating LLAMBO, we discovered that the [OptunaHub LLAMBO sampler](http
 
 We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_original/) of the paper's code (LLAMBO (Paper), `--backend llambo_original`) alongside the OptunaHub version (LLAMBO (Optuna), `--backend llambo`) to quantify these differences. Both are included in our benchmark.
 
+## Citation
+
+```bibtex
+@misc{ferreira2026autoresearchautoml,
+    title={When AutoML Meets autoresearch: Classical HPO, LLM Agents, and Hybrid Methods for Language Model Training},
+    author={Fabio Ferreira and Lucca Wobbe and Arjun Krishnakumar and Arber Zela},
+    year={2026},
+    howpublished={\url{https://github.com/ferreirafabio/autoresearch-automl}},
+}
+```
+
 ## Acknowledgements
 
 Thanks to Arjun Krishnakumar, Arber Zela, and Lucca Wobbe for their feedback.

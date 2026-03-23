@@ -1,0 +1,112 @@
+{
+  "stats": {
+    "submitted": 5,
+    "finished": 5,
+    "running": 0
+  },
+  "data": [
+    {
+      "config_id": 1,
+      "instance": null,
+      "seed": 0,
+      "budget": null,
+      "cost": 100.0,
+      "time": 0.0,
+      "cpu_time": 0.0,
+      "status": 4,
+      "starttime": 0.0,
+      "endtime": 0.0,
+      "additional_info": {}
+    },
+    {
+      "config_id": 1,
+      "instance": null,
+      "seed": 739930753,
+      "budget": null,
+      "cost": 100.0,
+      "time": 0.0,
+      "cpu_time": 0.0,
+      "status": 4,
+      "starttime": 0.0,
+      "endtime": 0.0,
+      "additional_info": {}
+    },
+    {
+      "config_id": 2,
+      "instance": null,
+      "seed": 0,
+      "budget": null,
+      "cost": 100.0,
+      "time": 0.0,
+      "cpu_time": 0.0,
+      "status": 4,
+      "starttime": 0.0,
+      "endtime": 0.0,
+      "additional_info": {}
+    },
+    {
+      "config_id": 2,
+      "instance": null,
+      "seed": 739930753,
+      "budget": null,
+      "cost": 100.0,
+      "time": 0.0,
+      "cpu_time": 0.0,
+      "status": 4,
+      "starttime": 0.0,
+      "endtime": 0.0,
+      "additional_info": {}
+    },
+    {
+      "config_id": 1,
+      "instance": null,
+      "seed": 955800611,
+      "budget": null,
+      "cost": 100.0,
+      "time": 0.0,
+      "cpu_time": 0.0,
+      "status": 4,
+      "starttime": 0.0,
+      "endtime": 0.0,
+      "additional_info": {}
+    }
+  ],
+  "configs": {
+    "1": {
+      "ASPECT_RATIO": 64,
+      "DEPTH": 8,
+      "DEVICE_BATCH_SIZE": 128,
+      "EMBEDDING_LR": 0.6,
+      "FINAL_LR_FRAC": 0.0,
+      "HEAD_DIM": 128,
+      "MATRIX_LR": 0.04,
+      "SCALAR_LR": 0.5,
+      "TOTAL_BATCH_SIZE": 524288,
+      "UNEMBEDDING_LR": 0.004,
+      "WARMDOWN_RATIO": 0.5,
+      "WARMUP_RATIO": 0.0,
+      "WEIGHT_DECAY": 0.2,
+      "WINDOW_PATTERN": "SSSL"
+    },
+    "2": {
+      "ASPECT_RATIO": 77,
+      "DEPTH": 10,
+      "DEVICE_BATCH_SIZE": 35,
+      "EMBEDDING_LR": 0.6913869803269,
+      "FINAL_LR_FRAC": 0.1604387592524,
+      "HEAD_DIM": 121,
+      "MATRIX_LR": 0.0777451711531,
+      "SCALAR_LR": 0.0904589505339,
+      "TOTAL_BATCH_SIZE": 437185,
+      "UNEMBEDDING_LR": 0.0453219717421,
+      "WARMDOWN_RATIO": 0.694345657248,
+      "WARMUP_RATIO": 0.2877231781371,
+      "WEIGHT_DECAY": 0.4145944467746,
+      "WINDOW_PATTERN": "SLSL"
+    }
+  },
+  "config_origins": {
+    "1": "Custom",
+    "2": "Initial Design: Sobol"
+  }
+}

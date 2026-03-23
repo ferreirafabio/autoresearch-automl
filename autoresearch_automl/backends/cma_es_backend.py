@@ -11,7 +11,7 @@ from autoresearch_automl.backends.optuna_backend import OptunaBackend
 
 
 class CmaESBackend(OptunaBackend):
-    """Optuna backend using CMA-ES sampler instead of TPE."""
+    """Optuna backend using CMA-ES sampler."""
 
     @property
     def name(self) -> str:

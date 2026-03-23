@@ -20,8 +20,6 @@ BACKEND_REGISTRY = {
     "llambo": "autoresearch_automl.backends.llambo_backend:LLAMBOBackend",
     "llambo_original": "autoresearch_automl.backends.llambo_original_backend:LLAMBOOriginalBackend",
     "smac": "autoresearch_automl.backends.smac_backend:SMACBackend",
-    "dehb": "autoresearch_automl.backends.dehb_backend:DEHBBackend",
-    "bohb": "autoresearch_automl.backends.bohb_backend:BOHBBackend",
     "cma_es": "autoresearch_automl.backends.cma_es_backend:CmaESBackend",
     "centaur": "autoresearch_automl.backends.centaur_backend:CentaurBackend",
 }

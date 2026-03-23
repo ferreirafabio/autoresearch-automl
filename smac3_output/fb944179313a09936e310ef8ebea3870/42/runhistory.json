@@ -1,0 +1,31 @@
+{
+  "stats": {
+    "submitted": 1,
+    "finished": 1,
+    "running": 0
+  },
+  "data": [
+    {
+      "config_id": 1,
+      "instance": null,
+      "seed": 1608637542,
+      "budget": null,
+      "cost": 1.0,
+      "time": 0.0,
+      "cpu_time": 0.0,
+      "status": 1,
+      "starttime": 0.0,
+      "endtime": 0.0,
+      "additional_info": {}
+    }
+  ],
+  "configs": {
+    "1": {
+      "batch_size": 103,
+      "lr": 1.71506482e-05
+    }
+  },
+  "config_origins": {
+    "1": "Initial Design: Sobol"
+  }
+}

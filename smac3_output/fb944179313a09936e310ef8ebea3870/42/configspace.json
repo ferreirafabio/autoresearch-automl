@@ -1,0 +1,1 @@
+{"name": null, "hyperparameters": [{"type": "uniform_int", "name": "batch_size", "lower": 8, "upper": 128, "default_value": 68, "log": false, "meta": null}, {"type": "uniform_float", "name": "lr", "lower": 1e-05, "upper": 0.1, "default_value": 0.001, "log": true, "meta": null}], "conditions": [], "forbiddens": [], "python_module_version": "1.2.0", "format_version": 0.4}
