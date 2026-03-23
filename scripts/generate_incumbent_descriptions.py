@@ -128,7 +128,7 @@ def main():
         "optuna",
         "llambo_Qwen3_5_27B",
         "llambo_original_Qwen3_5_27B",
-        "llm_greedy_Qwen3_5_27B",
+        "karpathy_agent_hps_Qwen3_5_27B",
     ]
 
     all_descriptions = {}

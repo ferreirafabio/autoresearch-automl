@@ -44,8 +44,8 @@ BACKENDS = {
     "random": "Random",
     "llambo_original_Qwen3_5_27B": "LLAMBO (Paper) [27B]",
     "llambo_original": "LLAMBO (Paper) [0.8B]",
-    "llm_greedy_Qwen3_5_27B": "Karpathy Agent (14 HPs) [27B]",
-    "llm_greedy": "Karpathy Agent (14 HPs) [0.8B]",
+    "karpathy_agent_hps_Qwen3_5_27B": "Karpathy Agent (14 HPs) [27B]",
+    "karpathy_agent_hps": "Karpathy Agent (14 HPs) [0.8B]",
     "llambo_Qwen3_5_27B": "LLAMBO (Optuna) [27B]",
     "llambo": "LLAMBO (Optuna) [0.8B]",
 }

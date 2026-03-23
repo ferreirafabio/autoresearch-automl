@@ -57,7 +57,7 @@ Differences:
 
 ### vs. Pure LLM HPO (Zhang et al., 2023)
 
-Pure LLM approaches (like `llm_greedy` in this repo) prompt the LLM with history and ask for the next config. No traditional optimizer involved.
+Pure LLM approaches (like `karpathy_agent_hps` in this repo) prompt the LLM with history and ask for the next config. No traditional optimizer involved.
 
 - Pure LLM has domain knowledge but no optimization state. It can't track covariance structure or convergence across trials.
 - CMA-ES + LLM gives the LLM an optimization "advisor" that compensates for this: CMA-ES tracks the landscape, the LLM brings the domain knowledge.

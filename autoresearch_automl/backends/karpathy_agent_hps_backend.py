@@ -37,7 +37,7 @@ about transformer training dynamics.
 Respond ONLY with a valid JSON object, no explanation."""
 
 
-class LLMGreedyBackend(HPOBackend):
+class KarpathyAgentHPSBackend(HPOBackend):
     """LLM-based greedy hill-climbing, mimicking Karpathy's approach.
 
     Uses an LLM to suggest configs based on the full evaluation history.
@@ -59,7 +59,7 @@ class LLMGreedyBackend(HPOBackend):
 
     @property
     def name(self) -> str:
-        return "llm_greedy"
+        return "karpathy_agent_hps"
 
     def configure(
         self,
@@ -220,7 +220,7 @@ class LLMGreedyBackend(HPOBackend):
         record["val_bpb"] = results.get(self._objectives[0])
         record["error"] = results.get("_error")
 
-        prefix = f"llm_greedy_seed{self._seed}_trial{self._trial_id}"
+        prefix = f"karpathy_agent_hps_seed{self._seed}_trial{self._trial_id}"
 
         # Response log (JSON with prompt, response, metadata)
         with open(self._log_dir / f"{prefix}.jsonl", "w") as f:
