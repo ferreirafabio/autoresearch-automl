@@ -682,13 +682,18 @@ def plot_progress_subplot_trials(ax, bench_dir, backend_name, display_name, colo
 
 
 def _best_seed(bench_dir: Path, backend_name: str) -> int:
-    """Find the seed with the best final val_bpb for a backend."""
+    """Find the seed with the best final val_bpb for a backend (only completed seeds)."""
+    BUDGET_SECONDS = 86400
+    MIN_BUDGET_FRAC = 0.95
     best_val, best_seed = float("inf"), 0
     for seed in range(10):
         jsonl = bench_dir / backend_name / f"seed_{seed}" / "trials.jsonl"
         if not jsonl.exists():
             continue
         trials = load_trials(jsonl)
+        total_train_s = sum(t.get("wall_time_seconds") or 0.0 for t in trials)
+        if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
+            continue
         for t in trials:
             if t.get("success") and t.get("val_bpb") is not None:
                 if t["val_bpb"] < best_val:
