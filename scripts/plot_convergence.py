@@ -101,9 +101,10 @@ def plot_convergence_walltime(
             if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
                 continue
             max_time = max(max_time, times[-1])
-            # Interpolate onto common grid (no fill beyond seed's data)
+            # Interpolate onto common grid; forward-fill last value for seeds
+            # that passed the budget filter but end slightly before 24h
             interped = np.interp(INTERP_HOURS, times, values,
-                                 left=np.nan, right=np.nan)
+                                 left=np.nan, right=values[-1])
             seed_interps.append(interped)
 
         if not seed_interps:
