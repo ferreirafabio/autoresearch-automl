@@ -212,5 +212,5 @@ RESULTS.md
 experiments/EXPERIMENTS.md
 scripts/monitor_jobs.sh
 smac3_output/
-results/exp2_benchmark/
+results/exp2_benchmark*/
 autoresearch/
