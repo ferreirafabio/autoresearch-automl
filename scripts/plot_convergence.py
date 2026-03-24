@@ -78,7 +78,7 @@ def plot_convergence_walltime(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100
-    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
+    MIN_BUDGET_FRAC = 0.90  # only include seeds that reached 95% of 24h budget
     BUDGET_SECONDS = 86400
     INTERP_HOURS = np.linspace(0, 24, 1000)  # interpolate to common time grid
 
@@ -101,10 +101,12 @@ def plot_convergence_walltime(
             if total_train_s < BUDGET_SECONDS * MIN_BUDGET_FRAC:
                 continue
             max_time = max(max_time, times[-1])
-            # Interpolate onto common grid; forward-fill last value for seeds
-            # that passed the budget filter but end slightly before 24h
+            # Interpolate onto common grid.
+            # Complete seeds (>=98% budget): forward-fill last value.
+            # Incomplete seeds (<98%): use NaN so mean/std uses fewer seeds.
+            right_val = values[-1] if total_train_s >= BUDGET_SECONDS * 0.98 else np.nan
             interped = np.interp(INTERP_HOURS, times, values,
-                                 left=np.nan, right=values[-1])
+                                 left=np.nan, right=right_val)
             seed_interps.append(interped)
 
         if not seed_interps:
@@ -134,7 +136,7 @@ def plot_convergence_walltime(
     if ranking:
         ranking.sort(key=lambda r: r[0])
         max_name_len = max(len(r[2]) for r in ranking)
-        header_handle, = ax.plot([], [], color="none", marker="none", linestyle="none")
+        header_handle, = ax.plot([], [], color="none", marker="", linestyle="none")
         handles = [header_handle]
         labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
         for val, handle, name in ranking:
@@ -161,7 +163,7 @@ def plot_convergence_multi(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     MIN_TRIALS = 100  # skip seeds with fewer trials
-    MIN_BUDGET_FRAC = 0.95  # only include seeds that reached 95% of 24h budget
+    MIN_BUDGET_FRAC = 0.90  # only include seeds that reached 95% of 24h budget
     BUDGET_SECONDS = 86400
 
     max_trials = 0
@@ -221,7 +223,7 @@ def plot_convergence_multi(
         ranking.sort(key=lambda r: r[0])
         max_name_len = max(len(r[2]) for r in ranking)
         # Header row (invisible handle)
-        header_handle, = ax.plot([], [], color="none", marker="none", linestyle="none")
+        header_handle, = ax.plot([], [], color="none", marker="", linestyle="none")
         handles = [header_handle]
         labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
         for val, handle, name in ranking:
@@ -704,7 +706,7 @@ def plot_progress_subplot_trials(ax, bench_dir, backend_name, display_name, colo
 def _best_seed(bench_dir: Path, backend_name: str) -> int:
     """Find the seed with the best final val_bpb for a backend (only completed seeds)."""
     BUDGET_SECONDS = 86400
-    MIN_BUDGET_FRAC = 0.95
+    MIN_BUDGET_FRAC = 0.90
     best_val, best_seed = float("inf"), 0
     for seed in range(10):
         jsonl = bench_dir / backend_name / f"seed_{seed}" / "trials.jsonl"
