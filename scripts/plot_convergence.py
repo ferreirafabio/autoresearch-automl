@@ -299,7 +299,8 @@ def plot_exp2_27b_walltime(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_27B,
         output_path,
-        title="autoresearch:HPO Convergence",
+        title="Classical vs LLM-based HPO",
+        ylim=(0.974, 0.993),
     )
 
 
