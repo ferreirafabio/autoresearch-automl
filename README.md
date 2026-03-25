@@ -1,5 +1,5 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
-<h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization? A Benchmark on <i>autoresearch</i></h3>
+<h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on <i>autoresearch</i></h3>
 
 > **Paper in progress.** All results are now final with 3 seeds for all 9 methods. Earlier versions shared on LinkedIn used 2 seeds for Karpathy Agent (Code) [27B]; the third seed performed notably worse, widening the gap between this method and classical HPO. The plots and tables below reflect the complete 3-seed results.
 
@@ -219,7 +219,7 @@ We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_origi
 
 ```bibtex
 @misc{ferreira2026autoresearchautoml,
-    title={Can LLMs Beat Classical Hyperparameter Optimization? A Benchmark on autoresearch},
+    title={Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on autoresearch},
     author={Fabio Ferreira and Lucca Wobbe and Arjun Krishnakumar and Arber Zela},
     year={2026},
     howpublished={\url{https://github.com/ferreirafabio/autoresearch-automl}},
