@@ -250,7 +250,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
         results_dir,
         backends,
         output_path,
-        title="Karpathy's Autoresearch: HPO Convergence (0.8B Optimizer)",
+        title="autoresearch:HPO Convergence (0.8B Optimizer)",
     )
 
 
@@ -288,7 +288,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_27B,
         output_path,
-        title="Karpathy's Autoresearch: HPO Convergence (by trial)",
+        title="autoresearch:HPO Convergence (by trial)",
         xlim=(0, 300),
     )
 
@@ -299,7 +299,7 @@ def plot_exp2_27b_walltime(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_27B,
         output_path,
-        title="Karpathy's Autoresearch: HPO Convergence",
+        title="autoresearch:HPO Convergence",
     )
 
 
@@ -309,7 +309,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_ALL,
         output_path,
-        title="Karpathy's Autoresearch: 0.8B vs 27B (by trial)",
+        title="autoresearch:0.8B vs 27B (by trial)",
         xlim=(0, 300),
     )
 
@@ -320,7 +320,7 @@ def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_ALL,
         output_path,
-        title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
+        title="autoresearch:0.8B vs 27B LLM Optimizer",
     )
 
 
@@ -337,7 +337,7 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
         results_dir,
         backends,
         output_path,
-        title="Karpathy's Autoresearch: 0.8B vs 27B LLM Optimizer",
+        title="autoresearch:0.8B vs 27B LLM Optimizer",
         xlim=(0, 300),
     )
 
@@ -483,7 +483,7 @@ def plot_progress_single(
 
     n_fail = sum(1 for t in trials if not t.get("success", False))
     ax.set_title(
-        f"Karpathy's Autoresearch: {display_name}\n"
+        f"autoresearch:{display_name}\n"
         f"{len(trials)} trials, {len(incumbents)} improvements, {n_fail} failed",
         fontsize=13,
     )
