@@ -313,7 +313,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         output_path,
         title="autoresearch: 0.8B vs 27B (by trial)",
         xlim=(0, 300),
-        ylim=(0.974, 0.993),
+        ylim=(0.9745, 0.993),
     )
 
 
