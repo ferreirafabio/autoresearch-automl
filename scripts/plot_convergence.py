@@ -290,6 +290,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
         output_path,
         title="autoresearch: HPO Convergence (by trial)",
         xlim=(0, 300),
+        ylim=(0.974, 0.993),
     )
 
 
@@ -312,6 +313,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         output_path,
         title="autoresearch: 0.8B vs 27B (by trial)",
         xlim=(0, 300),
+        ylim=(0.974, 0.993),
     )
 
 
@@ -726,7 +728,7 @@ def _best_seed(bench_dir: Path, backend_name: str) -> int:
     return best_seed
 
 
-def _plot_incumbent_grid(bench_dir, backends, output_path, title, ncols=3):
+def _plot_incumbent_grid(bench_dir, backends, output_path, title, ncols=2):
     """Shared helper: draw a multi-row grid of incumbent trace subplots (best seed per method)."""
     desc_path = Path(__file__).parent.parent / "assets" / "incumbent_descriptions.json"
     all_descriptions = {}
@@ -763,7 +765,7 @@ def _plot_incumbent_grid(bench_dir, backends, output_path, title, ncols=3):
     print(f"Saved {output_path}")
 
 
-def _plot_incumbent_grid_trials(bench_dir, backends, output_path, title, max_trials=250, ncols=3):
+def _plot_incumbent_grid_trials(bench_dir, backends, output_path, title, max_trials=250, ncols=2):
     """Shared helper: draw a multi-row grid of incumbent trace subplots by trial number."""
     desc_path = Path(__file__).parent.parent / "assets" / "incumbent_descriptions.json"
     all_descriptions = {}
