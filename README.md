@@ -1,6 +1,8 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
 <h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization? A Benchmark on <i>autoresearch</i></h3>
 
+> **Paper in progress.** All results are now final with 3 seeds for all 9 methods. Earlier versions shared on LinkedIn used 2 seeds for Karpathy Agent (Code) [27B]; the third seed performed notably worse, widening the gap between this method and classical HPO. The plots and tables below reflect the complete 3-seed results.
+
 Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) lets an LLM agent edit training code through trial and error, with no fixed search space, just code diffs. [Shwartz Ziv showed](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) that a classical AutoML method (TPE + expert HPs) can beat it. This makes autoresearch an excellent in-the-wild testbed to assess classical AutoML/HPO methods against newer LLM-based (agent) methods. We extend Karpathy's and Shwartz Ziv's experiments with a more extensive classical HPO vs. LLM-based comparison. We compare classical HPO (TPE, CMA-ES, SMAC, Random Search), LLM-based HPO ([LLAMBO](https://arxiv.org/abs/2402.03921), Karpathy Agent), and Centaur, a hybrid method that augments CMA-ES with LLM suggestions informed by the optimizer's internal state. All under the same budgets and constraints.
 
 ![HPO Convergence](assets/exp2_27b_walltime.png)
@@ -108,7 +110,7 @@ To understand *why* some methods outperform others, we measure how each backend 
 | Centaur [27B] | 3 | **0.9765** | 14% | 0.113 | 0.542 | 0.502 | 0.324 | 293 |
 | Centaur [0.8B] | 3 | **0.9766** | 13% | 0.131 | 0.642 | 0.543 | 0.368 | 317 |
 | TPE | 3 | **0.9768** | 11% | 0.197 | 0.999 | 0.938 | 0.413 | 494 |
-| Karpathy Agent (Code) [27B] | 2 | **0.9781** | 11% | - | - | - | - | - |
+| Karpathy Agent (Code) [27B] | 3 | **0.9814** | 11% | - | - | - | - | - |
 | CMA-ES | 3 | **0.9791** | 15% | 0.156 | 0.785 | 0.925 | 0.581 | 717 |
 | SMAC | 3 | **0.9803** | 32% | 0.239 | 1.198 | 0.935 | 0.373 | 195 |
 | LLAMBO (Paper) [27B] | 3 | 0.9862 | 43% | 0.242 | 1.201 | 1.016 | 1.153 | 327 |
