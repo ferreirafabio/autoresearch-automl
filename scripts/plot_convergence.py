@@ -724,59 +724,75 @@ def _best_seed(bench_dir: Path, backend_name: str) -> int:
     return best_seed
 
 
-def _plot_incumbent_grid(bench_dir, backends, output_path, title):
-    """Shared helper: draw a 1-row grid of incumbent trace subplots (best seed per method)."""
+def _plot_incumbent_grid(bench_dir, backends, output_path, title, ncols=3):
+    """Shared helper: draw a multi-row grid of incumbent trace subplots (best seed per method)."""
     desc_path = Path(__file__).parent.parent / "assets" / "incumbent_descriptions.json"
     all_descriptions = {}
     if desc_path.exists():
         all_descriptions = json.loads(desc_path.read_text())
 
     n = len(backends)
-    fig, axes = plt.subplots(1, n, figsize=(6.5 * n, 5.5))
-    if n == 1:
-        axes = [axes]
+    nrows = (n + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6.5 * ncols, 5.5 * nrows))
+    axes = np.atleast_2d(axes)
 
     for idx, (backend, name, color) in enumerate(backends):
+        row, col = divmod(idx, ncols)
+        ax = axes[row, col]
         seed = _best_seed(bench_dir, backend)
         descs = all_descriptions.get(backend)
         plot_progress_subplot(
-            axes[idx], bench_dir, backend, f"{name} (seed {seed})", color,
+            ax, bench_dir, backend, f"{name} (seed {seed})", color,
             descriptions=descs, seed=seed,
         )
-        axes[idx].set_xlabel("Cumulative training time (hours)", fontsize=10)
-    axes[0].set_ylabel("val_bpb", fontsize=10)
+        ax.set_xlabel("Cumulative training time (hours)", fontsize=10)
+        if col == 0:
+            ax.set_ylabel("val_bpb", fontsize=10)
+
+    # Hide unused axes
+    for idx in range(n, nrows * ncols):
+        row, col = divmod(idx, ncols)
+        axes[row, col].set_visible(False)
 
     fig.suptitle(title, fontsize=14, y=0.98)
-    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {output_path}")
 
 
-def _plot_incumbent_grid_trials(bench_dir, backends, output_path, title, max_trials=250):
-    """Shared helper: draw a 1-row grid of incumbent trace subplots by trial number."""
+def _plot_incumbent_grid_trials(bench_dir, backends, output_path, title, max_trials=250, ncols=3):
+    """Shared helper: draw a multi-row grid of incumbent trace subplots by trial number."""
     desc_path = Path(__file__).parent.parent / "assets" / "incumbent_descriptions.json"
     all_descriptions = {}
     if desc_path.exists():
         all_descriptions = json.loads(desc_path.read_text())
 
     n = len(backends)
-    fig, axes = plt.subplots(1, n, figsize=(6.5 * n, 5.5))
-    if n == 1:
-        axes = [axes]
+    nrows = (n + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6.5 * ncols, 5.5 * nrows))
+    axes = np.atleast_2d(axes)
 
     for idx, (backend, name, color) in enumerate(backends):
+        row, col = divmod(idx, ncols)
+        ax = axes[row, col]
         seed = _best_seed(bench_dir, backend)
         descs = all_descriptions.get(backend)
         plot_progress_subplot_trials(
-            axes[idx], bench_dir, backend, f"{name} (seed {seed})", color,
+            ax, bench_dir, backend, f"{name} (seed {seed})", color,
             descriptions=descs, seed=seed, max_trials=max_trials,
         )
-        axes[idx].set_xlabel("Trial #", fontsize=10)
-    axes[0].set_ylabel("val_bpb", fontsize=10)
+        ax.set_xlabel("Trial #", fontsize=10)
+        if col == 0:
+            ax.set_ylabel("val_bpb", fontsize=10)
+
+    # Hide unused axes
+    for idx in range(n, nrows * ncols):
+        row, col = divmod(idx, ncols)
+        axes[row, col].set_visible(False)
 
     fig.suptitle(title, fontsize=14, y=0.98)
-    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {output_path}")
