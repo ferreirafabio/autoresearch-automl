@@ -619,7 +619,7 @@ def plot_progress_subplot(ax, bench_dir, backend_name, display_name, color, desc
     if inc_y:
         ymin = min(inc_y)
         ymax = inc_y[0] if inc_y else 0.996
-        margin = (ymax - ymin) * 0.3 or 0.002
+        margin = (ymax - ymin) * 0.15 or 0.001
         ax.set_ylim(ymin - margin, ymax + margin * 0.5)
     ax.grid(True, alpha=0.2)
 
@@ -697,7 +697,7 @@ def plot_progress_subplot_trials(ax, bench_dir, backend_name, display_name, colo
     if inc_y:
         ymin = min(inc_y)
         ymax = inc_y[0] if inc_y else 0.996
-        margin = (ymax - ymin) * 0.3 or 0.002
+        margin = (ymax - ymin) * 0.15 or 0.001
         ax.set_ylim(ymin - margin, ymax + margin * 0.5)
     ax.grid(True, alpha=0.2)
 
