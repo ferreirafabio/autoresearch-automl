@@ -1,6 +1,5 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
-<h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization Algorithms?</h3>
-<h4 align="center">A Study on <i>autoresearch</i></h4>
+<h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization Algorithms?<br>A Study on <i>autoresearch</i></h3>
 
 > **Paper in progress.** All results are now final with 3 seeds for all 9 methods. Earlier versions shared on LinkedIn used 2 seeds for Karpathy Agent (Code) [27B]; the third seed performed notably worse, widening the gap between this method and classical HPO. The plots and tables below reflect the complete 3-seed results.
 
