@@ -42,16 +42,16 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 
 | Method | Seeds | Best val_bpb | OOM% |
 |--------|-------|-------------|------|
-| Centaur [27B] | 3 | **0.9763** | 15% |
-| Centaur [0.8B] | 3 | **0.9766** | 15% |
-| TPE | 3 | **0.9768** | 11% |
-| SMAC | 3 | **0.9778** | 36% |
-| CMA-ES | 3 | **0.9785** | 16% |
-| Karpathy Agent (Code) [27B] | 3 | **0.9814** | 12% |
-| LLAMBO (Paper) [27B] | 3 | 0.9862 | 48% |
-| Random | 3 | 0.9873 | 56% |
-| LLAMBO (Optuna) [27B] | 3 | 0.9882 | 61% |
-| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 | 1% |
+| Centaur [27B] | 3 | **0.9763 ± 0.0005** | 15% |
+| Centaur [0.8B] | 3 | **0.9766 ± 0.0008** | 15% |
+| TPE | 3 | **0.9768 ± 0.0019** | 11% |
+| SMAC | 3 | **0.9778 ± 0.0020** | 36% |
+| CMA-ES | 3 | **0.9785 ± 0.0036** | 16% |
+| Karpathy Agent (Code) [27B] | 3 | **0.9814 ± 0.0046** | 12% |
+| LLAMBO (Paper) [27B] | 3 | 0.9862 ± 0.0041 | 48% |
+| Random | 3 | 0.9873 ± 0.0021 | 56% |
+| LLAMBO (Optuna) [27B] | 3 | 0.9882 ± 0.0012 | 61% |
+| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 ± 0.0002 | 1% |
 
 ### Unconstrained code editing is viable but requires model scale
 
