@@ -3,41 +3,11 @@
 
 > **Paper in progress.** All results are now final with 3 seeds for all 9 methods. Earlier versions shared on LinkedIn used 2 seeds for Karpathy Agent (Code) [27B]; the third seed performed notably worse, widening the gap between this method and classical HPO. The plots and tables below reflect the complete 3-seed results.
 
-[autoresearch](https://github.com/karpathy/autoresearch) enables an LLM agent to search for optimal hyperparameter configurations on an unconstrained search space by editing the training code directly. We use autoresearch as a testbed to compare classical hyperparameter optimization (HPO) algorithms against LLM-based methods on tuning the hyperparameters of a small language model. We benchmark 9 methods — 4 classical, 4 LLM-based, and 1 hybrid — all under the same 24-hour GPU training budget with 3 seeds.
-
-## Results
-
-### Classical vs LLM-based HPO
-
-Within the fixed search space, classical HPO methods such as CMA-ES and TPE consistently outperform LLM-based agents. However, an LLM agent that directly edits training source code (unconstrained search space) narrows the gap to classical methods substantially despite using only a self-hosted open-weight 27B model. The top methods by mean best val_bpb are: Centaur (0.9763), TPE (0.9768), SMAC (0.9778), CMA-ES (0.9785), and Karpathy Agent (Code) (0.9814). The gap to the best fixed-space LLM method (LLAMBO Paper at 0.9862) is substantial, and several pure LLM methods perform worse than random search. OOM avoidance matters more than search diversity: the top methods all keep OOM rates below 16%, while the bottom four exceed 36%.
-
 ![Classical vs LLM-based HPO](assets/exp2_27b_walltime.png)
 
-### 0.8B vs 27B LLM Optimizer
+## Introduction
 
-Scaling the LLM from 0.8B to 27B is essential for unconstrained code editing (Karpathy Agent Code: 0.9910 vs 0.9814) but provides no advantage for fixed-HP optimization. All LLM methods use open-weight Qwen3.5; the gap between unconstrained code editing and classical methods is already small, and stronger frontier models may close it further.
-
-![0.8B vs 27B comparison](assets/exp2_all_walltime.png)
-
-### Centaur (CMA-ES+LLM): Hybrid Optimization
-
-Centaur outperformed all methods including CMA-ES alone by using the LLM on only 30% of trials. The LLM receives CMA-ES's full internal state (mean vector, step-size, covariance matrix), the top-5 configurations, and the last 20 trials, and almost always overrides CMA-ES's proposal. Centaur also substantially reduces CMA-ES's cross-seed variance (std 0.0005 vs 0.0036), suggesting the LLM stabilizes the optimizer. Notably, Centaur [0.8B] outperformed Centaur [27B], demonstrating that a cheap LLM suffices when paired with a strong classical optimizer.
-
-We ablate the LLM ratio: higher ratios degrade performance, confirming that CMA-ES should retain majority control. See [centaur.md](centaur.md) for the full algorithm.
-
-![Centaur LLM Ratio Ablation](assets/centaur_ratio_ablation.png)
-
-### Incumbent Traces
-
-Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far). Each panel shows the best seed for that method.
-
-**Classical + Hybrid:**
-
-![Incumbent Traces — Classical + Hybrid](assets/exp2_incumbents_classical.png)
-
-**LLM-based:**
-
-![Incumbent Traces — LLM-based](assets/exp2_incumbents_llm.png)
+[autoresearch](https://github.com/karpathy/autoresearch) enables an LLM agent to search for optimal hyperparameter configurations on an unconstrained search space by editing the training code directly. [Shwartz Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) showed that TPE with expert hyperparameters can beat Karpathy's agent. We use autoresearch as a testbed to compare classical hyperparameter optimization (HPO) algorithms against LLM-based methods on tuning the hyperparameters of a small language model. We benchmark 9 methods — 4 classical, 4 LLM-based, and 1 hybrid — all under the same 24-hour GPU training budget with 3 seeds.
 
 ## Methods
 
@@ -60,9 +30,56 @@ Grey dots are all trials, colored dots are new bests, staircase is the incumbent
 
 All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) as the LLM optimizer via vLLM on the same GPU that trains the optimizee (~50M parameter language model).
 
-## Setup
+## Experimental Setup
 
-Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing. All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM. Failed trials reported as `val_bpb=100.0` so optimizers learn to avoid OOM regions. 3 seeds per condition.
+Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP). All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz Ziv's experiments). Failed trials reported as `val_bpb=100.0` so optimizers learn to avoid OOM regions. 3 seeds per condition.
+
+## Results
+
+### Classical methods outperform LLMs in fixed search spaces
+
+Within the fixed search space, classical HPO methods consistently outperform LLM-based agents. The gap to the best fixed-space LLM method (LLAMBO Paper at 0.9862) is substantial, and several pure LLM methods perform worse than random search, indicating that restricting LLMs to a fixed HP search space does not leverage their strengths. OOM avoidance matters more than search diversity: the top methods all keep OOM rates below 16%, while the bottom four exceed 36%.
+
+| Method | Seeds | Best val_bpb | OOM% |
+|--------|-------|-------------|------|
+| Centaur [27B] | 3 | **0.9763** | 15% |
+| Centaur [0.8B] | 3 | **0.9766** | 15% |
+| TPE | 3 | **0.9768** | 11% |
+| SMAC | 3 | **0.9778** | 36% |
+| CMA-ES | 3 | **0.9785** | 16% |
+| Karpathy Agent (Code) [27B] | 3 | **0.9814** | 12% |
+| LLAMBO (Paper) [27B] | 3 | 0.9862 | 48% |
+| Random | 3 | 0.9873 | 56% |
+| LLAMBO (Optuna) [27B] | 3 | 0.9882 | 61% |
+| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 | 1% |
+
+### Unconstrained code editing is viable but requires model scale
+
+Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Given the simplicity of the setup and the use of a self-hosted open-weight model (Qwen3.5-27B), the gap to classical methods is smaller than one might expect, and stronger frontier models may close it further.
+
+Scaling the LLM from 0.8B to 27B is essential for unconstrained code editing (0.9910 vs 0.9814) but provides no advantage for fixed-HP optimization. Solid lines = 27B, dashed = 0.8B.
+
+![0.8B vs 27B comparison](assets/exp2_all_walltime.png)
+
+### Hybrid optimization: best of both worlds
+
+Centaur outperformed all methods including CMA-ES alone by using the LLM on only 30% of trials. The LLM receives CMA-ES's full internal state (mean vector, step-size, covariance matrix), the top-5 configurations, and the last 20 trials. Centaur substantially reduces CMA-ES's cross-seed variance (std 0.0005 vs 0.0036), suggesting the LLM stabilizes the optimizer. Notably, Centaur [0.8B] outperformed Centaur [27B], demonstrating that a cheap LLM suffices when paired with a strong classical optimizer.
+
+We ablate the LLM ratio: higher ratios degrade performance, confirming that CMA-ES should retain majority control. See [centaur.md](centaur.md) for the full algorithm.
+
+![Centaur LLM Ratio Ablation](assets/centaur_ratio_ablation.png)
+
+### Incumbent Traces
+
+Grey dots are all trials, colored dots are new bests, staircase is the incumbent (best-so-far). Each panel shows the best seed for that method.
+
+**Classical + Hybrid:**
+
+![Incumbent Traces — Classical + Hybrid](assets/exp2_incumbents_classical.png)
+
+**LLM-based:**
+
+![Incumbent Traces — LLM-based](assets/exp2_incumbents_llm.png)
 
 ## Search Space
 
