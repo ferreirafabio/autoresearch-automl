@@ -130,7 +130,7 @@ def plot_convergence_walltime(
     if xlim_hours:
         ax.set_xlim(*xlim_hours)
     else:
-        ax.set_xlim(0, min(max_time, 24))
+        ax.set_xlim(0, 24)
     ax.set_xticks(range(0, int(ax.get_xlim()[1]) + 1, 2))
     ax.grid(True, alpha=0.3)
 
