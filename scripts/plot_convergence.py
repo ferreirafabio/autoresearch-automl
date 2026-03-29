@@ -250,7 +250,7 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
         results_dir,
         backends,
         output_path,
-        title="autoresearch: HPO Convergence (0.8B Optimizer)",
+        title="HPO Convergence (0.8B Optimizer)",
     )
 
 
@@ -288,7 +288,7 @@ def plot_exp2_27b(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_27B,
         output_path,
-        title="autoresearch: HPO Convergence (by trial)",
+        title="HPO Convergence (by trial)",
         xlim=(0, 300),
         ylim=(0.974, 0.993),
     )
@@ -311,7 +311,7 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_ALL,
         output_path,
-        title="autoresearch: 0.8B vs 27B (by trial)",
+        title="0.8B vs 27B LLM Optimizer (by trial)",
         xlim=(0, 300),
         ylim=(0.9745, 0.993),
     )
@@ -323,7 +323,7 @@ def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
         results_dir,
         BACKENDS_ALL,
         output_path,
-        title="autoresearch: 0.8B vs 27B LLM Optimizer",
+        title="0.8B vs 27B LLM Optimizer",
         ylim=(0.974, 0.993),
     )
 
@@ -341,7 +341,7 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
         results_dir,
         backends,
         output_path,
-        title="autoresearch: 0.8B vs 27B LLM Optimizer",
+        title="0.8B vs 27B LLM Optimizer",
         xlim=(0, 300),
     )
 
