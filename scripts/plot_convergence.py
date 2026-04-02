@@ -260,7 +260,7 @@ BACKENDS_27B = {
     "cma_es": {"label": "CMA-ES", "color": "#2E7D32"},        # dark green
     "smac": {"label": "SMAC", "color": "#F57C00"},             # dark orange
     "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},  # pink
-    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#795548"},  # brown
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#4B0082"},  # purple
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
     "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},  # purple
     "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
@@ -278,8 +278,8 @@ BACKENDS_ALL = {
     "llambo": {"label": "LLAMBO (Optuna) [0.8B]", "color": "#9C27B0", "linestyle": "--"},
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
     "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
-    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
-    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4B0082", "linestyle": "-"},
+    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4B0082", "linestyle": "--"},
 }
 
 
@@ -333,8 +333,8 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
     """Compare 0.8B vs 27B LLM methods, with best classical as reference."""
     backends = {
         "cma_es": {"label": "CMA-ES (best classical)", "color": "#2E7D32", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#795548", "linestyle": "--"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#795548", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4B0082", "linestyle": "--"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4B0082", "linestyle": "-"},
         "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
         "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#D32F2F", "linestyle": "-"},
     }
@@ -815,7 +815,7 @@ INCUMBENT_LLM = [
     ("llambo_original_Qwen3_5_27B", "LLAMBO (Paper) [27B]", "#00BCD4"),
     ("llambo_Qwen3_5_27B", "LLAMBO (Optuna) [27B]", "#9C27B0"),
     ("karpathy_agent_hps_Qwen3_5_27B", "Karpathy Agent (14 HPs) [27B]", "#FF9800"),
-    ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#795548"),
+    ("karpathy_agent_Qwen3_5_27B", "Karpathy Agent (Code) [27B]", "#4B0082"),
 ]
 
 
