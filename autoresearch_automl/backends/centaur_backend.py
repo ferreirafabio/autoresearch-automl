@@ -233,11 +233,14 @@ class CentaurBackend(HPOBackend):
         messages = [{"role": "user", "content": prompt}]
 
         t0 = time.time()
+        # Use 16384 max_tokens: Gemini's OpenAI-compatible endpoint counts
+        # thinking tokens against max_tokens, so 2048 truncates responses
+        # when the prompt is large (covariance matrix, history, etc.)
         response = self._llm_client.chat.completions.create(
             model=self._model,
             messages=messages,
             temperature=0.7,
-            max_tokens=2048,
+            max_tokens=16384,
         )
         elapsed = time.time() - t0
 
