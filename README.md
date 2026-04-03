@@ -28,17 +28,17 @@
 **Hybrid (fixed [14-HP search space](#search-space)):**
 - **Centaur (CMA-ES+LLM):** CMA-ES runs every trial; on 30% of trials, the LLM receives CMA-ES's internal state and suggests a config. CMA-ES updates from all results, including LLM-suggested ones. See [centaur.md](centaur.md).
 
-All LLM methods use self-hosted Qwen3.5 (0.8B and 27B) as the LLM optimizer via vLLM on the same GPU that trains the optimizee (~50M parameter language model).
+Our main experiments use self-hosted Qwen3.5 (0.8B and 27B) as the LLM optimizer via vLLM on the same GPU that trains the optimizee (~50M parameter language model). We additionally run frontier model experiments with Gemini 3.1 Pro Preview via the Gemini API.
 
 ## Experimental Setup
 
-Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP). All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~80 GB VRAM (to match the H100 used in Karpathy's and Shwartz Ziv's experiments). Failed trials reported as `val_bpb=100.0` so optimizers learn to avoid OOM regions. 3 seeds per condition.
+Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extracted from `train.py` via [AST](https://docs.python.org/3/library/ast.html) parsing (every `ALL_CAPS = literal` assignment becomes a tunable HP). All methods get 24 hours of GPU training time (excluding LLM inference overhead), capped to ~76 GB VRAM (to match the H100 used in Karpathy's and Shwartz Ziv's experiments). Failed trials reported as `val_bpb=100.0` so optimizers learn to avoid OOM regions. 3 seeds per condition.
 
 ## Results
 
 ### Classical methods outperform LLMs in fixed search spaces
 
-Within the fixed search space, classical HPO methods consistently outperform LLM-based agents. The gap to the best fixed-space LLM method (LLAMBO Paper at 0.9862) is substantial, and several pure LLM methods perform worse than random search, indicating that restricting LLMs to a fixed HP search space does not leverage their strengths. OOM avoidance matters more than search diversity: the top methods all keep OOM rates below 16%, while the bottom four exceed 36%.
+Within the fixed search space, classical HPO methods consistently outperform LLM-based agents. The gap to the best fixed-space LLM method (LLAMBO Paper at 0.9862) is substantial, and several pure LLM methods perform worse than random search, indicating that restricting LLMs to a fixed HP search space does not leverage their strengths. OOM avoidance matters more than search diversity: the top methods all keep OOM rates below 16%, while the bottom four exceed 36%. Notably, LLAMBO observes full trial history yet produces OOM rates (48-61%) comparable to random search (56%), suggesting that small/mid-sized LLMs fail to learn which regions cause memory failures.
 
 | Method | Seeds | Best val_bpb | OOM% |
 |--------|-------|-------------|------|
@@ -62,6 +62,12 @@ Karpathy Agent (Code), which directly edits training source code, is the only pu
 Scaling the LLM from 0.8B to 27B is essential for unconstrained code editing (0.9910 vs 0.9814) but provides no advantage for fixed-HP optimization. Solid lines = 27B, dashed = 0.8B.
 
 ![0.8B vs 27B comparison](assets/exp2_all_walltime.png)
+
+#### Frontier model comparison
+
+Gemini 3.1 Pro Preview vs Qwen3.5-27B for Karpathy Agent (Code) and Centaur. Solid = Gemini, dashed = Qwen. TPE shown as reference.
+
+![Gemini 3.1 Pro Preview vs Qwen3.5-27B](assets/exp2_gemini_frontier.png)
 
 ### Hybrid optimization: best of both worlds
 
