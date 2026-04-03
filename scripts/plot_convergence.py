@@ -205,7 +205,7 @@ def plot_convergence_multi(
         best_val = np.nanmin(mean)
         line, = ax.plot(x, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"))
-        ax.fill_between(x, mean - std, mean + std, color=style["color"], alpha=0.12)
+        ax.fill_between(x, mean - std, mean + std, color=style["color"], alpha=0.03)
         ranking.append((best_val, line, style["label"]))
 
     ax.set_xlabel("Trial", fontsize=12)
@@ -262,7 +262,6 @@ BACKENDS_27B = {
     "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},  # pink
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#4B0082"},  # purple
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
-    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0"},  # purple
     "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
     "random": {"label": "Random", "color": "#607D8B"},         # grey
 }
@@ -274,8 +273,6 @@ BACKENDS_ALL = {
     "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--"},
     "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
     "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
-    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna) [27B]", "color": "#9C27B0", "linestyle": "-"},
-    "llambo": {"label": "LLAMBO (Optuna) [0.8B]", "color": "#9C27B0", "linestyle": "--"},
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
     "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4B0082", "linestyle": "-"},
