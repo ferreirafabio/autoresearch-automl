@@ -45,7 +45,7 @@ VLLM_EXTRA_ARGS=""
 ENABLE_THINKING="false"
 USE_GEMINI_API="false"
 case "${MODEL_NAME}" in
-    gemini-2.5-flash) USE_GEMINI_API="true"; AVAILABLE_VRAM="~140GB" ;;
+    gemini-*) USE_GEMINI_API="true"; AVAILABLE_VRAM="~140GB" ;;
     Qwen3.5-0.8B)  VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~118GB" ;;
     Qwen3.5-4B)    VLLM_GPU_UTIL=0.15; AVAILABLE_VRAM="~112GB" ;;
     Qwen3.5-9B)    VLLM_GPU_UTIL=0.20; AVAILABLE_VRAM="~108GB"; VLLM_EXTRA_ARGS="--enable-prefix-caching" ;;
@@ -86,7 +86,9 @@ echo "Trials:    $TRIALS"
 echo "Model:     $MODEL_NAME"
 echo "Node:      $(hostname)"
 echo "GPUs:      $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | tr '\n' ', ')"
+echo "GPU Mem:   $(nvidia-smi --query-gpu=memory.total --format=csv,noheader 2>/dev/null | tr '\n' ', ')"
 echo "Results:   $RESULTS_DIR"
+echo "VRAM Cap:  CUDA_MEM_FRACTION=0.543 (~76GB on H200)"
 echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
@@ -150,6 +152,23 @@ fi
 # Run HPO
 export AVAILABLE_VRAM="${AVAILABLE_VRAM}"
 
+# Verify VRAM cap is set
+echo ""
+echo "VRAM cap verification:"
+echo "  CUDA_MEM_FRACTION=${CUDA_MEM_FRACTION}"
+echo "  AVAILABLE_VRAM=${AVAILABLE_VRAM}"
+echo "  USE_GEMINI_API=${USE_GEMINI_API}"
+python3 -c "
+import torch, os
+frac = float(os.environ.get('CUDA_MEM_FRACTION', '1.0'))
+if torch.cuda.is_available():
+    total = torch.cuda.get_device_properties(0).total_mem / 1e9
+    print(f'  GPU total: {total:.1f} GB, fraction: {frac}, effective cap: {total*frac:.1f} GB')
+    torch.cuda.set_per_process_memory_fraction(frac)
+    print(f'  VRAM cap applied successfully')
+else:
+    print(f'  No GPU available (fraction={frac})')
+" 2>&1 || echo "  WARNING: Could not verify VRAM cap"
 echo ""
 echo "Starting HPO with ${BACKEND} backend..."
 python -m autoresearch_automl.cli run \
