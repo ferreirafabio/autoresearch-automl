@@ -59,15 +59,17 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 
 Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Given the simplicity of the setup and the use of a self-hosted open-weight model (Qwen3.5-27B), the gap to classical methods is smaller than one might expect. Experiments with the frontier model Gemini 3.1 Pro Preview (3 seeds) show competitive but not superior performance (KA Code: 0.9826 ± 0.0005 vs 0.9814 ± 0.0057 with Qwen), confirming that simply scaling the LLM optimizer does not close the gap.
 
-Scaling the LLM from 0.8B to 27B is essential for unconstrained code editing (0.9910 vs 0.9814) but provides no advantage for fixed-HP optimization. Solid lines = 27B, dashed = 0.8B.
-
-![0.8B vs 27B comparison](assets/exp2_all_walltime.png)
-
-#### Frontier model comparison
+### Frontier model comparison
 
 Gemini 3.1 Pro Preview vs Qwen3.5-27B for Karpathy Agent (Code) and Centaur. Solid = Gemini, dashed = Qwen. TPE shown as reference.
 
 ![Gemini 3.1 Pro Preview vs Qwen3.5-27B](assets/exp2_gemini_frontier.png)
+
+### 0.8B vs 27B LLM optimizer
+
+Scaling the LLM from 0.8B to 27B is essential for unconstrained code editing (0.9910 vs 0.9814) but provides no advantage for fixed-HP optimization. Solid lines = 27B, dashed = 0.8B.
+
+![0.8B vs 27B comparison](assets/exp2_all_walltime.png)
 
 ### Hybrid optimization: best of both worlds
 
