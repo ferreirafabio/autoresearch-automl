@@ -42,18 +42,18 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 
 | Method | Seeds | Best val_bpb | OOM% |
 |--------|-------|-------------|------|
-| Centaur [Qwen 27B] | 3 | **0.9763 ± 0.0006** | 15% |
-| Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0010** | 15% |
-| Centaur [Gemini 3.1 Pro Preview] | 3 | **0.9767 ± 0.0016** | 17% |
-| TPE | 3 | **0.9768 ± 0.0024** | 11% |
-| SMAC | 3 | **0.9778 ± 0.0024** | 36% |
-| CMA-ES | 3 | **0.9785 ± 0.0044** | 16% |
-| Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0057** | 12% |
-| Karpathy Agent (Code) [Gemini 3.1 Pro Preview] | 3 | 0.9826 ± 0.0005 | 2% |
-| LLAMBO (Paper) [27B] | 3 | 0.9862 ± 0.0050 | 48% |
-| Random | 3 | 0.9873 ± 0.0026 | 56% |
-| LLAMBO (Optuna) [27B] | 3 | 0.9882 ± 0.0015 | 61% |
-| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 ± 0.0003 | 1% |
+| Centaur [Qwen 27B] | 3 | **0.9763 ± 0.0005** | 15% |
+| Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0008** | 14% |
+| Centaur [Gemini 3.1 Pro Preview] | 3 | **0.9767 ± 0.0013** | 17% |
+| TPE | 3 | **0.9768 ± 0.0019** | 10% |
+| SMAC | 3 | **0.9778 ± 0.0020** | 35% |
+| CMA-ES | 3 | **0.9785 ± 0.0036** | 16% |
+| Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0046** | 11% |
+| Karpathy Agent (Code) [Gemini 3.1 Pro Preview] | 3 | 0.9826 ± 0.0004 | 3% |
+| LLAMBO (Paper) [27B] | 3 | 0.9862 ± 0.0041 | 47% |
+| Random | 3 | 0.9873 ± 0.0021 | 56% |
+| LLAMBO (Optuna) [27B] | 3 | 0.9882 ± 0.0012 | 61% |
+| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 ± 0.0002 | 0% |
 
 ### Unconstrained code editing is viable but requires model scale
 
