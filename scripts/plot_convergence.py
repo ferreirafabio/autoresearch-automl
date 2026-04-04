@@ -119,9 +119,7 @@ def plot_convergence_walltime(
         best_val = np.nanmin(mean)
         line, = ax.plot(INTERP_HOURS, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"))
-        ax.fill_between(INTERP_HOURS, mean - std, mean + std,
-                        color=style["color"], alpha=0.12)
-        ranking.append((best_val, line, style["label"]))
+        ranking.append((best_val, line, style["label"], style["color"], INTERP_HOURS, mean, std))
 
     ax.set_xlabel("Cumulative training time (hours)", fontsize=12)
     ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
@@ -134,13 +132,18 @@ def plot_convergence_walltime(
     ax.set_xticks(range(0, int(ax.get_xlim()[1]) + 1, 2))
     ax.grid(True, alpha=0.3)
 
+    # Add bands for top 5 methods only
     if ranking:
         ranking.sort(key=lambda r: r[0])
+        for i, (val, line, name, color, hrs, mean, std) in enumerate(ranking):
+            if i < 5:
+                ax.fill_between(hrs, mean - std, mean + std, color=color, alpha=0.08)
+
         max_name_len = max(len(r[2]) for r in ranking)
         header_handle, = ax.plot([], [], color="none", marker="", linestyle="none")
         handles = [header_handle]
         labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
-        for val, handle, name in ranking:
+        for val, handle, name, *_ in ranking:
             labels.append(f"{name.ljust(max_name_len + 2)}{val:.4f}")
             handles.append(handle)
         ax.legend(handles, labels, fontsize=8, loc="upper right",
@@ -205,8 +208,8 @@ def plot_convergence_multi(
         best_val = np.nanmin(mean)
         line, = ax.plot(x, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"))
-        ax.fill_between(x, mean - std, mean + std, color=style["color"], alpha=0.03)
-        ranking.append((best_val, line, style["label"]))
+        # Only show bands for top 5 methods (by best val)
+        ranking.append((best_val, line, style["label"], style["color"], x, mean, std))
 
     ax.set_xlabel("Trial", fontsize=12)
     ax.set_ylabel("val_bpb (lower is better)", fontsize=12)
@@ -219,15 +222,19 @@ def plot_convergence_multi(
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     ax.grid(True, alpha=0.3)
 
-    # Sorted monospace legend with header and right-aligned best scores
+    # Add bands for top 5 methods only
     if ranking:
         ranking.sort(key=lambda r: r[0])
+        for i, (val, line, name, color, x, mean, std) in enumerate(ranking):
+            if i < 5:
+                ax.fill_between(x, mean - std, mean + std, color=color, alpha=0.08)
+
+        # Sorted monospace legend with header and right-aligned best scores
         max_name_len = max(len(r[2]) for r in ranking)
-        # Header row (invisible handle)
         header_handle, = ax.plot([], [], color="none", marker="", linestyle="none")
         handles = [header_handle]
         labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
-        for val, handle, name in ranking:
+        for val, handle, name, *_ in ranking:
             labels.append(f"{name.ljust(max_name_len + 2)}{val:.4f}")
             handles.append(handle)
         ax.legend(handles, labels, fontsize=8, loc="upper right",
