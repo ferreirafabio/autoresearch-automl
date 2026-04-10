@@ -107,6 +107,7 @@
     .hint { font-size: 0.78em; }
     /* Make Plotly plots full-width and reasonable height on mobile */
     .js-plotly-plot, .plot-container > div { width: 100% !important; }
+    .modebar, .modebar-container { display: none !important; }
   }
 </style>
 </head>
@@ -141,8 +142,7 @@
     <li><a href="#fig5">Hyperparameter evolution</a></li>
     <li><a href="#fig6">Parallel coordinates (HP landscape)</a></li>
     <li><a href="#fig7">2D HP scatter with OOM overlay</a></li>
-    <li><a href="#fig8">OOM rate heatmap</a></li>
-    <li><a href="#fig9">Centaur LLM vs CMA-ES trial contributions</a></li>
+    <li><a href="#fig8">Centaur LLM vs CMA-ES trial contributions</a></li>
   </ol>
 </nav>
 
@@ -228,20 +228,7 @@
   <div id="plot-scatter2d" style="height:550px"></div>
 </div>
 
-<h2 id="fig8">8. OOM rate heatmap (aggregated across methods)</h2>
-<p class="fig-desc">
-  Pool all trials from all methods, bin by two HPs, and show the OOM failure rate per bin.
-  Reveals which HP combinations are memory-unsafe.
-</p>
-<div class="plot-container">
-  <div class="controls">
-    <label>X-axis: <select id="oom-x"></select></label>
-    <label>Y-axis: <select id="oom-y"></select></label>
-  </div>
-  <div id="plot-oom" style="height:550px"></div>
-</div>
-
-<h2 id="fig9">9. Centaur — LLM vs CMA-ES trial contributions</h2>
+<h2 id="fig8">8. Centaur — LLM vs CMA-ES trial contributions</h2>
 <p class="fig-desc">
   Centaur uses the LLM on ~30% of trials, CMA-ES on the rest. This plot shows which
   trials were contributed by which, with stars marking new incumbents.
@@ -381,7 +368,7 @@ async function plotIncumbents() {
         margin: { l: 70, r: 20, t: 60, b: 60 },
         font: { family: 'Inter, -apple-system, sans-serif' },
     };
-    Plotly.react('plot-incumbent', traces, layout, {responsive: true});
+    Plotly.react('plot-incumbent', traces, layout, {responsive: true, displayModeBar: false});
 }
 
 // =================================================================
@@ -389,11 +376,13 @@ async function plotIncumbents() {
 // =================================================================
 async function plotHPEvolution() {
     await loadData();
+    const isMobile = window.innerWidth <= 800;
     const method = document.getElementById('hp-evolution-method').value;
     const trials = Object.values(DATA[method]).flat();
     const successTrials = trials.filter(t => t.success && t.val_bpb && t.val_bpb < 50);
 
-    const ncols = 4, nrows = 4;
+    const ncols = isMobile ? 2 : 4;
+    const nrows = isMobile ? 7 : 4;
     const specs = [];
     for (let i = 0; i < nrows; i++) {
         specs.push(new Array(ncols).fill({}).map(() => ({})));
@@ -424,7 +413,7 @@ async function plotHPEvolution() {
     const layout = {
         title: `Hyperparameter evolution — ${method}`,
         grid: { rows: nrows, columns: ncols, pattern: 'independent' },
-        height: 800, plot_bgcolor: 'white', paper_bgcolor: 'white',
+        height: isMobile ? 1400 : 800, plot_bgcolor: 'white', paper_bgcolor: 'white',
         font: { family: 'Inter, -apple-system, sans-serif', size: 9 },
         margin: { l: 40, r: 80, t: 60, b: 40 },
         annotations: annotations,
@@ -437,7 +426,7 @@ async function plotHPEvolution() {
         layout[`xaxis${idx+1}`] = { title: idx >= 10 ? 'trial' : '', tickfont: { size: 8 }, gridcolor: '#e5e5e5' };
     });
 
-    Plotly.react('plot-hp-evolution', traces, layout, {responsive: true});
+    Plotly.react('plot-hp-evolution', traces, layout, {responsive: true, displayModeBar: false});
 }
 
 // =================================================================
@@ -480,7 +469,7 @@ async function plotParallel() {
         title: `Parallel coordinates — ${method}`,
         height: 550, font: { family: 'Inter, -apple-system, sans-serif', size: 10 },
         margin: { l: 80, r: 80, t: 80, b: 40 },
-    }, {responsive: true});
+    }, {responsive: true, displayModeBar: false});
 }
 
 // =================================================================
@@ -529,76 +518,7 @@ async function plot2D() {
         font: { family: 'Inter, -apple-system, sans-serif' },
         margin: { l: 70, r: 20, t: 60, b: 60 },
     };
-    Plotly.react('plot-scatter2d', traces, layout, {responsive: true});
-}
-
-// =================================================================
-// Plot: OOM heatmap (DEPTH x DEVICE_BATCH_SIZE or similar)
-// =================================================================
-async function plotOOMHeatmap() {
-    await loadData();
-    const xHP = document.getElementById('oom-x').value;
-    const yHP = document.getElementById('oom-y').value;
-
-    // Aggregate all methods
-    const allTrials = Object.values(DATA).flatMap(m => Object.values(m).flat());
-    const succ = allTrials.filter(t => t[xHP] !== undefined && t[yHP] !== undefined);
-
-    // Bin into grid
-    const nBins = 10;
-    const xVals = succ.map(t => t[xHP]);
-    const yVals = succ.map(t => t[yHP]);
-    const xMin = Math.min(...xVals), xMax = Math.max(...xVals);
-    const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
-
-    const bins = Array.from({length: nBins}, () => Array.from({length: nBins}, () => ({total: 0, oom: 0})));
-    succ.forEach(t => {
-        let xi, yi;
-        if (HP_LOG.has(xHP)) {
-            xi = Math.floor((Math.log10(t[xHP]) - Math.log10(xMin)) / (Math.log10(xMax) - Math.log10(xMin)) * nBins);
-        } else {
-            xi = Math.floor((t[xHP] - xMin) / (xMax - xMin) * nBins);
-        }
-        if (HP_LOG.has(yHP)) {
-            yi = Math.floor((Math.log10(t[yHP]) - Math.log10(yMin)) / (Math.log10(yMax) - Math.log10(yMin)) * nBins);
-        } else {
-            yi = Math.floor((t[yHP] - yMin) / (yMax - yMin) * nBins);
-        }
-        xi = Math.max(0, Math.min(nBins-1, xi));
-        yi = Math.max(0, Math.min(nBins-1, yi));
-        bins[yi][xi].total += 1;
-        if (!t.success) bins[yi][xi].oom += 1;
-    });
-
-    const z = bins.map(row => row.map(cell => cell.total > 0 ? cell.oom / cell.total * 100 : null));
-    const xEdges = Array.from({length: nBins}, (_, i) => {
-        const frac = (i + 0.5) / nBins;
-        return HP_LOG.has(xHP)
-            ? Math.pow(10, Math.log10(xMin) + frac * (Math.log10(xMax) - Math.log10(xMin)))
-            : xMin + frac * (xMax - xMin);
-    });
-    const yEdges = Array.from({length: nBins}, (_, i) => {
-        const frac = (i + 0.5) / nBins;
-        return HP_LOG.has(yHP)
-            ? Math.pow(10, Math.log10(yMin) + frac * (Math.log10(yMax) - Math.log10(yMin)))
-            : yMin + frac * (yMax - yMin);
-    });
-
-    const trace = {
-        type: 'heatmap',
-        z: z, x: xEdges, y: yEdges,
-        colorscale: 'Reds', zmin: 0, zmax: 100,
-        colorbar: { title: 'OOM %' },
-        hovertemplate: `${xHP}: %{x:.2g}<br>${yHP}: %{y:.2g}<br>OOM: %{z:.0f}%<extra></extra>`,
-    };
-    Plotly.react('plot-oom', [trace], {
-        title: `OOM rate across ${xHP} × ${yHP} (all methods pooled)`,
-        xaxis: { title: xHP, type: HP_LOG.has(xHP) ? 'log' : 'linear' },
-        yaxis: { title: yHP, type: HP_LOG.has(yHP) ? 'log' : 'linear' },
-        height: 550, plot_bgcolor: 'white', paper_bgcolor: 'white',
-        font: { family: 'Inter, -apple-system, sans-serif' },
-        margin: { l: 70, r: 80, t: 60, b: 60 },
-    }, {responsive: true});
+    Plotly.react('plot-scatter2d', traces, layout, {responsive: true, displayModeBar: false});
 }
 
 // =================================================================
@@ -677,7 +597,7 @@ async function plotCentaurOverride() {
         height: 500, plot_bgcolor: 'white', paper_bgcolor: 'white',
         font: { family: 'Inter, -apple-system, sans-serif' },
         margin: { l: 70, r: 20, t: 60, b: 60 },
-    }, {responsive: true});
+    }, {responsive: true, displayModeBar: false});
 }
 
 // =================================================================
@@ -700,7 +620,7 @@ async function initInteractive() {
     });
 
     // Populate HP selectors
-    ['scatter2d-x', 'scatter2d-y', 'oom-x', 'oom-y'].forEach(id => {
+    ['scatter2d-x', 'scatter2d-y'].forEach(id => {
         const sel = document.getElementById(id);
         if (!sel) return;
         HP_NAMES.forEach(hp => {
@@ -718,8 +638,6 @@ async function initInteractive() {
     document.getElementById('scatter2d-method').value = 'Centaur (CMA-ES+LLM)';
     document.getElementById('scatter2d-x').value = 'DEPTH';
     document.getElementById('scatter2d-y').value = 'DEVICE_BATCH_SIZE';
-    document.getElementById('oom-x').value = 'DEPTH';
-    document.getElementById('oom-y').value = 'DEVICE_BATCH_SIZE';
 
     // Wire up change handlers
     document.getElementById('incumbent-method').addEventListener('change', plotIncumbents);
@@ -729,8 +647,6 @@ async function initInteractive() {
     document.getElementById('scatter2d-method').addEventListener('change', plot2D);
     document.getElementById('scatter2d-x').addEventListener('change', plot2D);
     document.getElementById('scatter2d-y').addEventListener('change', plot2D);
-    document.getElementById('oom-x').addEventListener('change', plotOOMHeatmap);
-    document.getElementById('oom-y').addEventListener('change', plotOOMHeatmap);
     document.getElementById('centaur-seed').addEventListener('change', plotCentaurOverride);
 
     // Initial draw
@@ -738,7 +654,6 @@ async function initInteractive() {
     plotHPEvolution();
     plotParallel();
     plot2D();
-    plotOOMHeatmap();
     plotCentaurOverride();
 }
 
@@ -754,12 +669,12 @@ function applyMobileLayout() {
         'legend.orientation': 'h',
         'legend.x': 0.5,
         'legend.xanchor': 'center',
-        'legend.y': -0.25,
+        'legend.y': -0.35,
         'legend.yanchor': 'top',
         'legend.font.size': 9,
         'margin.l': 50,
         'margin.r': 15,
-        'margin.b': 120,
+        'margin.b': 150,
         'margin.t': 40,
         'xaxis.title.font.size': 10,
         'yaxis.title.font.size': 10,
