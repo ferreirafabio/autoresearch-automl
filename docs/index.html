@@ -1033,43 +1033,11 @@ loadData = async function() {
     return d;
 };
 
-// =================================================================
-// Method tooltips (title attr on legend entries is tricky with Plotly;
-// instead we add a methods legend card at the top of the interactive demo)
-// =================================================================
-const METHOD_DESCRIPTIONS = {
-    'TPE': 'Tree-structured Parzen Estimator (Optuna). Classical Bayesian HPO with density estimation.',
-    'CMA-ES': 'Covariance Matrix Adaptation Evolution Strategy. Classical evolutionary HPO.',
-    'SMAC': 'Sequential Model-based Algorithm Configuration with random-forest surrogate.',
-    'Random': 'Uniform random sampling. Baseline.',
-    'LLAMBO (Optuna)': 'LLAMBO via OptunaHub port. Binary surrogate labels, categoricals random, failed trials hidden.',
-    'LLAMBO (Paper)': 'Faithful reimplementation of LLAMBO paper: continuous labels, all HPs visible, failed trials included.',
-    'Karpathy Agent (14 HPs)': 'LLM sees trial history and suggests next config within fixed 14-HP search space.',
-    'Karpathy Agent (Code)': 'LLM directly edits train.py source each trial (Karpathy autoresearch, unconstrained).',
-    'Centaur (CMA-ES+LLM)': 'Hybrid: CMA-ES runs every trial; on 30% of trials the LLM overrides with a config informed by CMA-ES internal state.',
-};
-
-function insertMethodLegend() {
-    const fig1 = document.getElementById('fig1');
-    if (!fig1) return;
-    const card = document.createElement('details');
-    card.className = 'method-legend';
-    card.style.cssText = 'background:white;padding:1em 1.3em;border-radius:10px;margin:1em 0;box-shadow:0 1px 3px rgba(0,0,0,0.04);font-size:0.88em;max-width:1000px;';
-    card.innerHTML = '<summary style="cursor:pointer;font-weight:600;color:#0f0f0f;">ℹ️ Method descriptions</summary>' +
-        '<dl style="margin:0.8em 0 0 0;display:grid;grid-template-columns:auto 1fr;gap:0.4em 1em;">' +
-        Object.entries(METHOD_DESCRIPTIONS).map(([k, v]) =>
-            `<dt style="font-weight:600;color:#444;">${k}</dt><dd style="margin:0;color:#666;">${v}</dd>`
-        ).join('') +
-        '</dl>';
-    fig1.parentNode.insertBefore(card, fig1);
-}
-
 // Run all init on load
 window.addEventListener('load', () => {
     setTimeout(() => {
         applyHashStateToDropdowns();
         wireHashUpdaters();
-        insertMethodLegend();
     }, 200);
 });
 
