@@ -88,6 +88,26 @@
   }
   @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Mobile responsive */
+  @media (max-width: 800px) {
+    body { padding: 1em 0.5em 3em; }
+    h1 { font-size: 1.5em; }
+    h2 { font-size: 1.15em; }
+    .subtitle { font-size: 1em; }
+    .authors { font-size: 0.85em; }
+    .links a { padding: 0.5em 0.9em; font-size: 0.85em; margin: 0.2em; }
+    .tldr { padding: 1em 1.2em; font-size: 0.9em; }
+    nav.toc ol { columns: 1; }
+    .plot-container { padding: 0.8em 0.5em 0.8em; border-radius: 10px; }
+    .fig-desc { font-size: 0.88em; }
+    .controls { flex-direction: column; align-items: flex-start; gap: 0.5em; }
+    .controls label { width: 100%; }
+    .controls select { width: 100%; max-width: 100%; }
+    .hint { font-size: 0.78em; }
+    /* Make Plotly plots full-width and reasonable height on mobile */
+    .js-plotly-plot, .plot-container > div { width: 100% !important; }
+  }
 </style>
 </head>
 <body>
@@ -723,6 +743,33 @@ async function initInteractive() {
 }
 
 document.addEventListener('DOMContentLoaded', initInteractive);
+
+
+// Mobile: move legend to bottom and shrink plot margins
+function applyMobileLayout() {
+  if (window.innerWidth > 800) return;
+  document.querySelectorAll('.js-plotly-plot').forEach(el => {
+    try {
+      Plotly.relayout(el, {
+        'legend.orientation': 'h',
+        'legend.x': 0.5,
+        'legend.xanchor': 'center',
+        'legend.y': -0.25,
+        'legend.yanchor': 'top',
+        'legend.font.size': 9,
+        'margin.l': 50,
+        'margin.r': 15,
+        'margin.b': 120,
+        'margin.t': 40,
+        'xaxis.title.font.size': 10,
+        'yaxis.title.font.size': 10,
+        'title.font.size': 13,
+      });
+    } catch(e) {}
+  });
+}
+window.addEventListener('load', () => setTimeout(applyMobileLayout, 500));
+window.addEventListener('resize', () => { clearTimeout(window._r); window._r = setTimeout(applyMobileLayout, 300); });
 
 </script>
 
