@@ -124,7 +124,7 @@
 </header>
 
 <div class="tldr">
-  <strong>TL;DR:</strong> We benchmark 9 HPO methods — classical, LLM-based, and hybrid — on Karpathy's
+  <strong>TL;DR:</strong> We benchmark 9 HPO methods (classical, LLM-based, and hybrid) on Karpathy's
   <em>autoresearch</em> task under identical 24-hour budgets with 3 seeds. <strong>Classical methods
   (CMA-ES, TPE, SMAC) consistently outperform pure LLM-based agents</strong> within a fixed search space.
   <strong>Even frontier models like Gemini 3.1 Pro Preview do not close the gap.</strong>
@@ -148,7 +148,7 @@
 <h2 id="fig1">1. Classical vs LLM-based HPO</h2>
 <p class="fig-desc">
   Best val_bpb against cumulative training time (mean ± std across 3 seeds).
-  Gemini 3.1 Pro Preview variants are <strong>hidden by default</strong> — click their
+  Gemini 3.1 Pro Preview variants are <strong>hidden by default</strong>, click their
   names in the legend to reveal them and see that scaling the LLM to a frontier model does not close the gap.
 </p>
 <div class="plot-container">
@@ -215,7 +215,7 @@
   <div id="plot-scatter2d" style="height:550px"></div>
 </div>
 
-<h2 id="fig7">7. Centaur — LLM vs CMA-ES trial contributions</h2>
+<h2 id="fig7">7. Centaur: LLM vs CMA-ES trial contributions</h2>
 <p class="fig-desc">
   Centaur uses the LLM on ~30% of trials, CMA-ES on the rest. This plot shows which
   trials were contributed by which, with stars marking new incumbents.
@@ -365,7 +365,7 @@ async function plotIncumbents() {
     ];
 
     const layout = {
-        title: `Incumbent traces — ${method} (seed ${seed})`,
+        title: `Incumbent traces: ${method} (seed ${seed})`,
         xaxis: { title: 'Cumulative training time (hours)', range: [0, 24], dtick: 2, gridcolor: '#e5e5e5' },
         yaxis: { title: 'val_bpb (lower is better)', gridcolor: '#e5e5e5', range: [0.974, 0.993], autorange: false, fixedrange: true },
         height: 500, plot_bgcolor: 'white', paper_bgcolor: 'white',
@@ -415,7 +415,7 @@ async function plotHPEvolution() {
 
     // Build grid layout
     const layout = {
-        title: `Hyperparameter evolution — ${method}`,
+        title: `Hyperparameter evolution: ${method}`,
         grid: { rows: nrows, columns: ncols, pattern: 'independent' },
         height: isMobile ? 1400 : 800, plot_bgcolor: 'white', paper_bgcolor: 'white',
         font: { family: 'Inter, -apple-system, sans-serif', size: 9 },
@@ -473,7 +473,7 @@ async function plot2D() {
     ];
 
     const layout = {
-        title: `${xHP} vs ${yHP} — ${method}`,
+        title: `${xHP} vs ${yHP} - ${method}`,
         xaxis: { title: xHP, type: HP_LOG.has(xHP) ? 'log' : 'linear', gridcolor: '#e5e5e5' },
         yaxis: { title: yHP, type: HP_LOG.has(yHP) ? 'log' : 'linear', gridcolor: '#e5e5e5' },
         height: 550, plot_bgcolor: 'white', paper_bgcolor: 'white',
@@ -554,7 +554,7 @@ async function plotCentaurOverride() {
           name: 'New best (LLM)' },
     ];
     Plotly.react('plot-centaur-override', traces, {
-        title: `Centaur — LLM vs CMA-ES trial contributions (seed ${seed})`,
+        title: `Centaur: LLM vs CMA-ES trial contributions (seed ${seed})`,
         xaxis: { title: 'Cumulative training time (hours)', range: [0, 24], gridcolor: '#e5e5e5' },
         yaxis: { title: 'val_bpb', gridcolor: '#e5e5e5', range: [0.974, 0.993], autorange: false, fixedrange: true },
         height: 500, plot_bgcolor: 'white', paper_bgcolor: 'white',
