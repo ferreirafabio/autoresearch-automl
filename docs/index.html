@@ -304,20 +304,37 @@ async function plotIncumbents() {
     let bestX = [], bestY = [], bestText = [];
     let best = Infinity;
 
+    const formatConfig = (t) => {
+        const lines = [];
+        HP_NAMES.forEach(hp => {
+            let v = t[hp];
+            if (v === undefined || v === null) return;
+            if (typeof v === 'number') {
+                if (Math.abs(v) < 0.01 || Math.abs(v) >= 1000) v = v.toExponential(3);
+                else if (!Number.isInteger(v)) v = v.toFixed(4);
+            }
+            lines.push(`  ${hp}: ${v}`);
+        });
+        // WINDOW_PATTERN is categorical
+        if (t.WINDOW_PATTERN !== undefined) lines.push(`  WINDOW_PATTERN: ${t.WINDOW_PATTERN}`);
+        return lines.join('<br>');
+    };
+
     trials.forEach(t => {
         cum += (t.wt || 0);
         const hours = cum / 3600;
         if (hours > 24) return;
         const v = t.val_bpb;
         if (v !== null && v !== undefined && v < 50 && t.success) {
+            const hpText = formatConfig(t);
             allX.push(hours);
             allY.push(v);
-            allText.push(`trial ${t.tid}<br>val_bpb: ${v.toFixed(4)}`);
+            allText.push(`<b>trial ${t.tid}</b><br>val_bpb: ${v.toFixed(4)}<br>time: ${hours.toFixed(1)}h<br>--<br>${hpText}`);
             if (v < best) {
                 best = v;
                 bestX.push(hours);
                 bestY.push(v);
-                bestText.push(`NEW BEST<br>trial ${t.tid}<br>val_bpb: ${v.toFixed(4)}`);
+                bestText.push(`<b>🌟 NEW BEST · trial ${t.tid}</b><br>val_bpb: ${v.toFixed(4)}<br>time: ${hours.toFixed(1)}h<br>--<br>${hpText}`);
             }
         }
     });
@@ -363,7 +380,7 @@ async function plotIncumbents() {
     const layout = {
         title: `Incumbent traces — ${method} (seed ${seed})`,
         xaxis: { title: 'Cumulative training time (hours)', range: [0, 24], dtick: 2, gridcolor: '#e5e5e5' },
-        yaxis: { title: 'val_bpb (lower is better)', gridcolor: '#e5e5e5' },
+        yaxis: { title: 'val_bpb (lower is better)', gridcolor: '#e5e5e5', range: [0.974, 0.993], autorange: false, fixedrange: true },
         height: 500, plot_bgcolor: 'white', paper_bgcolor: 'white',
         margin: { l: 70, r: 20, t: 60, b: 60 },
         font: { family: 'Inter, -apple-system, sans-serif' },
@@ -593,7 +610,7 @@ async function plotCentaurOverride() {
     Plotly.react('plot-centaur-override', traces, {
         title: `Centaur — LLM vs CMA-ES trial contributions (seed ${seed})`,
         xaxis: { title: 'Cumulative training time (hours)', range: [0, 24], gridcolor: '#e5e5e5' },
-        yaxis: { title: 'val_bpb', gridcolor: '#e5e5e5' },
+        yaxis: { title: 'val_bpb', gridcolor: '#e5e5e5', range: [0.974, 0.993], autorange: false, fixedrange: true },
         height: 500, plot_bgcolor: 'white', paper_bgcolor: 'white',
         font: { family: 'Inter, -apple-system, sans-serif' },
         margin: { l: 70, r: 20, t: 60, b: 60 },
