@@ -140,9 +140,8 @@
     <li><a href="#fig3">Centaur LLM ratio ablation</a></li>
     <li><a href="#fig4">Incumbent trace explorer</a></li>
     <li><a href="#fig5">Hyperparameter evolution</a></li>
-    <li><a href="#fig6">Parallel coordinates (HP landscape)</a></li>
-    <li><a href="#fig7">2D HP scatter with OOM overlay</a></li>
-    <li><a href="#fig8">Centaur LLM vs CMA-ES trial contributions</a></li>
+    <li><a href="#fig6">2D HP scatter with OOM overlay</a></li>
+    <li><a href="#fig7">Centaur LLM vs CMA-ES trial contributions</a></li>
   </ol>
 </nav>
 
@@ -202,19 +201,7 @@
   <div id="plot-hp-evolution" style="height:800px"></div>
 </div>
 
-<h2 id="fig6">6. Parallel coordinates (HP landscape)</h2>
-<p class="fig-desc">
-  Each line = one trial. Drag vertical axes to filter. The last axis is val_bpb — look for the
-  darkest lines to see which HP combinations produced the best configs.
-</p>
-<div class="plot-container">
-  <div class="controls">
-    <label>Method: <select id="parallel-method"></select></label>
-  </div>
-  <div id="plot-parallel" style="height:550px"></div>
-</div>
-
-<h2 id="fig7">7. 2D HP scatter (pick two HPs)</h2>
+<h2 id="fig6">6. 2D HP scatter (pick two HPs)</h2>
 <p class="fig-desc">
   Pick two hyperparameters to see how a method explored that 2D slice of the search space.
   Red × marks failed (OOM/crashed) trials.
@@ -228,7 +215,7 @@
   <div id="plot-scatter2d" style="height:550px"></div>
 </div>
 
-<h2 id="fig8">8. Centaur — LLM vs CMA-ES trial contributions</h2>
+<h2 id="fig7">7. Centaur — LLM vs CMA-ES trial contributions</h2>
 <p class="fig-desc">
   Centaur uses the LLM on ~30% of trials, CMA-ES on the rest. This plot shows which
   trials were contributed by which, with stars marking new incumbents.
@@ -446,48 +433,6 @@ async function plotHPEvolution() {
     Plotly.react('plot-hp-evolution', traces, layout, {responsive: true, displayModeBar: false});
 }
 
-// =================================================================
-// Plot: Parallel coordinates
-// =================================================================
-async function plotParallel() {
-    await loadData();
-    const method = document.getElementById('parallel-method').value;
-    const trials = Object.values(DATA[method]).flat();
-    const succ = trials.filter(t => t.success && t.val_bpb && t.val_bpb < 50);
-
-    const dims = HP_NAMES.map(hp => {
-        const vals = succ.map(t => t[hp]).filter(v => v !== undefined && v !== null);
-        return {
-            label: hp,
-            values: succ.map(t => t[hp]),
-            range: HP_LOG.has(hp) ? [Math.log10(Math.min(...vals)), Math.log10(Math.max(...vals))] : undefined,
-        };
-    }).filter(d => d.values.some(v => v !== undefined));
-
-    // Add val_bpb as last dim
-    dims.push({
-        label: 'val_bpb',
-        values: succ.map(t => t.val_bpb),
-        range: [0.975, Math.min(1.0, Math.max(...succ.map(t => t.val_bpb)))],
-    });
-
-    const trace = {
-        type: 'parcoords',
-        line: {
-            color: succ.map(t => t.val_bpb),
-            colorscale: 'Viridis', reversescale: true, showscale: true,
-            cmin: 0.975, cmax: 0.995,
-            colorbar: { title: 'val_bpb' },
-        },
-        dimensions: dims,
-    };
-
-    Plotly.react('plot-parallel', [trace], {
-        title: `Parallel coordinates — ${method}`,
-        height: 550, font: { family: 'Inter, -apple-system, sans-serif', size: 10 },
-        margin: { l: 80, r: 80, t: 80, b: 40 },
-    }, {responsive: true, displayModeBar: false});
-}
 
 // =================================================================
 // Plot: 2D HP scatter (simple PCA approximation via 2 chosen HPs)
@@ -518,7 +463,7 @@ async function plot2D() {
                 color: succ.map(t => t.val_bpb),
                 colorscale: 'Viridis', reversescale: true,
                 cmin: 0.975, cmax: 0.995, size: 8,
-                colorbar: { title: 'val_bpb' },
+                colorbar: { title: 'val_bpb', x: 1.15, len: 0.85 },
                 line: { color: 'white', width: 0.5 },
             },
             text: succ.map(t => `trial ${t.tid}<br>val_bpb: ${t.val_bpb.toFixed(4)}`),
@@ -533,7 +478,8 @@ async function plot2D() {
         yaxis: { title: yHP, type: HP_LOG.has(yHP) ? 'log' : 'linear', gridcolor: '#e5e5e5' },
         height: 550, plot_bgcolor: 'white', paper_bgcolor: 'white',
         font: { family: 'Inter, -apple-system, sans-serif' },
-        margin: { l: 70, r: 20, t: 60, b: 60 },
+        margin: { l: 70, r: 120, t: 60, b: 60 },
+        legend: { x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#ddd', borderwidth: 1 },
     };
     Plotly.react('plot-scatter2d', traces, layout, {responsive: true, displayModeBar: false});
 }
@@ -624,7 +570,7 @@ async function initInteractive() {
     await loadData();
 
     // Populate all method selectors
-    ['incumbent-method', 'hp-evolution-method', 'parallel-method',
+    ['incumbent-method', 'hp-evolution-method',
      'scatter2d-method', 'centaur-method'].forEach(id => {
         const sel = document.getElementById(id);
         if (!sel) return;
@@ -651,7 +597,6 @@ async function initInteractive() {
     // Set defaults
     document.getElementById('incumbent-method').value = 'Centaur (CMA-ES+LLM)';
     document.getElementById('hp-evolution-method').value = 'CMA-ES';
-    document.getElementById('parallel-method').value = 'TPE';
     document.getElementById('scatter2d-method').value = 'Centaur (CMA-ES+LLM)';
     document.getElementById('scatter2d-x').value = 'DEPTH';
     document.getElementById('scatter2d-y').value = 'DEVICE_BATCH_SIZE';
@@ -660,7 +605,6 @@ async function initInteractive() {
     document.getElementById('incumbent-method').addEventListener('change', plotIncumbents);
     document.getElementById('incumbent-seed').addEventListener('change', plotIncumbents);
     document.getElementById('hp-evolution-method').addEventListener('change', plotHPEvolution);
-    document.getElementById('parallel-method').addEventListener('change', plotParallel);
     document.getElementById('scatter2d-method').addEventListener('change', plot2D);
     document.getElementById('scatter2d-x').addEventListener('change', plot2D);
     document.getElementById('scatter2d-y').addEventListener('change', plot2D);
@@ -669,7 +613,6 @@ async function initInteractive() {
     // Initial draw
     plotIncumbents();
     plotHPEvolution();
-    plotParallel();
     plot2D();
     plotCentaurOverride();
 }
