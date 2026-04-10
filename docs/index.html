@@ -40,11 +40,13 @@
   .authors { color: #444; font-size: 0.95em; margin-bottom: 1.5em; }
   .links { margin: 1.5em 0; }
   .links a {
-    display: inline-block; margin: 0.3em 0.4em; padding: 0.6em 1.3em;
+    display: inline-flex; align-items: center; gap: 0.45em;
+    margin: 0.3em 0.4em; padding: 0.6em 1.2em;
     background: #1a1a1a; color: white; text-decoration: none; border-radius: 8px;
     font-size: 0.95em; font-weight: 500; transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
+  .links .link-icon { width: 1.05em; height: 1.05em; flex-shrink: 0; }
   .links a:hover {
     background: #E91E63; transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(233, 30, 99, 0.25);
@@ -257,9 +259,18 @@
   <p class="subtitle">A Study on <a href="https://github.com/karpathy/autoresearch" style="color:inherit;text-decoration:underline"><em>autoresearch</em></a></p>
   <p class="authors">Fabio Ferreira · Lucca Wobbe · Arjun Krishnakumar · Frank Hutter · Arber Zela</p>
   <div class="links">
-    <a href="https://arxiv.org/abs/2603.24647">Paper (arXiv)</a>
-    <a href="https://github.com/ferreirafabio/autoresearch-automl">Code</a>
-    <a href="#" id="copy-bibtex-btn" onclick="copyBibtex(event)">Copy BibTeX</a>
+    <a href="https://arxiv.org/abs/2603.24647" aria-label="arXiv paper">
+      <svg class="link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      Paper (arXiv)
+    </a>
+    <a href="https://github.com/ferreirafabio/autoresearch-automl" aria-label="GitHub code">
+      <svg class="link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.18c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.69 1.24 3.34.95.1-.74.4-1.24.72-1.53-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.16 1.18.92-.26 1.9-.39 2.88-.39.98 0 1.96.13 2.88.39 2.2-1.49 3.16-1.18 3.16-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.4-5.25 5.68.41.36.78 1.06.78 2.13v3.16c0 .31.21.67.8.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+      Code
+    </a>
+    <a href="#" id="copy-bibtex-btn" onclick="copyBibtex(event)" aria-label="Copy BibTeX citation">
+      <svg class="link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+      Copy BibTeX
+    </a>
   </div>
   <textarea id="bibtex-source" style="position:absolute;left:-9999px;" readonly>@article{ferreira2026autoresearchautoml,
     title={Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on autoresearch},
