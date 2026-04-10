@@ -173,19 +173,6 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .plot-container { position: relative; }
 
-  /* Sticky TOC on desktop */
-  @media (min-width: 1100px) {
-    body { display: grid; grid-template-columns: 220px 1fr; gap: 2em; max-width: 1400px; }
-    header, .tldr, footer { grid-column: 1 / -1; }
-    nav.toc {
-      position: sticky; top: 1em; align-self: start;
-      max-height: calc(100vh - 2em); overflow-y: auto;
-      padding: 1em 1.2em; font-size: 0.88em;
-    }
-    nav.toc ol { columns: 1; padding-left: 1.2em; }
-    nav.toc li { margin: 0.3em 0; }
-  }
-
   /* BibTeX button state */
   #copy-bibtex-btn.copied { background: #4CAF50 !important; }
 
