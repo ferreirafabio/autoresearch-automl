@@ -2,6 +2,8 @@
 <h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization Algorithms?<br>A Study on <i>autoresearch</i></h3>
 
 > **Paper:** [Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on *autoresearch*](https://arxiv.org/abs/2603.24647)
+>
+> **Interactive demo:** [ferreirafabio.github.io/autoresearch-automl](https://ferreirafabio.github.io/autoresearch-automl)
 
 ![Classical vs LLM-based HPO](assets/exp2_27b_walltime.png)
 
