@@ -109,6 +109,13 @@
     .js-plotly-plot, .plot-container > div { width: 100% !important; }
     .modebar, .modebar-container { display: none !important; }
   }
+
+  /* Mobile: allow page scroll when touching plots (Plotly otherwise captures it) */
+  @media (max-width: 800px) {
+    .js-plotly-plot, .js-plotly-plot .plot-container, .js-plotly-plot svg,
+    .js-plotly-plot .main-svg, .js-plotly-plot .legend { touch-action: pan-y !important; }
+    .plot-container { touch-action: pan-y !important; }
+  }
 </style>
 </head>
 <body>
