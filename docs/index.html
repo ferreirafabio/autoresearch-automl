@@ -147,8 +147,10 @@
     .hint { font-size: 0.78em; }
     /* Make Plotly plots full-width and reasonable height on mobile */
     .js-plotly-plot, .plot-container > div { width: 100% !important; }
-    .modebar, .modebar-container { display: none !important; }
   }
+
+  /* Hide Plotly modebar on all plots (including pre-rendered Figs 1-3) */
+  .modebar, .modebar-container { display: none !important; }
 
   /* Loading indicator */
   .loading-overlay {
