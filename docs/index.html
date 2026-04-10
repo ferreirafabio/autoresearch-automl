@@ -118,6 +118,38 @@
     .group-filter .gf-label { width: 100%; margin-bottom: 0.2em; }
   }
 
+  /* Subtle method descriptions */
+  details.method-refs {
+    max-width: 1000px; margin: 0.3em auto 1.8em;
+    font-size: 0.82em; color: #777;
+  }
+  details.method-refs summary {
+    cursor: pointer; color: #888; font-weight: 500;
+    padding: 0.4em 0; list-style: none; display: flex; align-items: center; gap: 0.3em;
+  }
+  details.method-refs summary::before {
+    content: "▸"; font-size: 0.8em; transition: transform 0.15s;
+    display: inline-block;
+  }
+  details.method-refs[open] summary::before { transform: rotate(90deg); }
+  details.method-refs summary::-webkit-details-marker { display: none; }
+  details.method-refs summary:hover { color: #E91E63; }
+  details.method-refs .method-list {
+    padding: 0.6em 0 0.2em 1em;
+    border-left: 2px solid #eee;
+    margin: 0.3em 0 0 0.3em;
+  }
+  details.method-refs .method-list > div {
+    margin: 0.45em 0; line-height: 1.55;
+  }
+  details.method-refs strong { color: #444; font-weight: 600; }
+  details.method-refs a {
+    color: #999; text-decoration: none;
+    border-bottom: 1px dotted #ccc;
+  }
+  details.method-refs a:hover { color: #E91E63; border-bottom-color: #E91E63; }
+  details.method-refs code { background: #f4f4f6; padding: 0 0.3em; border-radius: 3px; font-size: 0.92em; }
+
   .hint {
     color: #888; font-size: 0.85em; margin-top: 0.8em;
     text-align: center; font-style: italic;
@@ -144,7 +176,39 @@
     .controls { flex-direction: column; align-items: flex-start; gap: 0.5em; }
     .controls label { width: 100%; }
     .controls select { width: 100%; max-width: 100%; }
-    .hint { font-size: 0.78em; }
+    /* Subtle method descriptions */
+  details.method-refs {
+    max-width: 1000px; margin: 0.3em auto 1.8em;
+    font-size: 0.82em; color: #777;
+  }
+  details.method-refs summary {
+    cursor: pointer; color: #888; font-weight: 500;
+    padding: 0.4em 0; list-style: none; display: flex; align-items: center; gap: 0.3em;
+  }
+  details.method-refs summary::before {
+    content: "▸"; font-size: 0.8em; transition: transform 0.15s;
+    display: inline-block;
+  }
+  details.method-refs[open] summary::before { transform: rotate(90deg); }
+  details.method-refs summary::-webkit-details-marker { display: none; }
+  details.method-refs summary:hover { color: #E91E63; }
+  details.method-refs .method-list {
+    padding: 0.6em 0 0.2em 1em;
+    border-left: 2px solid #eee;
+    margin: 0.3em 0 0 0.3em;
+  }
+  details.method-refs .method-list > div {
+    margin: 0.45em 0; line-height: 1.55;
+  }
+  details.method-refs strong { color: #444; font-weight: 600; }
+  details.method-refs a {
+    color: #999; text-decoration: none;
+    border-bottom: 1px dotted #ccc;
+  }
+  details.method-refs a:hover { color: #E91E63; border-bottom-color: #E91E63; }
+  details.method-refs code { background: #f4f4f6; padding: 0 0.3em; border-radius: 3px; font-size: 0.92em; }
+
+  .hint { font-size: 0.78em; }
     /* Make Plotly plots full-width and reasonable height on mobile */
     .js-plotly-plot, .plot-container > div { width: 100% !important; }
   }
@@ -233,6 +297,22 @@
     <li><a href="#appendix">Appendix: paper figures</a></li>
   </ol>
 </nav>
+
+<details class="method-refs">
+  <summary>Method details &amp; references</summary>
+  <div class="method-list">
+    <div><strong>TPE</strong> — Tree-structured Parzen Estimator. Classical Bayesian HPO with density estimation. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.TPESampler.html" target="_blank" rel="noopener">Optuna</a></div>
+    <div><strong>CMA-ES</strong> — Covariance Matrix Adaptation Evolution Strategy. Classical evolutionary HPO. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html" target="_blank" rel="noopener">Optuna</a></div>
+    <div><strong>SMAC</strong> — Sequential Model-based Algorithm Configuration with random-forest surrogate. <a href="https://github.com/automl/SMAC3" target="_blank" rel="noopener">SMAC3</a></div>
+    <div><strong>Random</strong> — Uniform random sampling baseline. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html" target="_blank" rel="noopener">Optuna</a></div>
+    <div><strong>LLAMBO (Optuna)</strong> — LLAMBO via OptunaHub port. Binary surrogate labels, categoricals random, failed trials hidden. <a href="https://hub.optuna.org/samplers/llambo/" target="_blank" rel="noopener">OptunaHub</a></div>
+    <div><strong>LLAMBO (Paper)</strong> — Faithful reimplementation of LLAMBO paper: continuous labels, all HPs visible, failed trials included. <a href="https://arxiv.org/abs/2402.03921" target="_blank" rel="noopener">Ye et al. 2024</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/tree/main/autoresearch_automl/backends/llambo_original" target="_blank" rel="noopener">our impl</a></div>
+    <div><strong>Karpathy Agent (14 HPs)</strong> — LLM sees trial history and suggests next config within the fixed 14-HP search space. <a href="https://github.com/ferreirafabio/autoresearch-automl" target="_blank" rel="noopener">our impl</a></div>
+    <div><strong>Karpathy Agent (Code)</strong> — LLM directly edits <code>train.py</code> source each trial (unconstrained). <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener">Karpathy autoresearch</a></div>
+    <div><strong>Centaur (CMA-ES+LLM)</strong> — Hybrid: CMA-ES runs every trial; on 30% of trials the LLM overrides with a config informed by CMA-ES internal state. <a href="https://arxiv.org/abs/2603.24647" target="_blank" rel="noopener">our paper</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/centaur.md" target="_blank" rel="noopener">algorithm</a></div>
+  </div>
+</details>
+
 
 <h2 id="fig1">1. Classical vs LLM-based HPO</h2>
 <p class="fig-desc">
