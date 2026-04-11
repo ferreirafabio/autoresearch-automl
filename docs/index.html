@@ -1084,8 +1084,29 @@ window.addEventListener('load', () => {
     setTimeout(() => {
         applyHashStateToDropdowns();
         wireHashUpdaters();
-    }, 200);
+        applyCategoryLinestyles('fig1');
+    }, 250);
 });
+
+// =================================================================
+// Category-based linestyle (solid = classical, dash = pure LLM, dot = hybrid)
+// Applied client-side so the paper figures can stay as-is.
+// =================================================================
+function applyCategoryLinestyles(containerId) {
+    const el = findPlotlyDivInContainer(containerId);
+    if (!el || !el.data) return;
+    const tagList = buildTraceTagList(containerId, el.data);
+    const dashes = tagList.map((tags, i) => {
+        if (!tags || tags.length === 0) return 'solid'; // band traces (invisible, width 0)
+        if (tags.includes('classical')) return 'solid';
+        if (tags.includes('hybrid')) return 'dot';
+        if (tags.includes('llm') || tags.includes('code')) return 'dash';
+        return 'solid';
+    });
+    try {
+        Plotly.restyle(el, { 'line.dash': dashes });
+    } catch(e) { console.warn('Category linestyle restyle failed', e); }
+}
 
 
 
