@@ -91,11 +91,24 @@ class KarpathyAgentClaudeCodeBackend(KarpathyAgentBackend):
         """Single-turn Claude Code SDK call. Returns assistant text content only."""
         from claude_agent_sdk import query, ClaudeAgentOptions  # type: ignore
 
+        # Hard-disable extended thinking so the comparison with Qwen3.5-27B
+        # (thinking off) and Gemini 3.1 Pro Preview (thinking off) is fair.
+        # ThinkingConfigDisabled is a TypedDict {"type": "disabled"} that
+        # the SDK forwards to the underlying messages.create call.
+        #
+        # Critical: system_prompt="" replaces Claude Code's default preset
+        # system prompt (tool instructions, working dir context, git status).
+        # Without this override, Opus would receive MORE context than the
+        # Qwen / Gemini baselines did (they ran via OpenAI-compatible APIs
+        # with no system message, only the AGENT_PROMPT as a user turn).
         options = ClaudeAgentOptions(
             model=self._model,
             max_turns=self._max_turns,
             permission_mode=self._permission_mode,
             allowed_tools=[],  # pure completion; no tool use
+            system_prompt="",  # disable default Claude Code system prompt
+            thinking={"type": "disabled"},  # server-side disable
+            max_thinking_tokens=0,          # belt and suspenders
         )
 
         text_parts: list[str] = []
