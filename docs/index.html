@@ -332,9 +332,9 @@
 </details>
 
 <details class="method-refs">
-  <summary>LLM problem context &amp; prompts (read before saying "it's a black box")</summary>
+  <summary>LLM system prompts</summary>
   <div class="method-list">
-    <p style="margin:0.4em 0 0.8em;">Every LLM-based method in this benchmark is explicitly told what problem it is solving. Each prompt includes the optimization goal, the model class and training stack, the dataset, the hardware constraints with an explicit OOM warning, the search space with bounds, and the trial history. None of our LLM-based methods is a black-box optimizer. Click to expand each prompt verbatim.</p>
+    <p style="margin:0.4em 0 0.8em;">Full system prompts for each LLM-based method, filled in at runtime with the trial history and search space. Click to expand.</p>
 
     <details style="margin:0.4em 0;">
       <summary style="cursor:pointer;color:#444;font-weight:600;">Karpathy Agent (Code) — sees full <code>train.py</code></summary>
