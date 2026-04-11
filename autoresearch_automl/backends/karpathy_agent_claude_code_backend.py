@@ -105,8 +105,8 @@ class KarpathyAgentClaudeCodeBackend(KarpathyAgentBackend):
             model=self._model,
             max_turns=self._max_turns,
             permission_mode=self._permission_mode,
-            allowed_tools=[],  # pure completion; no tool use
-            system_prompt="",  # disable default Claude Code system prompt
+            tools=[],                       # load NO tools at all (not just an empty allow-filter)
+            system_prompt="",               # disable default Claude Code system prompt
             thinking={"type": "disabled"},  # server-side disable
             max_thinking_tokens=0,          # belt and suspenders
         )

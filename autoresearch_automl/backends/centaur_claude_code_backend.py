@@ -101,7 +101,7 @@ class CentaurClaudeCodeBackend(CentaurBackend):
             model=self._model,
             max_turns=1,
             permission_mode="bypassPermissions",
-            allowed_tools=[],                    # no tool use
+            tools=[],                            # load NO tools (not just an empty allow-filter)
             system_prompt="",                    # disable Claude Code default preset
             thinking={"type": "disabled"},       # server-side thinking off
             max_thinking_tokens=0,               # defensive
