@@ -323,11 +323,109 @@
     <div><strong>CMA-ES</strong> — Covariance Matrix Adaptation Evolution Strategy. Classical evolutionary HPO. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html" target="_blank" rel="noopener">Optuna</a></div>
     <div><strong>SMAC</strong> — Sequential Model-based Algorithm Configuration with random-forest surrogate. <a href="https://github.com/automl/SMAC3" target="_blank" rel="noopener">SMAC3</a></div>
     <div><strong>Random</strong> — Uniform random sampling baseline. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html" target="_blank" rel="noopener">Optuna</a></div>
-    <div><strong>LLAMBO (Optuna)</strong> — LLAMBO via OptunaHub port. Binary surrogate labels, categoricals random, failed trials hidden. <a href="https://hub.optuna.org/samplers/llambo/" target="_blank" rel="noopener">OptunaHub</a></div>
+    <div><strong>LLAMBO (Optuna)</strong> — LLAMBO via OptunaHub port. Binary surrogate labels, categoricals random, failed trials hidden. <a href="https://hub.optuna.org/samplers/llambo/" target="_blank" rel="noopener">OptunaHub</a> · <a href="https://arxiv.org/abs/2510.02798" target="_blank" rel="noopener">Shibata et al. 2025</a></div>
     <div><strong>LLAMBO (Paper)</strong> — Faithful reimplementation of LLAMBO paper: continuous labels, all HPs visible, failed trials included. <a href="https://arxiv.org/abs/2402.03921" target="_blank" rel="noopener">Ye et al. 2024</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/tree/main/autoresearch_automl/backends/llambo_original" target="_blank" rel="noopener">our impl</a></div>
     <div><strong>Karpathy Agent (14 HPs)</strong> — LLM sees trial history and suggests next config within the fixed 14-HP search space. <a href="https://github.com/ferreirafabio/autoresearch-automl" target="_blank" rel="noopener">our impl</a></div>
     <div><strong>Karpathy Agent (Code)</strong> — LLM directly edits <code>train.py</code> source each trial (unconstrained). <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener">Karpathy autoresearch</a></div>
     <div><strong>Centaur (CMA-ES+LLM)</strong> — Hybrid: CMA-ES runs every trial; on 30% of trials the LLM overrides with a config informed by CMA-ES internal state. <a href="https://arxiv.org/abs/2603.24647" target="_blank" rel="noopener">our paper</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/centaur.md" target="_blank" rel="noopener">algorithm</a></div>
+  </div>
+</details>
+
+<details class="method-refs">
+  <summary>LLM problem context &amp; prompts (read before saying "it's a black box")</summary>
+  <div class="method-list">
+    <p style="margin:0.4em 0 0.8em;">Every LLM-based method in this benchmark is explicitly told what problem it is solving. Each prompt includes the optimization goal, the model class and training stack, the dataset, the hardware constraints with an explicit OOM warning, the search space with bounds, and the trial history. None of our LLM-based methods is a black-box optimizer. Click to expand each prompt verbatim.</p>
+
+    <details style="margin:0.4em 0;">
+      <summary style="cursor:pointer;color:#444;font-weight:600;">Karpathy Agent (Code) — sees full <code>train.py</code></summary>
+      <pre style="background:#f7f7f9;padding:0.8em 1em;border-radius:6px;font-size:0.78em;overflow-x:auto;line-height:1.35;white-space:pre-wrap;">You are an autonomous ML researcher. Your goal: minimize val_bpb (validation bits-per-byte) for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
+
+Current train.py (the version that achieved the best result so far):
+```python
+{current_source}
+```
+
+Previous experiments:
+{history}
+
+Current best val_bpb: {best_val_bpb}
+
+Rules:
+- You can change ANYTHING in train.py: architecture, optimizer, hyperparameters, training loop, model size.
+- Do NOT modify imports from prepare (prepare.py is read-only).
+- The script runs for exactly 5 minutes on a single GPU with {available_vram} VRAM available.
+- Configs that use too much memory will crash (OOM) - be mindful of DEPTH, HEAD_DIM, DEVICE_BATCH_SIZE.
+- Simplicity wins: a small improvement from deleting code is better than a large improvement from adding complexity.
+- Think about what previous experiments tell you - learn from both successes and failures.
+
+Respond in EXACTLY this format (no extra text before or after):
+
+DESCRIPTION: &lt;one line explaining what you changed and why&gt;
+```python
+&lt;the complete modified train.py - must be valid, runnable Python&gt;
+```</pre>
+      <p style="font-size:0.82em;color:#777;margin:0.2em 0;">Source: <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/karpathy_agent_backend.py" target="_blank" rel="noopener">karpathy_agent_backend.py</a></p>
+    </details>
+
+    <details style="margin:0.4em 0;">
+      <summary style="cursor:pointer;color:#444;font-weight:600;">Karpathy Agent (14 HPs) — fixed search space</summary>
+      <pre style="background:#f7f7f9;padding:0.8em 1em;border-radius:6px;font-size:0.78em;overflow-x:auto;line-height:1.35;white-space:pre-wrap;">You are optimizing hyperparameters for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
+The goal is to minimize val_bpb (validation bits-per-byte).
+Training runs on a single H200 GPU (141GB VRAM, {available_vram} available after vLLM) - configs with very high DEPTH, large HEAD_DIM,
+or large DEVICE_BATCH_SIZE may cause OOM (out of memory) crashes.
+
+Current search space with bounds:
+{space_description}
+
+Previous evaluations (config -&gt; result):
+{history}
+
+{incumbent_info}
+
+Suggest the next configuration to try. Learn from both successful runs AND failures (OOM crashes
+mean the model was too large for the GPU). Respond with a JSON object mapping HP names to values.
+Only include HPs from the search space. Be creative but principled - consider what you know
+about transformer training dynamics.
+
+Respond ONLY with a valid JSON object, no explanation.</pre>
+      <p style="font-size:0.82em;color:#777;margin:0.2em 0;">Source: <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/karpathy_agent_hps_backend.py" target="_blank" rel="noopener">karpathy_agent_hps_backend.py</a></p>
+    </details>
+
+    <details style="margin:0.4em 0;">
+      <summary style="cursor:pointer;color:#444;font-weight:600;">Centaur (CMA-ES + LLM) — shares CMA-ES internal state</summary>
+      <pre style="background:#f7f7f9;padding:0.8em 1em;border-radius:6px;font-size:0.78em;overflow-x:auto;line-height:1.35;white-space:pre-wrap;">You are optimizing hyperparameters for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
+Goal: minimize val_bpb. GPU: H200 with {available_vram} available.
+
+Search space:
+{space_description}
+
+{cma_analysis}
+
+Previous evaluations (last 20):
+{history}
+
+{incumbent_info}
+
+Use CMA-ES's analysis as guidance:
+- If CMA-ES is converging (low sigma), exploit near its mean
+- If sigma is large, CMA-ES is still exploring - help by using your transformer knowledge
+- You can diverge from CMA-ES if you see patterns it might miss (e.g., OOM-prone regions, known good ratios)
+
+Respond ONLY with a valid JSON object mapping HP names to values.</pre>
+      <p style="font-size:0.82em;color:#777;margin:0.2em 0;">Source: <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/centaur_backend.py" target="_blank" rel="noopener">centaur_backend.py</a></p>
+    </details>
+
+    <details style="margin:0.4em 0;">
+      <summary style="cursor:pointer;color:#444;font-weight:600;">LLAMBO (Paper and Optuna) — custom task description</summary>
+      <pre style="background:#f7f7f9;padding:0.8em 1em;border-radius:6px;font-size:0.78em;overflow-x:auto;line-height:1.35;white-space:pre-wrap;">Optimizing a GPT-2 scale transformer for language modeling on climbmix-400b-shuffle.
+The model uses a Muon+AdamW optimizer with weight decay and learning rate scheduling.
+Architecture hyperparameters control model depth, width (via aspect ratio and head dim), and attention patterns. Optimization hyperparameters control learning rates for different parameter groups (embedding, unembedding, matrix, scalar), weight decay, and batch sizes.
+Goal: minimize val_bpb (validation bits-per-byte).
+Training runs on a single H200 GPU (141GB VRAM, {available_vram} available after vLLM) with a fixed time budget of {budget}s.
+VRAM is a soft constraint - large models with high DEPTH and large DEVICE_BATCH_SIZE can OOM.
+WINDOW_PATTERN is encoded as ordinal: 0=SSSL, 1=SSLL, 2=SLSL, 3=LLLL, 4=SSSS, 5=LSSL (controls sliding window vs full attention pattern per layer).</pre>
+      <p style="font-size:0.82em;color:#777;margin:0.2em 0;">This task description is prefixed to the LLAMBO surrogate / acquisition templates from <a href="https://arxiv.org/abs/2402.03921" target="_blank" rel="noopener">Ye et al. 2024</a>. Sources: <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/llambo_original_backend.py" target="_blank" rel="noopener">llambo_original_backend.py</a>, <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/llambo_backend.py" target="_blank" rel="noopener">llambo_backend.py</a></p>
+    </details>
   </div>
 </details>
 

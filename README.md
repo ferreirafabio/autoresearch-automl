@@ -165,9 +165,21 @@ python -m autoresearch_automl.cli run --backend centaur --trials 100 --llm-model
 
 Our baseline (Karpathy's default config) achieves val_bpb ≈ 0.991 on H200 at full clock speed (~1750K tokens/s), comparable to Karpathy's ~0.998 on H100. Early runs showed a higher baseline of ~1.008 due to GPU power throttling. All results reported here use non-throttled H200s.
 
+### LLM problem context (all 5 LLM-based methods receive it)
+
+Every LLM-based method in this benchmark is explicitly told what problem it is solving. Each prompt includes the optimization goal (minimize val_bpb), the model class and training stack (GPT-2 scale transformer, Muon+AdamW optimizer), the dataset (FineWeb), the hardware constraints with an explicit OOM warning, the search space with bounds, and the trial history. Full prompt templates are inlined verbatim in the paper appendix (§LLM Prompts and Problem Context) and live in source here:
+
+- Karpathy Agent (Code): [`karpathy_agent_backend.py`](autoresearch_automl/backends/karpathy_agent_backend.py) — `AGENT_PROMPT`
+- Karpathy Agent (14 HPs): [`karpathy_agent_hps_backend.py`](autoresearch_automl/backends/karpathy_agent_hps_backend.py) — `SUGGEST_PROMPT`
+- Centaur: [`centaur_backend.py`](autoresearch_automl/backends/centaur_backend.py) — `SUGGEST_PROMPT`
+- LLAMBO (Paper): [`llambo_original_backend.py`](autoresearch_automl/backends/llambo_original_backend.py) — `DEFAULT_TASK_DESCRIPTION` + [`llambo_original/acquisition_function.py`](autoresearch_automl/backends/llambo_original/acquisition_function.py)
+- LLAMBO (Optuna): [`llambo_backend.py`](autoresearch_automl/backends/llambo_backend.py) — `DEFAULT_TASK_DESCRIPTION`
+
+None of our LLM-based methods is a black-box optimizer. If you think the gap to classical methods should close given more context, the prompts in the appendix and source code above are the ones we used.
+
 ### LLAMBO (Optuna) vs LLAMBO (Paper)
 
-The [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) in several ways that materially affect optimization quality:
+The [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) ([Shibata et al., 2025](https://arxiv.org/abs/2510.02798)) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) in several ways that materially affect optimization quality:
 
 | Aspect | Original paper | OptunaHub port |
 |--------|---------------|----------------|
