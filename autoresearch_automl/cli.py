@@ -16,6 +16,7 @@ BACKEND_REGISTRY = {
     "random": "autoresearch_automl.backends.random_backend:RandomBackend",
     "karpathy_agent_hps": "autoresearch_automl.backends.karpathy_agent_hps_backend:KarpathyAgentHPSBackend",
     "karpathy_agent": "autoresearch_automl.backends.karpathy_agent_backend:KarpathyAgentBackend",
+    "karpathy_agent_claude_code": "autoresearch_automl.backends.karpathy_agent_claude_code_backend:KarpathyAgentClaudeCodeBackend",
     "optuna": "autoresearch_automl.backends.optuna_backend:OptunaBackend",
     "llambo": "autoresearch_automl.backends.llambo_backend:LLAMBOBackend",
     "llambo_original": "autoresearch_automl.backends.llambo_original_backend:LLAMBOOriginalBackend",
@@ -97,9 +98,9 @@ def run(
     backend_kwargs = {}
     if backend == "optuna" and storage:
         backend_kwargs["storage"] = storage
-    if llm_model and backend in ("karpathy_agent_hps", "karpathy_agent", "llambo", "llambo_original", "centaur"):
+    if llm_model and backend in ("karpathy_agent_hps", "karpathy_agent", "karpathy_agent_claude_code", "llambo", "llambo_original", "centaur"):
         backend_kwargs["model"] = llm_model
-    if backend in ("llambo", "llambo_original", "karpathy_agent_hps", "karpathy_agent", "centaur"):
+    if backend in ("llambo", "llambo_original", "karpathy_agent_hps", "karpathy_agent", "karpathy_agent_claude_code", "centaur"):
         backend_kwargs["log_dir"] = Path(results_dir)
     if llm_ratio is not None and backend == "centaur":
         backend_kwargs["llm_ratio"] = llm_ratio
@@ -145,9 +146,9 @@ def benchmark(method: str, scenario: str, seed: int, train_py: str, results_dir:
 
     sc = get_scenario(scenario)
     backend_kwargs = {}
-    if llm_model and method in ("karpathy_agent_hps", "karpathy_agent", "llambo", "llambo_original", "centaur"):
+    if llm_model and method in ("karpathy_agent_hps", "karpathy_agent", "karpathy_agent_claude_code", "llambo", "llambo_original", "centaur"):
         backend_kwargs["model"] = llm_model
-    if method in ("llambo", "llambo_original", "karpathy_agent_hps", "karpathy_agent", "centaur"):
+    if method in ("llambo", "llambo_original", "karpathy_agent_hps", "karpathy_agent", "karpathy_agent_claude_code", "centaur"):
         backend_kwargs["log_dir"] = Path(results_dir)
     hpo_backend = _load_backend(method, **backend_kwargs)
 
