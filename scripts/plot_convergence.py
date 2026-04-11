@@ -85,9 +85,11 @@ def plot_convergence_walltime(
     max_time = 0.0
     ranking = []
     for backend_dir, style in backends.items():
+        # Allow per-method absolute path override via style["path"]; otherwise join with results_dir
+        base = Path(style["path"]) if "path" in style else (results_dir / backend_dir)
         seed_interps = []
         for seed in range(3):
-            jsonl = results_dir / backend_dir / f"seed_{seed}" / "trials.jsonl"
+            jsonl = base / f"seed_{seed}" / "trials.jsonl"
             if not jsonl.exists():
                 continue
             trials = load_trials(jsonl)
@@ -332,6 +334,75 @@ def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
         BACKENDS_ALL,
         output_path,
         title="0.8B vs 27B LLM Optimizer",
+        ylim=(0.974, 0.993),
+    )
+
+
+# Gemini Pro Preview results are split across two result dirs:
+#   Centaur Gemini Pro lives in fabio's autoresearch-automl/results/gemini31pro_benchmark/
+#   KA Code + LLAMBO Gemini Pro live in zelaa's repo at /home/zelaa/autoresearch-automl-private/results/gemini31pro_benchmark/
+# The Qwen 27B baselines come from the standard results_dir.
+GEMINI_PRO_CENTAUR_BASE = Path(
+    "/work/dlclarge1/ferreira-autoresearch-automl/results/gemini31pro_benchmark"
+)
+GEMINI_PRO_ZELAA_BASE = Path(
+    "/home/zelaa/autoresearch-automl-private/results/gemini31pro_benchmark"
+)
+
+
+def _gemini_frontier_backends(results_dir: Path) -> dict[str, dict]:
+    """Build the backend dict for the Gemini frontier plot.
+
+    Same palette and linestyle convention as Fig 1 (BACKENDS_27B):
+      - classical = dashed, pure LLM = solid, hybrid = dashdot
+      - Qwen 27B and Gemini Pro variants of the same method family share a hue
+        but different shades (matches interactive demo).
+    """
+    return {
+        # TPE reference (classical)
+        "optuna": {
+            "label": "TPE (reference)",
+            "color": "#2196F3",
+            "linestyle": "--",
+            "path": str(results_dir / "optuna"),
+        },
+        # Hybrid Centaur: Qwen 27B (pink) vs Gemini Pro (burgundy)
+        "centaur_Qwen3_5_27B": {
+            "label": "Centaur [Qwen 27B]",
+            "color": "#E91E63",
+            "linestyle": "-.",
+            "path": str(results_dir / "centaur_Qwen3_5_27B"),
+        },
+        "centaur_gemini_3_1_pro_preview": {
+            "label": "Centaur [Gemini 3.1 Pro]",
+            "color": "#880E4F",
+            "linestyle": "-.",
+            "path": str(GEMINI_PRO_CENTAUR_BASE / "centaur_gemini_3_1_pro_preview"),
+        },
+        # Pure LLM: Karpathy Agent (Code) — Qwen 27B (deep purple) vs Gemini Pro (teal)
+        "karpathy_agent_Qwen3_5_27B": {
+            "label": "Karpathy Agent (Code) [Qwen 27B]",
+            "color": "#4A148C",
+            "linestyle": "-",
+            "path": str(results_dir / "karpathy_agent_Qwen3_5_27B"),
+        },
+        "karpathy_agent_gemini_3_1_pro_preview": {
+            "label": "Karpathy Agent (Code) [Gemini 3.1 Pro]",
+            "color": "#00897B",
+            "linestyle": "-",
+            "path": str(GEMINI_PRO_ZELAA_BASE / "karpathy_agent_gemini_3_1_pro_preview"),
+        },
+    }
+
+
+def plot_exp2_gemini_frontier(results_dir: Path, output_path: Path):
+    """Gemini 3.1 Pro Preview vs Qwen3.5-27B (Centaur and Karpathy Agent Code), with TPE reference."""
+    backends = _gemini_frontier_backends(results_dir)
+    plot_convergence_walltime(
+        results_dir,
+        backends,
+        output_path,
+        title="Frontier LLM Comparison: Gemini 3.1 Pro Preview vs Qwen3.5-27B",
         ylim=(0.974, 0.993),
     )
 
@@ -862,6 +933,7 @@ if __name__ == "__main__":
     # Primary plots: wall-time x-axis
     plot_exp2_27b_walltime(results_dir, assets_dir / "exp2_27b_walltime.png")
     plot_exp2_all_walltime(results_dir, assets_dir / "exp2_all_walltime.png")
+    plot_exp2_gemini_frontier(results_dir, assets_dir / "exp2_gemini_frontier.png")
     # Secondary plots: trial-number x-axis (appendix)
     plot_exp2_27b(results_dir, assets_dir / "exp2_27b_convergence.png")
     plot_exp2_all(results_dir, assets_dir / "exp2_all_convergence.png")
