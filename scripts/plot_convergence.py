@@ -262,15 +262,18 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
     )
 
 
+# Category linestyle convention (matches the interactive demo):
+#   classical HPO -> dashed ("--"), pure LLM -> solid ("-"), hybrid -> dashdot ("-.")
 BACKENDS_27B = {
-    "optuna": {"label": "TPE", "color": "#2196F3"},           # blue
-    "cma_es": {"label": "CMA-ES", "color": "#2E7D32"},        # dark green
-    "smac": {"label": "SMAC", "color": "#F57C00"},             # dark orange
-    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63"},  # pink
-    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#4B0082"},  # purple
-    "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107"},  # amber/gold
-    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4"},  # cyan
-    "random": {"label": "Random", "color": "#607D8B"},         # grey
+    "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "--"},                 # blue
+    "cma_es": {"label": "CMA-ES", "color": "#2E7D32", "linestyle": "--"},              # dark green
+    "smac": {"label": "SMAC", "color": "#F57C00", "linestyle": "--"},                  # dark orange
+    "random": {"label": "Random", "color": "#607D8B", "linestyle": "--"},              # grey
+    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63", "linestyle": "-."},  # pink
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#4A148C", "linestyle": "-"},  # deep purple
+    "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107", "linestyle": "-"},  # amber/gold
+    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4", "linestyle": "-"},  # cyan
+    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0", "linestyle": "-"},  # purple
 }
 
 BACKENDS_ALL = {
@@ -282,8 +285,8 @@ BACKENDS_ALL = {
     "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
     "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
-    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4B0082", "linestyle": "-"},
-    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4B0082", "linestyle": "--"},
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4A148C", "linestyle": "-"},
+    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4A148C", "linestyle": "--"},
 }
 
 
@@ -337,8 +340,8 @@ def plot_exp2_model_size(results_dir: Path, output_path: Path):
     """Compare 0.8B vs 27B LLM methods, with best classical as reference."""
     backends = {
         "cma_es": {"label": "CMA-ES (best classical)", "color": "#2E7D32", "linestyle": "-"},
-        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4B0082", "linestyle": "--"},
-        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4B0082", "linestyle": "-"},
+        "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4A148C", "linestyle": "--"},
+        "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4A148C", "linestyle": "-"},
         "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
         "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#D32F2F", "linestyle": "-"},
     }
