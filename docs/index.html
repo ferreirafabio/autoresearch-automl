@@ -313,7 +313,7 @@
     <li><a href="#fig5">Incumbent trace explorer</a></li>
     <li><a href="#fig6">Hyperparameter evolution</a></li>
     <li><a href="#fig7">2D HP scatter with OOM overlay</a></li>
-    <li><a href="#fig8">LLM prompt explorer</a></li>
+    <li><a href="#fig8">LLM prompts</a></li>
   </ol>
 </nav>
 
@@ -457,21 +457,68 @@
 
 
 
-<h2 id="fig8">8. LLM prompt explorer</h2>
+<h2 id="fig8">8. LLM prompts</h2>
 <p class="fig-desc">
-  Each LLM-based method receives a prompt containing the optimization goal, model class, training stack, hardware constraints, search space, and trial history. Select a method to view its prompt template. Braces like <code>{name}</code> are Python format placeholders filled in at runtime.
+  The two prompts below are the ones our LLM-based methods use. <strong>Karpathy Agent (Code)</strong> is the pure-LLM code-editing baseline; <strong>Centaur</strong> is our hybrid, which additionally shares CMA-ES's internal state with the LLM on a fraction of trials. Braces like <code>{name}</code> are Python format placeholders filled in at runtime with the current state.
 </p>
+
 <div class="plot-container">
-  <div class="controls">
-    <label>Method: <select id="prompt-method">
-      <option value="ka_code">Karpathy Agent (Code)</option>
-      <option value="ka_14hps">Karpathy Agent (14 HPs)</option>
-      <option value="centaur">Centaur (CMA-ES + LLM)</option>
-      <option value="llambo">LLAMBO (Paper and Optuna)</option>
-    </select></label>
-    <a id="prompt-source-link" href="#" target="_blank" rel="noopener" style="font-size:0.85em;color:#E91E63;text-decoration:none;margin-left:auto;">View source on GitHub ↗</a>
+  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1em;margin-bottom:0.6em;flex-wrap:wrap;">
+    <h3 style="margin:0;font-size:1em;font-weight:600;color:#0f0f0f;">Karpathy Agent (Code)</h3>
+    <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/karpathy_agent_backend.py" target="_blank" rel="noopener" style="font-size:0.85em;color:#E91E63;text-decoration:none;">View source on GitHub ↗</a>
   </div>
-  <pre id="prompt-display" style="background:#f7f7f9;padding:1em 1.2em;border-radius:8px;font-size:0.84em;overflow-x:auto;line-height:1.5;white-space:pre-wrap;margin:0;"></pre>
+  <pre style="background:#f7f7f9;padding:1em 1.2em;border-radius:8px;font-size:0.84em;overflow-x:auto;line-height:1.5;white-space:pre-wrap;margin:0;">You are an autonomous ML researcher. Your goal: minimize val_bpb (validation bits-per-byte) for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
+
+Current train.py (the version that achieved the best result so far):
+```python
+{current_source}
+```
+
+Previous experiments:
+{history}
+
+Current best val_bpb: {best_val_bpb}
+
+Rules:
+- You can change ANYTHING in train.py: architecture, optimizer, hyperparameters, training loop, model size.
+- Do NOT modify imports from prepare (prepare.py is read-only).
+- The script runs for exactly 5 minutes on a single GPU with {available_vram} VRAM available.
+- Configs that use too much memory will crash (OOM) - be mindful of DEPTH, HEAD_DIM, DEVICE_BATCH_SIZE.
+- Simplicity wins: a small improvement from deleting code is better than a large improvement from adding complexity.
+- Think about what previous experiments tell you - learn from both successes and failures.
+
+Respond in EXACTLY this format (no extra text before or after):
+
+DESCRIPTION: &lt;one line explaining what you changed and why&gt;
+```python
+&lt;the complete modified train.py - must be valid, runnable Python&gt;
+```</pre>
+</div>
+
+<div class="plot-container">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:1em;margin-bottom:0.6em;flex-wrap:wrap;">
+    <h3 style="margin:0;font-size:1em;font-weight:600;color:#0f0f0f;">Centaur (CMA-ES + LLM)</h3>
+    <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/centaur_backend.py" target="_blank" rel="noopener" style="font-size:0.85em;color:#E91E63;text-decoration:none;">View source on GitHub ↗</a>
+  </div>
+  <pre style="background:#f7f7f9;padding:1em 1.2em;border-radius:8px;font-size:0.84em;overflow-x:auto;line-height:1.5;white-space:pre-wrap;margin:0;">You are optimizing hyperparameters for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
+Goal: minimize val_bpb. GPU: H200 with {available_vram} available.
+
+Search space:
+{space_description}
+
+{cma_analysis}
+
+Previous evaluations (last 20):
+{history}
+
+{incumbent_info}
+
+Use CMA-ES's analysis as guidance:
+- If CMA-ES is converging (low sigma), exploit near its mean
+- If sigma is large, CMA-ES is still exploring - help by using your transformer knowledge
+- You can diverge from CMA-ES if you see patterns it might miss (e.g., OOM-prone regions, known good ratios)
+
+Respond ONLY with a valid JSON object mapping HP names to values.</pre>
 </div>
 
 
@@ -884,116 +931,6 @@ async function initInteractive() {
 
 document.addEventListener('DOMContentLoaded', initInteractive);
 
-// =================================================================
-// Fig 8: LLM prompt explorer
-// =================================================================
-const LLM_PROMPTS = {
-    ka_code: {
-        source: 'https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/karpathy_agent_backend.py',
-        text: `You are an autonomous ML researcher. Your goal: minimize val_bpb (validation bits-per-byte) for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
-
-Current train.py (the version that achieved the best result so far):
-\`\`\`python
-{current_source}
-\`\`\`
-
-Previous experiments:
-{history}
-
-Current best val_bpb: {best_val_bpb}
-
-Rules:
-- You can change ANYTHING in train.py: architecture, optimizer, hyperparameters, training loop, model size.
-- Do NOT modify imports from prepare (prepare.py is read-only).
-- The script runs for exactly 5 minutes on a single GPU with {available_vram} VRAM available.
-- Configs that use too much memory will crash (OOM) - be mindful of DEPTH, HEAD_DIM, DEVICE_BATCH_SIZE.
-- Simplicity wins: a small improvement from deleting code is better than a large improvement from adding complexity.
-- Think about what previous experiments tell you - learn from both successes and failures.
-
-Respond in EXACTLY this format (no extra text before or after):
-
-DESCRIPTION: <one line explaining what you changed and why>
-\`\`\`python
-<the complete modified train.py - must be valid, runnable Python>
-\`\`\``
-    },
-    ka_14hps: {
-        source: 'https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/karpathy_agent_hps_backend.py',
-        text: `You are optimizing hyperparameters for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
-The goal is to minimize val_bpb (validation bits-per-byte).
-Training runs on a single H200 GPU (141GB VRAM, {available_vram} available after vLLM) - configs with very high DEPTH, large HEAD_DIM,
-or large DEVICE_BATCH_SIZE may cause OOM (out of memory) crashes.
-
-Current search space with bounds:
-{space_description}
-
-Previous evaluations (config -> result):
-{history}
-
-{incumbent_info}
-
-Suggest the next configuration to try. Learn from both successful runs AND failures (OOM crashes
-mean the model was too large for the GPU). Respond with a JSON object mapping HP names to values.
-Only include HPs from the search space. Be creative but principled - consider what you know
-about transformer training dynamics.
-
-Respond ONLY with a valid JSON object, no explanation.`
-    },
-    centaur: {
-        source: 'https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/centaur_backend.py',
-        text: `You are optimizing hyperparameters for a GPT-2 scale transformer trained on climbmix-400b-shuffle.
-Goal: minimize val_bpb. GPU: H200 with {available_vram} available.
-
-Search space:
-{space_description}
-
-{cma_analysis}
-
-Previous evaluations (last 20):
-{history}
-
-{incumbent_info}
-
-Use CMA-ES's analysis as guidance:
-- If CMA-ES is converging (low sigma), exploit near its mean
-- If sigma is large, CMA-ES is still exploring - help by using your transformer knowledge
-- You can diverge from CMA-ES if you see patterns it might miss (e.g., OOM-prone regions, known good ratios)
-
-Respond ONLY with a valid JSON object mapping HP names to values.`
-    },
-    llambo: {
-        source: 'https://github.com/ferreirafabio/autoresearch-automl/blob/main/autoresearch_automl/backends/llambo_original_backend.py',
-        text: `Optimizing a GPT-2 scale transformer for language modeling on climbmix-400b-shuffle.
-The model uses a Muon+AdamW optimizer with weight decay and learning rate scheduling.
-Architecture hyperparameters control model depth, width (via aspect ratio and head dim), and attention patterns. Optimization hyperparameters control learning rates for different parameter groups (embedding, unembedding, matrix, scalar), weight decay, and batch sizes.
-Goal: minimize val_bpb (validation bits-per-byte).
-Training runs on a single H200 GPU (141GB VRAM, {available_vram} available after vLLM) with a fixed time budget of {budget}s.
-VRAM is a soft constraint - large models with high DEPTH and large DEVICE_BATCH_SIZE can OOM.
-WINDOW_PATTERN is encoded as ordinal: 0=SSSL, 1=SSLL, 2=SLSL, 3=LLLL, 4=SSSS, 5=LSSL (controls sliding window vs full attention pattern per layer).
-
-(This task description is prefixed to the LLAMBO surrogate / acquisition templates from Ye et al. 2024. LLAMBO (Paper) is our faithful reimplementation; LLAMBO (Optuna) uses the OptunaHub port with binary top-20% labels, random categorical sampling, and failed trials hidden.)`
-    }
-};
-
-function updatePromptDisplay() {
-    const sel = document.getElementById('prompt-method');
-    const disp = document.getElementById('prompt-display');
-    const link = document.getElementById('prompt-source-link');
-    if (!sel || !disp || !link) return;
-    const key = sel.value;
-    const p = LLM_PROMPTS[key];
-    if (!p) return;
-    disp.textContent = p.text;
-    link.href = p.source;
-}
-
-window.addEventListener('load', () => {
-    const sel = document.getElementById('prompt-method');
-    if (sel) {
-        sel.addEventListener('change', updatePromptDisplay);
-        updatePromptDisplay();
-    }
-});
 
 // =================================================================
 // Group filter buttons for Fig 1 and Fig 2
