@@ -9,7 +9,7 @@
 
 ## Introduction
 
-[autoresearch](https://github.com/karpathy/autoresearch) enables an LLM agent to search for optimal hyperparameter configurations on an unconstrained search space by editing the training code directly. [Shwartz Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) showed that TPE with expert hyperparameters can beat Karpathy's agent. We use autoresearch as a testbed to compare classical hyperparameter optimization (HPO) algorithms against LLM-based methods on tuning the hyperparameters of a small language model. We benchmark 9 methods — 4 classical, 4 LLM-based, and 1 hybrid — all under the same 24-hour GPU training budget with 3 seeds.
+[autoresearch](https://github.com/karpathy/autoresearch) enables an LLM agent to optimize hyperparameters by editing training code directly. We use it as a testbed to compare classical HPO algorithms against LLM-based methods on tuning the hyperparameters of a small language model under a fixed compute budget. When defining a fixed search space, classical methods such as CMA-ES and TPE consistently outperform LLM-based agents. Allowing the LLM to directly edit source code narrows the gap but does not close it, even with frontier models such as Claude Opus 4.6 and Gemini 3.1 Pro Preview. Our hybrid Centaur, which shares CMA-ES's internal state with the LLM, achieves the best result, and a 0.8B LLM already suffices to outperform all classical and pure LLM methods. We benchmark 9 methods, 4 classical, 4 LLM-based, and 1 hybrid, all under the same 24-hour GPU training budget with 3 seeds.
 
 ## Methods
 
@@ -30,7 +30,7 @@
 **Hybrid (fixed [14-HP search space](#search-space)):**
 - **Centaur (CMA-ES+LLM):** CMA-ES runs every trial; on 30% of trials, the LLM receives CMA-ES's internal state and suggests a config. CMA-ES updates from all results, including LLM-suggested ones. See [centaur.md](centaur.md).
 
-Our main experiments use self-hosted Qwen3.5 (0.8B and 27B) as the LLM optimizer via vLLM on the same GPU that trains the optimizee (~50M parameter language model). We additionally run frontier model experiments with Gemini 3.1 Pro Preview via the Gemini API.
+Our main experiments use self-hosted Qwen3.5 (0.8B and 27B) as the LLM optimizer via vLLM on the same GPU that trains the optimizee (~50M parameter language model). We additionally run frontier model experiments with Gemini 3.1 Pro Preview via the Gemini API and Claude Opus 4.6 via the Claude API.
 
 ## Experimental Setup
 
@@ -44,10 +44,12 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 
 | Method | Seeds | Best val_bpb | OOM% |
 |--------|-------|-------------|------|
+| Centaur [Opus 4.6] | 3 | **0.9739 ± 0.0012** | 17% |
 | Centaur [Qwen 27B] | 3 | **0.9763 ± 0.0005** | 15% |
 | Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0008** | 14% |
 | Centaur [Gemini 3.1 Pro Preview] | 3 | **0.9767 ± 0.0013** | 17% |
 | TPE | 3 | **0.9768 ± 0.0019** | 10% |
+| Karpathy Agent (Code) [Opus 4.6] | 1 | **0.9773** | 2% |
 | SMAC | 3 | **0.9778 ± 0.0020** | 35% |
 | CMA-ES | 3 | **0.9785 ± 0.0036** | 16% |
 | Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0046** | 11% |
@@ -59,11 +61,11 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 
 ### Unconstrained code editing is viable but requires model scale
 
-Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Given the simplicity of the setup and the use of a self-hosted open-weight model (Qwen3.5-27B), the gap to classical methods is smaller than one might expect. Experiments with the frontier model Gemini 3.1 Pro Preview (3 seeds) show competitive but not superior performance (KA Code: 0.9826 ± 0.0005 vs 0.9814 ± 0.0057 with Qwen), confirming that simply scaling the LLM optimizer does not close the gap.
+Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9773, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768).
 
 ### Frontier model comparison
 
-Gemini 3.1 Pro Preview vs Qwen3.5-27B for Karpathy Agent (Code) and Centaur. Solid = Gemini, dashed = Qwen. TPE shown as reference.
+Frontier models (Claude Opus 4.6, Gemini 3.1 Pro Preview) vs Qwen3.5-27B for Karpathy Agent (Code) and Centaur. Centaur with Opus 4.6 achieves the best result (0.9739). TPE shown as classical reference.
 
 ![Gemini 3.1 Pro Preview vs Qwen3.5-27B](assets/exp2_gemini_frontier.png)
 
@@ -75,7 +77,7 @@ Scaling the LLM from 0.8B to 27B is essential for unconstrained code editing (0.
 
 ### Hybrid optimization: best of both worlds
 
-Centaur outperformed all methods including CMA-ES alone by using the LLM on only 30% of trials. The LLM receives CMA-ES's full internal state (mean vector, step-size, covariance matrix), the top-5 configurations, and the last 20 trials. Centaur substantially reduces CMA-ES's cross-seed variance (std 0.0006 vs 0.0044 for CMA-ES), suggesting the LLM stabilizes the optimizer. Centaur with Gemini 3.1 Pro Preview (0.9767) performs comparably to Centaur with Qwen3.5-27B (0.9763), further confirming that scaling the LLM does not provide a significant advantage when paired with a strong classical optimizer.
+Centaur outperformed all methods including CMA-ES alone by using the LLM on only 30% of trials. The LLM receives CMA-ES's full internal state (mean vector, step-size, covariance matrix), the top-5 configurations, and the last 20 trials. A 0.8B LLM already suffices to outperform all classical and pure LLM methods. Scaling from 0.8B (0.9766) to 27B (0.9763) to Gemini Pro (0.9767) yields no improvement, suggesting a capability plateau. However, Centaur with Claude Opus 4.6 breaks through this plateau to 0.9739, with the improvement coming from higher-quality suggestions rather than better OOM avoidance (17% vs 15% for Qwen 27B).
 
 We ablate the LLM ratio: higher ratios degrade performance, confirming that CMA-ES should retain majority control. See [centaur.md](centaur.md) for the full algorithm.
 

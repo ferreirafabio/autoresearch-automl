@@ -9,7 +9,7 @@
 <!-- Open Graph -->
 <meta property="og:type" content="article">
 <meta property="og:title" content="Can LLMs Beat Classical Hyperparameter Optimization Algorithms?">
-<meta property="og:description" content="A 0.8B LLM paired with CMA-ES beats every HPO method we tried — including frontier LLMs like Gemini 3.1 Pro Preview. Interactive demo & paper.">
+<meta property="og:description" content="Classical HPO beats LLM agents, even frontier models. Our hybrid Centaur (CMA-ES + LLM) achieves the best result. Interactive demo & paper.">
 <meta property="og:url" content="https://ferreirafabio.github.io/autoresearch-automl">
 <meta property="og:image" content="https://ferreirafabio.github.io/autoresearch-automl/assets/exp2_27b_walltime.png">
 <meta property="og:image:alt" content="Convergence curves comparing classical and LLM-based HPO methods">
@@ -17,7 +17,7 @@
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Can LLMs Beat Classical HPO? Interactive Demo">
-<meta name="twitter:description" content="A 0.8B LLM + CMA-ES beats every HPO method we tried, including frontier models. Interactive demo & paper.">
+<meta name="twitter:description" content="Classical HPO beats LLM agents, even frontier models. Our hybrid Centaur (CMA-ES + LLM) achieves the best result. Interactive demo & paper.">
 <meta name="twitter:image" content="https://ferreirafabio.github.io/autoresearch-automl/assets/exp2_27b_walltime.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
@@ -293,11 +293,11 @@
 
 <div class="tldr">
   We benchmark 9 HPO methods (classical, LLM-based, and hybrid) on Karpathy's
-  <em>autoresearch</em> task under identical 24-hour budgets with 3 seeds. <strong>Classical methods
-  (CMA-ES, TPE, SMAC) consistently outperform pure LLM-based agents</strong> within a fixed search space.
-  <strong>Even frontier models like Gemini 3.1 Pro Preview do not close the gap.</strong>
-  Our hybrid <strong>Centaur</strong>, which shares CMA-ES's full internal state with the LLM,
-  achieves the best result in our experiments.
+  <em>autoresearch</em> task under identical 24-hour budgets. <strong>Classical methods
+  consistently outperform pure LLM-based agents</strong> within a fixed search space, even with
+  frontier models such as Claude Opus 4.6 and Gemini 3.1 Pro Preview.
+  Our hybrid <strong>Centaur</strong>, which shares CMA-ES's internal state with the LLM,
+  achieves the best result, and a 0.8B LLM already suffices to outperform all classical and pure LLM methods.
 </div>
 
 <h2 style="text-align:center;margin-top:2em;margin-bottom:0.5em;padding-top:0;border-top:none">Interactive Demo</h2>
