@@ -294,10 +294,13 @@
 <div class="tldr">
   We benchmark 9 HPO methods (classical, LLM-based, and hybrid) on Karpathy's
   <em>autoresearch</em> task under identical 24-hour budgets. <strong>Classical methods
-  consistently outperform pure LLM-based agents</strong> within a fixed search space, even with
-  frontier models such as Claude Opus 4.6 and Gemini 3.1 Pro Preview.
-  Our hybrid <strong>Centaur</strong>, which shares CMA-ES's internal state with the LLM,
+  consistently outperform pure LLM-based agents</strong> within a fixed search space, where
+  avoiding out-of-memory failures matters more than search diversity. Allowing the LLM
+  to directly edit source code narrows the gap but does not close it, even with frontier
+  models such as Claude Opus 4.6 and Gemini 3.1 Pro Preview.
+  Our hybrid <strong>Centaur</strong>, which shares CMA-ES's interpretable internal state with the LLM,
   achieves the best result, and a 0.8B LLM already suffices to outperform all classical and pure LLM methods.
+  All in all, our results suggest that <strong>LLMs are most effective as a complement to classical optimizers, not as a replacement</strong>.
 </div>
 
 <h2 style="text-align:center;margin-top:2em;margin-bottom:0.5em;padding-top:0;border-top:none">Interactive Demo</h2>
