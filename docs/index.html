@@ -1068,14 +1068,20 @@ function buildTraceTagList(containerId, traces) {
     return tagList;
 }
 
-function applyGroupFilter(containerId, group) {
+function applyGroupFilter(containerId, groups) {
+    // groups: Set of active group names, or the single string "all"
     const el = findPlotlyDivInContainer(containerId);
     if (!el || !el.data) return;
     const tagList = buildTraceTagList(containerId, el.data);
+    const showAll = groups === 'all' || (groups instanceof Set && groups.has('all'));
     const vis = tagList.map(tags => {
-        if (group === 'all') return true;
+        if (showAll) return true;
         if (!tags || tags.length === 0) return 'legendonly';
-        return tags.includes(group) ? true : 'legendonly';
+        // show trace if any of its tags is in the active set
+        for (const g of groups) {
+            if (tags.includes(g)) return true;
+        }
+        return 'legendonly';
     });
     Plotly.restyle(el, { visible: vis });
 }
@@ -1116,9 +1122,28 @@ function initGroupFilters() {
         if (el) lockAxes(el);
         gf.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
-                applyGroupFilter(target, btn.dataset.group);
+                const group = btn.dataset.group;
+                const allBtn = gf.querySelector('button[data-group="all"]');
+                if (group === 'all') {
+                    // Clicking "All" activates it, deactivates everything else.
+                    gf.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+                    applyGroupFilter(target, 'all');
+                } else {
+                    // Toggle this button. Deactivate "all" when any specific group is active.
+                    btn.classList.toggle('active');
+                    if (allBtn) allBtn.classList.remove('active');
+                    // Collect active groups
+                    const active = new Set();
+                    gf.querySelectorAll('button.active').forEach(b => active.add(b.dataset.group));
+                    if (active.size === 0) {
+                        // Nothing selected -> fall back to "All"
+                        if (allBtn) allBtn.classList.add('active');
+                        applyGroupFilter(target, 'all');
+                    } else {
+                        applyGroupFilter(target, active);
+                    }
+                }
                 if (el) reapplyAxisLock(el);
-                gf.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
             });
         });
     });
