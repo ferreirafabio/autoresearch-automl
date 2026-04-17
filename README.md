@@ -21,7 +21,7 @@
 
 **LLM-based (fixed [14-HP search space](#search-space)):**
 - **LLAMBO (Optuna):** LLM as surrogate + candidate generator inside Bayesian optimization ([OptunaHub port](https://hub.optuna.org/samplers/llambo/)). Uses binary surrogate labels, delegates categorical HPs to random sampling, and hides failed trials from the surrogate (see [Details](#llambo-optuna-vs-llambo-paper)).
-- **LLAMBO (Paper):** Our reimplementation faithful to the original paper: continuous surrogate labels, all HPs visible to the LLM, failed trials included ([Ye et al., 2024](https://arxiv.org/abs/2402.03921)).
+- **LLAMBO (Paper):** Our reimplementation faithful to the original paper: continuous surrogate labels, all HPs visible to the LLM, failed trials included ([Liu et al., 2024](https://arxiv.org/abs/2402.03921)).
 - **Karpathy Agent (14 HPs):** LLM sees trial history and suggests the next config within the fixed search space.
 
 **LLM-based (unconstrained search space):**
@@ -159,7 +159,7 @@ python -m autoresearch_automl.cli run --backend centaur --trials 100 --llm-model
 
 - [Karpathy's autoresearch](https://github.com/karpathy/autoresearch) for the training task and the idea of LLM-driven experimentation
 - [Ravid Shwartz Ziv](https://www.linkedin.com/posts/ravid-shwartz-ziv-8bb18761_do-llm-coding-agents-fool-us-karpathys-activity-7437556522240536576-ygrQ) for showing that expert HP selection beats blind LLM search
-- [LLAMBO (Ye et al., 2024)](https://arxiv.org/abs/2402.03921) for using LLMs as surrogate models in Bayesian optimization
+- [LLAMBO (Liu et al., 2024)](https://arxiv.org/abs/2402.03921) for using LLMs as surrogate models in Bayesian optimization
 
 ## Details
 
@@ -179,7 +179,7 @@ The system prompts used by each LLM-based method include the optimization goal (
 
 ### LLAMBO (Optuna) vs LLAMBO (Paper)
 
-The [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) ([Shibata et al., 2025](https://arxiv.org/abs/2510.02798)) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) in several ways that materially affect optimization quality:
+The [OptunaHub LLAMBO sampler](https://hub.optuna.org/samplers/llambo/) ([Ozaki et al., 2025](https://arxiv.org/abs/2510.02798)) differs from the [original paper code](https://github.com/tennisonliu/LLAMBO) in several ways that materially affect optimization quality:
 
 | Aspect | Original paper | OptunaHub port |
 |--------|---------------|----------------|

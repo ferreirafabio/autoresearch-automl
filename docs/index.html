@@ -327,8 +327,8 @@
     <div><strong>CMA-ES</strong> — Covariance Matrix Adaptation Evolution Strategy. Classical evolutionary HPO. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.CmaEsSampler.html" target="_blank" rel="noopener">Optuna</a></div>
     <div><strong>SMAC</strong> — Sequential Model-based Algorithm Configuration with random-forest surrogate. <a href="https://github.com/automl/SMAC3" target="_blank" rel="noopener">SMAC3</a></div>
     <div><strong>Random</strong> — Uniform random sampling baseline. <a href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.RandomSampler.html" target="_blank" rel="noopener">Optuna</a></div>
-    <div><strong>LLAMBO (Optuna)</strong> — LLAMBO via OptunaHub port. Binary surrogate labels, categoricals random, failed trials hidden. <a href="https://hub.optuna.org/samplers/llambo/" target="_blank" rel="noopener">OptunaHub</a> · <a href="https://arxiv.org/abs/2510.02798" target="_blank" rel="noopener">Shibata et al. 2025</a></div>
-    <div><strong>LLAMBO (Paper)</strong> — Faithful reimplementation of LLAMBO paper: continuous labels, all HPs visible, failed trials included. <a href="https://arxiv.org/abs/2402.03921" target="_blank" rel="noopener">Ye et al. 2024</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/tree/main/autoresearch_automl/backends/llambo_original" target="_blank" rel="noopener">our impl</a></div>
+    <div><strong>LLAMBO (Optuna)</strong> — LLAMBO via OptunaHub port. Binary surrogate labels, categoricals random, failed trials hidden. <a href="https://hub.optuna.org/samplers/llambo/" target="_blank" rel="noopener">OptunaHub</a> · <a href="https://arxiv.org/abs/2510.02798" target="_blank" rel="noopener">Ozaki et al. 2025</a></div>
+    <div><strong>LLAMBO (Paper)</strong> — Faithful reimplementation of LLAMBO paper: continuous labels, all HPs visible, failed trials included. <a href="https://arxiv.org/abs/2402.03921" target="_blank" rel="noopener">Liu et al. 2024</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/tree/main/autoresearch_automl/backends/llambo_original" target="_blank" rel="noopener">our impl</a></div>
     <div><strong>Karpathy Agent (14 HPs)</strong> — LLM sees trial history and suggests next config within the fixed 14-HP search space. <a href="https://github.com/ferreirafabio/autoresearch-automl" target="_blank" rel="noopener">our impl</a></div>
     <div><strong>Karpathy Agent (Code)</strong> — LLM directly edits <code>train.py</code> source each trial (unconstrained). <a href="https://github.com/karpathy/autoresearch" target="_blank" rel="noopener">Karpathy autoresearch</a></div>
     <div><strong>Centaur (CMA-ES+LLM)</strong> — Hybrid: CMA-ES runs every trial; on 30% of trials the LLM overrides with a config informed by CMA-ES internal state. <a href="https://arxiv.org/abs/2603.24647" target="_blank" rel="noopener">our paper</a> · <a href="https://github.com/ferreirafabio/autoresearch-automl/blob/main/centaur.md" target="_blank" rel="noopener">algorithm</a></div>
@@ -974,7 +974,7 @@ Training runs on a single H200 GPU (141GB VRAM, {available_vram} available after
 VRAM is a soft constraint - large models with high DEPTH and large DEVICE_BATCH_SIZE can OOM.
 WINDOW_PATTERN is encoded as ordinal: 0=SSSL, 1=SSLL, 2=SLSL, 3=LLLL, 4=SSSS, 5=LSSL (controls sliding window vs full attention pattern per layer).
 
-(This task description is prefixed to the LLAMBO surrogate / acquisition templates from Ye et al. 2024. LLAMBO (Paper) is our faithful reimplementation; LLAMBO (Optuna) uses the OptunaHub port with binary top-20% labels, random categorical sampling, and failed trials hidden.)`
+(This task description is prefixed to the LLAMBO surrogate / acquisition templates from Liu et al. 2024. LLAMBO (Paper) is our faithful reimplementation; LLAMBO (Optuna) uses the OptunaHub port with binary top-20% labels, random categorical sampling, and failed trials hidden.)`
     }
 };
 
@@ -1242,6 +1242,8 @@ window.addEventListener('load', () => {
         applyHashStateToDropdowns();
         wireHashUpdaters();
         applyCategoryLinestyles('fig1');
+        applyCategoryMarkers('fig1');
+        applyCategoryMarkers('fig2');
     }, 250);
 });
 
@@ -1263,6 +1265,38 @@ function applyCategoryLinestyles(containerId) {
     try {
         Plotly.restyle(el, { 'line.dash': dashes });
     } catch(e) { console.warn('Category linestyle restyle failed', e); }
+}
+
+// =================================================================
+// Category-based marker: circle = classical, diamond = hybrid, star = pure LLM
+// Only applied to mean lines (non-band traces), sparse to avoid clutter.
+// =================================================================
+function applyCategoryMarkers(containerId) {
+    const el = findPlotlyDivInContainer(containerId);
+    if (!el || !el.data) return;
+    const tagList = buildTraceTagList(containerId, el.data);
+    const modes = [];
+    const symbols = [];
+    tagList.forEach((tags, i) => {
+        const tr = el.data[i];
+        const isBand = !tags || tags.length === 0 || (tr.line && tr.line.width === 0);
+        if (isBand) {
+            modes.push(tr.mode || 'lines');
+            symbols.push('circle');
+            return;
+        }
+        let sym = 'circle';
+        if (tags.includes('hybrid')) sym = 'diamond';
+        else if (tags.includes('llm') || tags.includes('code')) sym = 'star';
+        else if (tags.includes('classical')) sym = 'circle';
+        modes.push('lines+markers');
+        symbols.push(sym);
+    });
+    try {
+        // Pass per-trace updates by giving arrays-of-values; Plotly's restyle
+        // expects either a single value or a per-trace array.
+        Plotly.restyle(el, { 'mode': modes, 'marker.symbol': symbols, 'marker.size': 7 });
+    } catch(e) { console.warn('Category markers restyle failed', e); }
 }
 
 

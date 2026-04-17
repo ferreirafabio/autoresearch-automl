@@ -73,6 +73,7 @@ def plot_convergence_walltime(
     title: str = "Convergence (wall-time)",
     ylim: tuple[float, float] = (0.973, 1.001),
     xlim_hours: tuple[float, float] | None = None,
+    max_bands: int = 5,
 ):
     """Plot convergence with x-axis = cumulative training wall-time (hours)."""
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -120,7 +121,9 @@ def plot_convergence_walltime(
 
         best_val = np.nanmin(mean)
         line, = ax.plot(INTERP_HOURS, mean, color=style["color"], linewidth=2,
-                        linestyle=style.get("linestyle", "-"))
+                        linestyle=style.get("linestyle", "-"),
+                        marker=style.get("marker", ""), markevery=80, markersize=6,
+                        markeredgecolor="black", markeredgewidth=0.5)
         ranking.append((best_val, line, style["label"], style["color"], INTERP_HOURS, mean, std))
 
     ax.set_xlabel("Cumulative training time (hours)", fontsize=12)
@@ -134,11 +137,11 @@ def plot_convergence_walltime(
     ax.set_xticks(range(0, int(ax.get_xlim()[1]) + 1, 2))
     ax.grid(True, alpha=0.3)
 
-    # Add bands for top 5 methods only
+    # Add bands for top methods only
     if ranking:
         ranking.sort(key=lambda r: r[0])
         for i, (val, line, name, color, hrs, mean, std) in enumerate(ranking):
-            if i < 5:
+            if i < max_bands:
                 ax.fill_between(hrs, mean - std, mean + std, color=color, alpha=0.08)
 
         max_name_len = max(len(r[2]) for r in ranking)
@@ -209,7 +212,9 @@ def plot_convergence_multi(
         x = np.arange(max_len)
         best_val = np.nanmin(mean)
         line, = ax.plot(x, mean, color=style["color"], linewidth=2,
-                        linestyle=style.get("linestyle", "-"))
+                        linestyle=style.get("linestyle", "-"),
+                        marker=style.get("marker", ""), markevery=25, markersize=6,
+                        markeredgecolor="black", markeredgewidth=0.5)
         # Only show bands for top 5 methods (by best val)
         ranking.append((best_val, line, style["label"], style["color"], x, mean, std))
 
@@ -266,29 +271,30 @@ def plot_exp2_0_8b(results_dir: Path, output_path: Path):
 
 # Category linestyle convention (matches the interactive demo):
 #   classical HPO -> dashed ("--"), pure LLM -> solid ("-"), hybrid -> dashdot ("-.")
+# Marker convention (Option B, grouped by category):
+#   classical HPO -> o (circle), hybrid -> D (diamond), pure LLM -> * (star)
 BACKENDS_27B = {
-    "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "--"},                 # blue
-    "cma_es": {"label": "CMA-ES", "color": "#2E7D32", "linestyle": "--"},              # dark green
-    "smac": {"label": "SMAC", "color": "#F57C00", "linestyle": "--"},                  # dark orange
-    "random": {"label": "Random", "color": "#607D8B", "linestyle": "--"},              # grey
-    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63", "linestyle": "-."},  # pink
-    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#4A148C", "linestyle": "-"},  # deep purple
-    "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107", "linestyle": "-"},  # amber/gold
-    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4", "linestyle": "-"},  # cyan
-    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0", "linestyle": "-"},  # purple
+    "optuna": {"label": "TPE", "color": "#2196F3", "linestyle": "--", "marker": "o"},
+    "cma_es": {"label": "CMA-ES", "color": "#2E7D32", "linestyle": "--", "marker": "o"},
+    "smac": {"label": "SMAC", "color": "#F57C00", "linestyle": "--", "marker": "o"},
+    "random": {"label": "Random", "color": "#607D8B", "linestyle": "--", "marker": "o"},
+    "centaur_Qwen3_5_27B": {"label": "Centaur (CMA-ES+LLM)", "color": "#E91E63", "linestyle": "-.", "marker": "D"},
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code)", "color": "#4A148C", "linestyle": "-", "marker": "*"},
+    "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs)", "color": "#FFC107", "linestyle": "-", "marker": "*"},
+    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper)", "color": "#00BCD4", "linestyle": "-", "marker": "*"},
+    "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0", "linestyle": "-", "marker": "*"},
 }
 
 BACKENDS_ALL = {
-    "optuna": {"label": "TPE (best classical)", "color": "#2196F3", "linestyle": "-"},
-    "random": {"label": "Random", "color": "#607D8B", "linestyle": "-"},
-    "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#E91E63", "linestyle": "-"},
-    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--"},
-    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-"},
-    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--"},
-    "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-"},
-    "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--"},
-    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4A148C", "linestyle": "-"},
-    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4A148C", "linestyle": "--"},
+    "optuna": {"label": "TPE (best classical)", "color": "#2196F3", "linestyle": "-", "marker": "o"},
+    "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#E91E63", "linestyle": "-", "marker": "D"},
+    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--", "marker": "D"},
+    "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-", "marker": "*"},
+    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--", "marker": "*"},
+    "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-", "marker": "*"},
+    "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--", "marker": "*"},
+    "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4A148C", "linestyle": "-", "marker": "*"},
+    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4A148C", "linestyle": "--", "marker": "*"},
 }
 
 
@@ -329,12 +335,22 @@ def plot_exp2_all(results_dir: Path, output_path: Path):
 
 def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
     """0.8B vs 27B comparison — wall-time x-axis (primary plot)."""
+    backends = {
+        "centaur_claude_opus_4_6": {
+            "label": "Centaur [Opus 4.6] (best)",
+            "color": "#C62828",
+            "linestyle": "-.",
+            "marker": "D",
+            "path": str(OPUS46_BASE / "centaur_claude_opus_4_6"),
+        },
+        **{k: v for k, v in BACKENDS_ALL.items() if k != "random"},
+    }
     plot_convergence_walltime(
         results_dir,
-        BACKENDS_ALL,
+        backends,
         output_path,
         title="0.8B vs 27B LLM Optimizer",
-        ylim=(0.974, 0.993),
+        ylim=(0.971, 0.993),
     )
 
 
@@ -347,6 +363,9 @@ GEMINI_PRO_CENTAUR_BASE = Path(
 )
 GEMINI_PRO_ZELAA_BASE = Path(
     "/home/zelaa/autoresearch-automl-private/results/gemini31pro_benchmark"
+)
+OPUS46_BASE = Path(
+    "/work/dlclarge1/ferreira-autoresearch-automl/results/opus46_benchmark"
 )
 
 
@@ -364,19 +383,22 @@ def _gemini_frontier_backends(results_dir: Path) -> dict[str, dict]:
             "label": "TPE (reference)",
             "color": "#2196F3",
             "linestyle": "--",
+            "marker": "o",
             "path": str(results_dir / "optuna"),
         },
-        # Hybrid Centaur: Qwen 27B (pink) vs Gemini Pro (burgundy)
+        # Hybrid Centaur: Qwen 27B (pink) vs Gemini Pro (burgundy) vs Opus (dark red)
         "centaur_Qwen3_5_27B": {
             "label": "Centaur [Qwen 27B]",
             "color": "#E91E63",
             "linestyle": "-.",
+            "marker": "D",
             "path": str(results_dir / "centaur_Qwen3_5_27B"),
         },
         "centaur_gemini_3_1_pro_preview": {
             "label": "Centaur [Gemini 3.1 Pro]",
             "color": "#880E4F",
             "linestyle": "-.",
+            "marker": "D",
             "path": str(GEMINI_PRO_CENTAUR_BASE / "centaur_gemini_3_1_pro_preview"),
         },
         # Pure LLM: Karpathy Agent (Code) — Qwen 27B (deep purple) vs Gemini Pro (teal)
@@ -384,26 +406,44 @@ def _gemini_frontier_backends(results_dir: Path) -> dict[str, dict]:
             "label": "Karpathy Agent (Code) [Qwen 27B]",
             "color": "#4A148C",
             "linestyle": "-",
+            "marker": "*",
             "path": str(results_dir / "karpathy_agent_Qwen3_5_27B"),
         },
         "karpathy_agent_gemini_3_1_pro_preview": {
             "label": "Karpathy Agent (Code) [Gemini 3.1 Pro]",
             "color": "#00897B",
             "linestyle": "-",
+            "marker": "*",
             "path": str(GEMINI_PRO_ZELAA_BASE / "karpathy_agent_gemini_3_1_pro_preview"),
+        },
+        # Claude Opus 4.6 (frontier closed-source model)
+        "centaur_claude_opus_4_6": {
+            "label": "Centaur [Opus 4.6]",
+            "color": "#C62828",
+            "linestyle": "-.",
+            "marker": "D",
+            "path": str(OPUS46_BASE / "centaur_claude_opus_4_6"),
+        },
+        "karpathy_agent_claude_opus_4_6": {
+            "label": "Karpathy Agent (Code) [Opus 4.6]",
+            "color": "#1565C0",
+            "linestyle": "-",
+            "marker": "*",
+            "path": str(OPUS46_BASE / "karpathy_agent_claude_opus_4_6"),
         },
     }
 
 
 def plot_exp2_gemini_frontier(results_dir: Path, output_path: Path):
-    """Gemini 3.1 Pro Preview vs Qwen3.5-27B (Centaur and Karpathy Agent Code), with TPE reference."""
+    """Frontier models vs Qwen3.5-27B (Centaur and Karpathy Agent Code), with TPE reference."""
     backends = _gemini_frontier_backends(results_dir)
     plot_convergence_walltime(
         results_dir,
         backends,
         output_path,
-        title="Frontier LLM Comparison: Gemini 3.1 Pro Preview vs Qwen3.5-27B",
-        ylim=(0.974, 0.993),
+        title="Scaling the LLM Optimizer: Frontier Models vs Qwen3.5-27B",
+        ylim=(0.971, 0.993),
+        max_bands=99,
     )
 
 
