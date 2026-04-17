@@ -1242,6 +1242,8 @@ window.addEventListener('load', () => {
         applyHashStateToDropdowns();
         wireHashUpdaters();
         applyCategoryLinestyles('fig1');
+        applyCategoryMarkers('fig1');
+        applyCategoryMarkers('fig2');
     }, 250);
 });
 
@@ -1270,17 +1272,26 @@ function applyCategoryLinestyles(containerId) {
 // Only applied to mean lines (non-band traces), sparse to avoid clutter.
 // =================================================================
 function applyCategoryMarkers(containerId) {
+    // Plotly doesn't have matplotlib's markevery; we fake it by passing a
+    // per-point size array where most points have size 0 and only ~12 evenly
+    // spaced indices have size > 0. That's the cleanest way to get sparse
+    // markers without mutating the underlying data.
     const el = findPlotlyDivInContainer(containerId);
     if (!el || !el.data) return;
     const tagList = buildTraceTagList(containerId, el.data);
     const modes = [];
     const symbols = [];
+    const sizes = [];
+    const lineColors = [];
+    const N_MARKERS = 12;
     tagList.forEach((tags, i) => {
         const tr = el.data[i];
         const isBand = !tags || tags.length === 0 || (tr.line && tr.line.width === 0);
         if (isBand) {
             modes.push(tr.mode || 'lines');
             symbols.push('circle');
+            sizes.push(0);
+            lineColors.push((tr.marker && tr.marker.line && tr.marker.line.color) || 'rgba(0,0,0,0)');
             return;
         }
         let sym = 'circle';
@@ -1289,11 +1300,21 @@ function applyCategoryMarkers(containerId) {
         else if (tags.includes('classical')) sym = 'circle';
         modes.push('lines+markers');
         symbols.push(sym);
+        const n = (tr.x || []).length;
+        const step = Math.max(1, Math.floor(n / N_MARKERS));
+        const arr = new Array(n).fill(0);
+        for (let k = Math.floor(step / 2); k < n; k += step) arr[k] = 9;
+        sizes.push(arr);
+        lineColors.push('#000');
     });
     try {
-        // Pass per-trace updates by giving arrays-of-values; Plotly's restyle
-        // expects either a single value or a per-trace array.
-        Plotly.restyle(el, { 'mode': modes, 'marker.symbol': symbols, 'marker.size': 7 });
+        Plotly.restyle(el, {
+            'mode': modes,
+            'marker.symbol': symbols,
+            'marker.size': sizes,
+            'marker.line.color': lineColors,
+            'marker.line.width': 0.5,
+        });
     } catch(e) { console.warn('Category markers restyle failed', e); }
 }
 
