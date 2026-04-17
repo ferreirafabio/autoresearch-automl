@@ -49,7 +49,7 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 | Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0008** | 14% |
 | Centaur [Gemini 3.1 Pro Preview] | 3 | **0.9767 ± 0.0013** | 17% |
 | TPE | 3 | **0.9768 ± 0.0019** | 10% |
-| Karpathy Agent (Code) [Opus 4.6] | 1 | **0.9773** | 2% |
+| Karpathy Agent (Code) [Opus 4.6] | 3 | **0.9770 ± 0.0027** | 5% |
 | SMAC | 3 | **0.9778 ± 0.0020** | 35% |
 | CMA-ES | 3 | **0.9785 ± 0.0036** | 16% |
 | Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0046** | 11% |
@@ -61,7 +61,7 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 
 ### Unconstrained code editing is viable but requires model scale
 
-Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9773, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768).
+Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9770 ± 0.0027, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768).
 
 ### Frontier model comparison
 
