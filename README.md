@@ -42,17 +42,19 @@ Single H200 GPU, 5 min/trial, minimize val_bpb. Search space: 14 HPs auto-extrac
 
 Within the fixed search space, classical HPO methods consistently outperform LLM-based agents. The gap to the best fixed-space LLM method (LLAMBO Paper at 0.9862) is substantial, and several pure LLM methods perform worse than random search, indicating that restricting LLMs to a fixed HP search space does not leverage their strengths. OOM avoidance matters more than search diversity: the top methods all keep OOM rates below 16%, while the bottom four exceed 36%. Notably, LLAMBO observes full trial history yet produces OOM rates (48-61%) comparable to random search (56%), suggesting that small/mid-sized LLMs fail to learn which regions cause memory failures.
 
+Best in each category is highlighted: <span style="background-color:#0072B2;color:white;padding:1px 6px;border-radius:3px">hybrid</span> <span style="background-color:#E69F00;color:black;padding:1px 6px;border-radius:3px">classical</span> <span style="background-color:#009E73;color:white;padding:1px 6px;border-radius:3px">pure LLM</span> (Okabe-Ito colorblind-safe).
+
 | Method | Seeds | Best val_bpb | OOM% |
 |--------|-------|-------------|------|
-| Centaur [Opus 4.6] | 3 | **0.9739 ± 0.0012** | 17% |
-| Centaur [Qwen 27B] | 3 | **0.9763 ± 0.0005** | 15% |
-| Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0008** | 13% |
-| Centaur [Gemini 3.1 Pro] | 3 | **0.9767 ± 0.0013** | 20% |
-| TPE | 3 | **0.9768 ± 0.0019** | 11% |
-| Karpathy Agent (Code) [Opus 4.6] | 3 | **0.9770 ± 0.0027** | 5% |
-| SMAC | 3 | **0.9778 ± 0.0020** | 36% |
-| CMA-ES | 3 | **0.9785 ± 0.0036** | 16% |
-| Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0046** | 12% |
+| <span style="background-color:#0072B2;color:white">**Centaur [Opus 4.6]**</span> | 3 | **0.9739 ± 0.0012** | 17% |
+| Centaur [Qwen 27B] | 3 | 0.9763 ± 0.0005 | 15% |
+| Centaur [Qwen 0.8B] | 3 | 0.9766 ± 0.0008 | 13% |
+| Centaur [Gemini 3.1 Pro] | 3 | 0.9767 ± 0.0013 | 20% |
+| <span style="background-color:#E69F00;color:black">**TPE**</span> | 3 | **0.9768 ± 0.0019** | 11% |
+| <span style="background-color:#009E73;color:white">**Karpathy Agent (Code) [Opus 4.6]**</span> | 3 | **0.9770 ± 0.0027** | 5% |
+| SMAC | 3 | 0.9778 ± 0.0020 | 36% |
+| CMA-ES | 3 | 0.9785 ± 0.0036 | 16% |
+| Karpathy Agent (Code) [Qwen 27B] | 3 | 0.9814 ± 0.0046 | 12% |
 | Karpathy Agent (Code) [Gemini 3.1 Pro] | 3 | 0.9826 ± 0.0004 | 3% |
 | LLAMBO (Paper) [Qwen 27B] | 3 | 0.9862 ± 0.0041 | 48% |
 | Random | 3 | 0.9873 ± 0.0021 | 56% |
