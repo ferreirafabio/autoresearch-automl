@@ -1120,26 +1120,34 @@ function initGroupFilters() {
         // Lock axes once per plot
         const el = findPlotlyDivInContainer(target);
         if (el) lockAxes(el);
+        // Initial state: All + every group highlighted (everything visible)
+        gf.querySelectorAll('button').forEach(b => b.classList.add('active'));
         gf.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('click', () => {
                 const group = btn.dataset.group;
                 const allBtn = gf.querySelector('button[data-group="all"]');
+                const allButtons = gf.querySelectorAll('button');
+                const specificButtons = Array.from(allButtons).filter(b => b.dataset.group !== 'all');
                 if (group === 'all') {
-                    // Clicking "All" activates it, deactivates everything else.
-                    gf.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+                    // Clicking "All" highlights every button (everything visible).
+                    allButtons.forEach(b => b.classList.add('active'));
                     applyGroupFilter(target, 'all');
                 } else {
-                    // Toggle this button. Deactivate "all" when any specific group is active.
-                    btn.classList.toggle('active');
-                    if (allBtn) allBtn.classList.remove('active');
-                    // Collect active groups
+                    // If "All" is active, a specific-group click narrows down to only that group.
+                    if (allBtn && allBtn.classList.contains('active')) {
+                        allBtn.classList.remove('active');
+                        specificButtons.forEach(b => b.classList.toggle('active', b === btn));
+                    } else {
+                        btn.classList.toggle('active');
+                    }
                     const active = new Set();
-                    gf.querySelectorAll('button.active').forEach(b => active.add(b.dataset.group));
-                    if (active.size === 0) {
-                        // Nothing selected -> fall back to "All"
-                        if (allBtn) allBtn.classList.add('active');
+                    specificButtons.forEach(b => { if (b.classList.contains('active')) active.add(b.dataset.group); });
+                    if (active.size === 0 || active.size === specificButtons.length) {
+                        // Nothing selected OR every specific group selected -> treat as "All"
+                        allButtons.forEach(b => b.classList.add('active'));
                         applyGroupFilter(target, 'all');
                     } else {
+                        if (allBtn) allBtn.classList.remove('active');
                         applyGroupFilter(target, active);
                     }
                 }
