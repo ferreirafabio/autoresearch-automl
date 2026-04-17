@@ -1364,7 +1364,7 @@ function applyCategoryMarkers(containerId) {
         let hash = 0;
         for (let c = 0; c < name.length; c++) hash = ((hash << 5) - hash + name.charCodeAt(c)) | 0;
         const offset = Math.abs(hash) % step;
-        for (let k = offset; k < n; k += step) arr[k] = 9;
+        for (let k = offset; k < n; k += step) arr[k] = 12;
         sizes.push(arr);
         lineColors.push('#000');
     });

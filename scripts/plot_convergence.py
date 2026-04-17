@@ -122,7 +122,7 @@ def plot_convergence_walltime(
         best_val = np.nanmin(mean)
         line, = ax.plot(INTERP_HOURS, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"),
-                        marker=style.get("marker", ""), markevery=80, markersize=6,
+                        marker=style.get("marker", ""), markevery=80, markersize=9,
                         markeredgecolor="black", markeredgewidth=0.5)
         ranking.append((best_val, line, style["label"], style["color"], INTERP_HOURS, mean, std))
 
@@ -213,7 +213,7 @@ def plot_convergence_multi(
         best_val = np.nanmin(mean)
         line, = ax.plot(x, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"),
-                        marker=style.get("marker", ""), markevery=25, markersize=6,
+                        marker=style.get("marker", ""), markevery=25, markersize=9,
                         markeredgecolor="black", markeredgewidth=0.5)
         # Only show bands for top 5 methods (by best val)
         ranking.append((best_val, line, style["label"], style["color"], x, mean, std))
