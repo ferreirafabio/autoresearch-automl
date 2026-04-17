@@ -120,9 +120,17 @@ def plot_convergence_walltime(
         std = np.nanstd(aligned, axis=0)
 
         best_val = np.nanmin(mean)
+        # Deterministic per-trace marker offset (stable hash of label) so markers
+        # across methods don't line up vertically at the same x positions - matches
+        # the interactive demo behavior.
+        import hashlib
+        label_hash = int(hashlib.md5(style["label"].encode()).hexdigest()[:8], 16)
+        me_step = 80
+        offset = label_hash % me_step
         line, = ax.plot(INTERP_HOURS, mean, color=style["color"], linewidth=2,
                         linestyle=style.get("linestyle", "-"),
-                        marker=style.get("marker", ""), markevery=80, markersize=9,
+                        marker=style.get("marker", ""),
+                        markevery=(offset, me_step), markersize=9,
                         markeredgecolor="black", markeredgewidth=0.5)
         ranking.append((best_val, line, style["label"], style["color"], INTERP_HOURS, mean, std))
 

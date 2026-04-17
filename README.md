@@ -64,7 +64,7 @@ Best in each category is highlighted: <span style="background-color:#0072B2;colo
 
 ### Unconstrained code editing is viable but requires model scale
 
-Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9770 ± 0.0027, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768). Frontier model capability also shows up in the OOM rate: Karpathy Agent (Code)'s failure rate drops monotonically with LLM capability (19% for Qwen 0.8B, 12% for Qwen 27B, 3% for Gemini 3.1 Pro, 5% for Opus 4.6), whereas Centaur's stays roughly constant around 13-20%, indicating that CMA-ES dominates OOM avoidance in the hybrid.
+Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9770 ± 0.0027, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768). Frontier model capability also shows up in the OOM rate: Karpathy Agent (Code)'s failure rate drops sharply with LLM capability (19% for Qwen 0.8B, 12% for Qwen 27B, 3% for Gemini 3.1 Pro, 5% for Opus 4.6), whereas Centaur's stays in a narrow range (13-20%) across model choices, indicating that CMA-ES dominates OOM avoidance in the hybrid.
 
 ### Frontier model comparison
 
