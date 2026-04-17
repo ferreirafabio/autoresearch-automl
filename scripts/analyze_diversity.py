@@ -33,6 +33,10 @@ DEFAULT = {
 
 HP_ORDER = list(BOUNDS.keys())
 
+OPUS_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/results/opus46_benchmark")
+GEMINI_PRO_CENTAUR_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/results/gemini31pro_benchmark")
+GEMINI_PRO_KA_BASE = Path("/home/zelaa/autoresearch-automl-private/results/gemini31pro_benchmark")
+
 BACKENDS = {
     "centaur_Qwen3_5_0_8B": "Centaur [0.8B]",
     "centaur_Qwen3_5_27B": "Centaur [27B]",
@@ -48,6 +52,12 @@ BACKENDS = {
     "karpathy_agent_hps": "Karpathy Agent (14 HPs) [0.8B]",
     "llambo_Qwen3_5_27B": "LLAMBO (Optuna) [27B]",
     "llambo": "LLAMBO (Optuna) [0.8B]",
+    # Claude Opus 4.6 (paths are absolute, resolved in main())
+    "@opus:centaur_claude_opus_4_6": "Centaur [Opus 4.6]",
+    "@opus:karpathy_agent_claude_opus_4_6": "Karpathy Agent (Code) [Opus 4.6]",
+    # Gemini 3.1 Pro Preview
+    "@geminipro-centaur:centaur_gemini_3_1_pro_preview": "Centaur [Gemini 3.1 Pro]",
+    "@geminipro-ka:karpathy_agent_gemini_3_1_pro_preview": "Karpathy Agent (Code) [Gemini 3.1 Pro]",
 }
 
 MIN_BUDGET_FRAC = 0.70
@@ -90,8 +100,16 @@ def main():
         n_seeds = 0
         is_code = "Code" in display_name
 
+        if backend_dir.startswith("@opus:"):
+            base = OPUS_BASE / backend_dir.removeprefix("@opus:")
+        elif backend_dir.startswith("@geminipro-centaur:"):
+            base = GEMINI_PRO_CENTAUR_BASE / backend_dir.removeprefix("@geminipro-centaur:")
+        elif backend_dir.startswith("@geminipro-ka:"):
+            base = GEMINI_PRO_KA_BASE / backend_dir.removeprefix("@geminipro-ka:")
+        else:
+            base = RESULTS / backend_dir
         for seed in range(10):
-            jsonl = RESULTS / backend_dir / f"seed_{seed}" / "trials.jsonl"
+            jsonl = base / f"seed_{seed}" / "trials.jsonl"
             if not jsonl.exists():
                 continue
             # Cap trials at 24h training budget
