@@ -46,22 +46,23 @@ Within the fixed search space, classical HPO methods consistently outperform LLM
 |--------|-------|-------------|------|
 | Centaur [Opus 4.6] | 3 | **0.9739 ± 0.0012** | 17% |
 | Centaur [Qwen 27B] | 3 | **0.9763 ± 0.0005** | 15% |
-| Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0008** | 14% |
-| Centaur [Gemini 3.1 Pro Preview] | 3 | **0.9767 ± 0.0013** | 17% |
-| TPE | 3 | **0.9768 ± 0.0019** | 10% |
+| Centaur [Qwen 0.8B] | 3 | **0.9766 ± 0.0008** | 13% |
+| Centaur [Gemini 3.1 Pro] | 3 | **0.9767 ± 0.0013** | 20% |
+| TPE | 3 | **0.9768 ± 0.0019** | 11% |
 | Karpathy Agent (Code) [Opus 4.6] | 3 | **0.9770 ± 0.0027** | 5% |
-| SMAC | 3 | **0.9778 ± 0.0020** | 35% |
+| SMAC | 3 | **0.9778 ± 0.0020** | 36% |
 | CMA-ES | 3 | **0.9785 ± 0.0036** | 16% |
-| Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0046** | 11% |
-| Karpathy Agent (Code) [Gemini 3.1 Pro Preview] | 3 | 0.9826 ± 0.0004 | 3% |
-| LLAMBO (Paper) [27B] | 3 | 0.9862 ± 0.0041 | 47% |
+| Karpathy Agent (Code) [Qwen 27B] | 3 | **0.9814 ± 0.0046** | 12% |
+| Karpathy Agent (Code) [Gemini 3.1 Pro] | 3 | 0.9826 ± 0.0004 | 3% |
+| LLAMBO (Paper) [Qwen 27B] | 3 | 0.9862 ± 0.0041 | 48% |
 | Random | 3 | 0.9873 ± 0.0021 | 56% |
-| LLAMBO (Optuna) [27B] | 3 | 0.9882 ± 0.0012 | 61% |
-| Karpathy Agent (14 HPs) [27B] | 3 | 0.9904 ± 0.0002 | 0% |
+| LLAMBO (Optuna) [Qwen 27B] | 3 | 0.9882 ± 0.0012 | 61% |
+| Karpathy Agent (14 HPs) [Qwen 27B] | 3 | 0.9904 ± 0.0002 | 1% |
+| Karpathy Agent (Code) [Qwen 0.8B] | 3 | 0.9910 ± 0.0001 | 19% |
 
 ### Unconstrained code editing is viable but requires model scale
 
-Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9770 ± 0.0027, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768).
+Karpathy Agent (Code), which directly edits training source code, is the only pure LLM method competitive with classical approaches. Experiments with frontier models Gemini 3.1 Pro Preview and Claude Opus 4.6 narrow the gap further (Opus 4.6: 0.9770 ± 0.0027, competitive with CMA-ES at 0.9785) but do not close it to the best classical methods like TPE (0.9768). Frontier model capability also shows up in the OOM rate: Karpathy Agent (Code)'s failure rate drops monotonically with LLM capability (19% for Qwen 0.8B, 12% for Qwen 27B, 3% for Gemini 3.1 Pro, 5% for Opus 4.6), whereas Centaur's stays roughly constant around 13-20%, indicating that CMA-ES dominates OOM avoidance in the hybrid.
 
 ### Frontier model comparison
 
