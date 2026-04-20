@@ -78,7 +78,7 @@ def main():
         results_dir=RESULTS_BASE,
         backends=build_backends(),
         output_path=output_path,
-        title="Opus 4.6 vs Opus 4.7 (Centaur, KA HPs, KA Code) + TPE reference",
+        title="autoresearch Opus 4.6 vs. Opus 4.7",
         ylim=(0.973, 0.993),
         max_bands=7,
     )
