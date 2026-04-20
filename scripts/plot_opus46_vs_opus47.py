@@ -73,14 +73,14 @@ def build_backends() -> dict[str, dict]:
             "path": str(OPUS46_BASE / "centaur_claude_opus_4_6"),
         },
         "karpathy_agent_hps_claude_opus_4_6": {
-            "label": "KA HPs",
+            "label": "Karpathy Agent (14 HPs)",
             "group": "opus46",
             "color": "#00897B",
             "linestyle": "-",
             "path": str(OPUS46_BASE / "karpathy_agent_hps_claude_opus_4_6"),
         },
         "karpathy_agent_claude_opus_4_6": {
-            "label": "KA Code",
+            "label": "Karpathy Agent (Code)",
             "group": "opus46",
             "color": "#1565C0",
             "linestyle": "-",
@@ -95,14 +95,14 @@ def build_backends() -> dict[str, dict]:
             "path": str(OPUS47_BASE / "centaur_claude_opus_4_7"),
         },
         "karpathy_agent_hps_claude_opus_4_7": {
-            "label": "KA HPs",
+            "label": "Karpathy Agent (14 HPs)",
             "group": "opus47",
             "color": "#00897B",
             "linestyle": "--",
             "path": str(OPUS47_BASE / "karpathy_agent_hps_claude_opus_4_7"),
         },
         "karpathy_agent_claude_opus_4_7": {
-            "label": "KA Code",
+            "label": "Karpathy Agent (Code)",
             "group": "opus47",
             "color": "#1565C0",
             "linestyle": "--",
