@@ -17,9 +17,6 @@ import numpy as np
 RESULTS_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl/results")
 OPUS46_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/results/opus46_benchmark")
 OPUS47_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/results/opus47_benchmark")
-# Gemini 3.1 Pro Preview results are split across two dirs
-GEMINI_CENTAUR_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/results/gemini31pro_benchmark")
-GEMINI_ZELAA_BASE = Path("/home/zelaa/autoresearch-automl-private/results/gemini31pro_benchmark")
 
 
 def load_trials(jsonl_path: Path) -> list[dict]:
@@ -111,21 +108,6 @@ def build_backends() -> dict[str, dict]:
             "linestyle": "--",
             "path": str(OPUS47_BASE / "karpathy_agent_claude_opus_4_7"),
         },
-        # Gemini 3.1 Pro Preview block — KA HPs was not run with Gemini
-        "centaur_gemini_3_1_pro_preview": {
-            "label": "Centaur",
-            "group": "gemini",
-            "color": "#C62828",
-            "linestyle": "-.",
-            "path": str(GEMINI_CENTAUR_BASE / "centaur_gemini_3_1_pro_preview"),
-        },
-        "karpathy_agent_gemini_3_1_pro_preview": {
-            "label": "Karpathy Agent (Code)",
-            "group": "gemini",
-            "color": "#1565C0",
-            "linestyle": "-.",
-            "path": str(GEMINI_ZELAA_BASE / "karpathy_agent_gemini_3_1_pro_preview"),
-        },
     }
 
 
@@ -133,7 +115,6 @@ GROUP_HEADERS = {
     "classical": "Classical",
     "opus46":    "Opus 4.6",
     "opus47":    "Opus 4.7",
-    "gemini":    "Gemini 3.1 Pro",
 }
 
 
@@ -206,7 +187,7 @@ def plot(backends: dict[str, dict], output_path: Path, title: str,
         spacer = Line2D([], [], color="none", marker="", linestyle="none")
 
         handles, labels = [], []
-        for group_key in ("classical", "opus46", "opus47", "gemini"):
+        for group_key in ("classical", "opus46", "opus47"):
             group_entries = [e for e in entries if e["group"] == group_key]
             if not group_entries:
                 continue
@@ -235,7 +216,7 @@ def main():
     plot(
         backends=build_backends(),
         output_path=output_path,
-        title="autoresearch Opus 4.6 vs. Opus 4.7 vs. Gemini 3.1 Pro",
+        title="autoresearch Opus 4.6 vs. Opus 4.7",
     )
 
 
