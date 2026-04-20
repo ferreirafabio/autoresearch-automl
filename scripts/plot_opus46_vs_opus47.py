@@ -20,58 +20,52 @@ OPUS47_BASE = Path("/work/dlclarge1/ferreira-autoresearch-automl/results/opus47_
 
 
 def build_backends() -> dict[str, dict]:
+    """Color encodes method family; linestyle encodes model version (4.6 solid, 4.7 dashed)."""
     return {
-        # Classical reference
+        # Classical reference — distinct color + dotted linestyle
         "optuna": {
             "label": "TPE (classical)",
             "color": "#E69F00",
-            "linestyle": "--",
-            "marker": "o",
+            "linestyle": ":",
             "path": str(RESULTS_BASE / "optuna"),
         },
-        # Centaur (hybrid): Opus 4.6 darker, Opus 4.7 lighter
+        # Centaur (hybrid) — red family
         "centaur_claude_opus_4_6": {
             "label": "Centaur [Opus 4.6]",
-            "color": "#8E0000",
-            "linestyle": "-.",
-            "marker": "D",
+            "color": "#C62828",
+            "linestyle": "-",
             "path": str(OPUS46_BASE / "centaur_claude_opus_4_6"),
         },
         "centaur_claude_opus_4_7": {
             "label": "Centaur [Opus 4.7]",
-            "color": "#E57373",
-            "linestyle": "-.",
-            "marker": "D",
+            "color": "#C62828",
+            "linestyle": "--",
             "path": str(OPUS47_BASE / "centaur_claude_opus_4_7"),
         },
-        # KA HPs (pure LLM, fixed search space)
+        # KA HPs (pure LLM, fixed search space) — teal family
         "karpathy_agent_hps_claude_opus_4_6": {
             "label": "KA HPs [Opus 4.6]",
-            "color": "#00695C",
+            "color": "#00897B",
             "linestyle": "-",
-            "marker": "*",
             "path": str(OPUS46_BASE / "karpathy_agent_hps_claude_opus_4_6"),
         },
         "karpathy_agent_hps_claude_opus_4_7": {
             "label": "KA HPs [Opus 4.7]",
-            "color": "#4DB6AC",
-            "linestyle": "-",
-            "marker": "*",
+            "color": "#00897B",
+            "linestyle": "--",
             "path": str(OPUS47_BASE / "karpathy_agent_hps_claude_opus_4_7"),
         },
-        # KA Code (pure LLM, free code editing)
+        # KA Code (pure LLM, free code editing) — blue family
         "karpathy_agent_claude_opus_4_6": {
             "label": "KA Code [Opus 4.6]",
             "color": "#1565C0",
             "linestyle": "-",
-            "marker": "*",
             "path": str(OPUS46_BASE / "karpathy_agent_claude_opus_4_6"),
         },
         "karpathy_agent_claude_opus_4_7": {
             "label": "KA Code [Opus 4.7]",
-            "color": "#64B5F6",
-            "linestyle": "-",
-            "marker": "*",
+            "color": "#1565C0",
+            "linestyle": "--",
             "path": str(OPUS47_BASE / "karpathy_agent_claude_opus_4_7"),
         },
     }
