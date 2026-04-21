@@ -66,10 +66,17 @@ echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
 
-# Quick server reachability probe
-curl -sf --max-time 30 "http://${KIMI_ENDPOINT}/v1/models" > /dev/null || {
-    echo "Warning: Kimi server not yet responding — will keep retrying during run"
-}
+# Block until Kimi server actually serves (not just endpoint file exists);
+# prevents fail-hard patch from killing us if server is still loading.
+echo "Probing Kimi server at http://${KIMI_ENDPOINT}/v1/models..."
+for _i in $(seq 1 360); do
+    if curl -sf --max-time 5 "http://${KIMI_ENDPOINT}/v1/models" > /dev/null 2>&1; then
+        echo "Kimi server healthy after $((_i*10))s"
+        break
+    fi
+    sleep 10
+done
+curl -sf --max-time 5 "http://${KIMI_ENDPOINT}/v1/models" > /dev/null 2>&1 || { echo "Kimi server never responded after 60 min"; exit 1; }
 
 python -m autoresearch_automl.cli run \
     --backend "centaur" \
