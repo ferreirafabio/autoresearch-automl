@@ -43,6 +43,7 @@ if [ -z "${KIMI_ENDPOINT:-}" ]; then
     exit 1
 fi
 
+export OPENAI_BASE_URL="http://${KIMI_ENDPOINT}/v1"
 export OPENAI_API_BASE="http://${KIMI_ENDPOINT}/v1"
 export OPENAI_API_KEY="dummy"  # vLLM doesn't check; OpenAI client needs it set
 
