@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774117666.6984148,
+  "elapsed_s": 14.106,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 328,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26631,
+  "thinking_length": 0,
+  "description": "Fixed the initialization mapping bug in the `Block` class where instance attributes `self.x` and `self.x0` were incorrectly assigned to forward pass parameters (`self.x`, `self.x0`) instead of the class dictionary `self.resid_lambdas`. This caused the `MuonAdamW` optimizer to fail initialization on the first step due to empty tensors, crashing the training loop.",
+  "val_bpb": 0.991619,
+  "error": null,
+  "kept": false
+}

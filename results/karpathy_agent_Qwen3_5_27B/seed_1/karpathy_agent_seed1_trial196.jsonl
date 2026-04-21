@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774161031.6022956,
+  "elapsed_s": 393.78,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 196,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26693,
+  "thinking_length": 0,
+  "description": "Increase device batch size to 256 and reduce depth to 8 to maximize token throughput within the 5-minute budget, leveraging the VRAM freed by the shallower model to process more data, which is the most effective lever for reducing val_bpb on a short horizon.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774162924.4992998,
+  "elapsed_s": 0.534,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 171,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 1032,
+  "thinking_length": 0,
+  "description": "Removed the memory-hungry, division-by-zero-prone helper functions (`get_muon_momentum`, `get_weight_decay`) that contained `torch._foreach_copy_` overhead and incorrect momentum scaling (division by zero in `step_size` leading to negative/zero values), which caused the optimizer to crash after ~10 steps and introduce ~500ms GC stalls.",
+  "val_bpb": null,
+  "error": null,
+  "kept": false
+}

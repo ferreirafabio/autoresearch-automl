@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774125984.9663231,
+  "elapsed_s": 391.292,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 16,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26606,
+  "thinking_length": 0,
+  "description": "Increase model capacity by shifting from 8 to 9 layers (keeping head_dim=128) to fit within VRAM, and further tune the Muon learning rate to 0.07 with reduced weight decay (0.08) to accelerate convergence on the deeper network within the 5-minute budget.",
+  "val_bpb": 1.036253,
+  "error": null,
+  "kept": false
+}

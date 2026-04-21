@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774045963.459901,
+  "elapsed_s": 13.929,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 186,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26305,
+  "thinking_length": 0,
+  "description": "Removed the heavy, state-vector-mismatched hyperparameter initialization loops and optimizer management code from `MuonAdamW.__init__` that introduced unnecessary `torch._foreach_copy_` overhead and optimizer state vector memory leaks (causing crashes under load).",
+  "val_bpb": 0.991711,
+  "error": null,
+  "kept": false
+}

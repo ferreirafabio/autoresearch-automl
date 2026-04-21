@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774171833.8188872,
+  "elapsed_s": 391.753,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 83,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26682,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 6 layers and increase Matrix LR to 0.08 to maximize the number of training steps and tokens processed within the 5-minute budget, leveraging the \"compute-optimal\" regime where faster convergence on a smaller model outperforms the slower, capacity-limited 8-layer baseline.",
+  "val_bpb": 1.024963,
+  "error": null,
+  "kept": false
+}

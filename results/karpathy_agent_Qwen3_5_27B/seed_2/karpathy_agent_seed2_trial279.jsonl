@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774369872.0647793,
+  "elapsed_s": 393.164,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 279,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26680,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable 8-layer depth and Matrix LR 0.055, but increase the Embedding Learning Rate to 0.62 and slightly reduce the Warmdown Ratio to 0.45 to aggressively accelerate embedding convergence in the early phase while maintaining a stable plateau, addressing the persistent gap to the 0.9879 baseline by allowing the embedding space to settle faster.",
+  "val_bpb": 0.988723,
+  "error": null,
+  "kept": false
+}

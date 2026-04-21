@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774194258.8407524,
+  "elapsed_s": 393.996,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 243,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26623,
+  "thinking_length": 0,
+  "description": "Revert to Depth 10 to restore capacity, reduce Matrix LR to 0.029 for stability, and increase Weight Decay to 0.27 to improve generalization, aiming to beat the 0.9785 record by balancing expressivity and regularization.",
+  "val_bpb": 0.981928,
+  "error": null,
+  "kept": false
+}

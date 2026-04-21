@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774007365.2177715,
+  "elapsed_s": 13.996,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 6,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26464,
+  "thinking_length": 0,
+  "description": "Removed the redundant `get_muon_momentum` and `get_weight_decay` helper functions to eliminate unnecessary overhead and the `torch._foreach_copy_` call inside `MuonAdamW.step()` to prevent crashes.",
+  "val_bpb": 0.991287,
+  "error": null,
+  "kept": false
+}

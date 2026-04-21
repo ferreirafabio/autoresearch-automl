@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774361212.1041503,
+  "elapsed_s": 392.748,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 267,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26570,
+  "thinking_length": 0,
+  "description": "Revert to the most stable configuration (8 layers, Matrix LR 0.055, Embedding LR 0.55) but introduce a small Warmup Ratio (0.05) to prevent initial gradient explosion which can cause the optimizer to overshoot the optimal basin in the first few steps, a common issue with high embedding LRs.",
+  "val_bpb": 0.992267,
+  "error": null,
+  "kept": false
+}

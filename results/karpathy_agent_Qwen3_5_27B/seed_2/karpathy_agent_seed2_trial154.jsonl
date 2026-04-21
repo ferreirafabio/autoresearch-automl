@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774282935.7998486,
+  "elapsed_s": 391.954,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 154,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26629,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable 8-layer/128-dim/128-batch configuration and reduce the matrix learning rate to 0.055 to maximize stability and convergence quality within the 5-minute budget, as previous attempts to increase the LR or batch size resulted in higher validation loss or crashes.",
+  "val_bpb": 0.988495,
+  "error": null,
+  "kept": false
+}

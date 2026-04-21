@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774025360.8930464,
+  "elapsed_s": 386.007,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 17,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26573,
+  "thinking_length": 0,
+  "description": "Increase model depth to 10 layers (from 8) and reduce device batch size to 96 to fit within 76GB VRAM, aiming to leverage the extra capacity to lower validation loss while maintaining the high-performance Muon optimizer and architecture.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

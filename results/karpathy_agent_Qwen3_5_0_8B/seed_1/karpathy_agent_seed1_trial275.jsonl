@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774066885.5102694,
+  "elapsed_s": 13.928,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 275,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26259,
+  "thinking_length": 0,
+  "description": "Removed the heavy, state-vector-mismatched `setup_optimizer` initialization loops that caused `torch._foreach_copy_` overhead, compiler state vector mismatches, and OOM crashes, restoring the stable val_bpb of 0.9912.",
+  "val_bpb": 0.991553,
+  "error": null,
+  "kept": false
+}

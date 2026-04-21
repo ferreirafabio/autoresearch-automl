@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774119453.663608,
+  "elapsed_s": 391.432,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 7,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26657,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 6 layers and increase head dimension to 128 to reduce parameter count and memory overhead (activations/grads) while maintaining width, allowing for a larger device batch size (256) to maximize throughput and convergence speed within the 5-minute budget.",
+  "val_bpb": 1.022702,
+  "error": null,
+  "kept": false
+}

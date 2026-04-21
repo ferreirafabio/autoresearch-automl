@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774342576.4032915,
+  "elapsed_s": 392.992,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 242,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26647,
+  "thinking_length": 0,
+  "description": "Revert to the 8-layer baseline but increase the Matrix Learning Rate to 0.06 and Embedding LR to 0.6 to test if the previous 0.9876 result was a lucky dip or if we can push further by slightly increasing the step size, as the 0.055/0.55 combo might be under-exploring the loss landscape.",
+  "val_bpb": 0.987912,
+  "error": null,
+  "kept": false
+}

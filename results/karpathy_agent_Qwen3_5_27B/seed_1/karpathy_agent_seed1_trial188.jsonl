@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774156143.5946677,
+  "elapsed_s": 393.616,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 188,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26723,
+  "thinking_length": 0,
+  "description": "Reduce model depth from 10 to 8 layers to drastically lower VRAM usage, allowing an increase in device batch size from 128 to 256 (doubling throughput), and restore the high-velocity embedding learning rate (0.6) to maximize convergence speed within the 5-minute budget, aiming to process significantly more tokens with a slightly smaller but faster-converging model.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

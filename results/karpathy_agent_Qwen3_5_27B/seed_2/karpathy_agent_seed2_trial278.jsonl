@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774369150.497931,
+  "elapsed_s": 392.723,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 278,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26604,
+  "thinking_length": 0,
+  "description": "Revert to the proven baseline configuration (Depth 8, Matrix LR 0.055, Embedding LR 0.55, Warmdown 0.5) and explicitly ensure the embedding initialization standard deviation is 1.0 to maximize the chance of hitting the 0.9879 baseline, as previous \"improvement\" attempts consistently degraded performance due to instability.",
+  "val_bpb": 0.988096,
+  "error": null,
+  "kept": false
+}

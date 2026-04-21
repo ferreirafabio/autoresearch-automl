@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774204413.8597221,
+  "elapsed_s": 394.543,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 257,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26719,
+  "thinking_length": 0,
+  "description": "Revert to the successful Depth 9 architecture and Matrix LR 0.040 (which yielded 0.9797), but increase Weight Decay to 0.26 to improve generalization and potentially beat the 0.9785 record, as the previous 0.9789 run with lower WD might have overfit slightly in the short budget.",
+  "val_bpb": 0.979767,
+  "error": null,
+  "kept": false
+}

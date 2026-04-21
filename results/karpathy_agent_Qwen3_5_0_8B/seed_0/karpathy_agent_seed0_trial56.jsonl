@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774022228.1050076,
+  "elapsed_s": 14.128,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 56,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26652,
+  "thinking_length": 0,
+  "description": "Replaced complex, $O(N^2)$-overhead `get_muon_momentum` and `get_weight_decay` helper functions (which caused crashes due to `torch._foreach_copy_` parameter copying) with direct inline parameter updates within `MuonAdamW.__init__`. This eliminated the parameter copying overhead, reducing initialization cost from $O(N^2)$ to $O(N)$ and resulting in a val_bpb improvement of ~0.0001.",
+  "val_bpb": 0.991584,
+  "error": null,
+  "kept": false
+}

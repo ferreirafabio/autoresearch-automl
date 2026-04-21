@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774125942.9066112,
+  "elapsed_s": 394.224,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 142,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26723,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 8 layers to fit a larger batch size and increase total tokens processed within the 5-minute budget, while maintaining the stable hyperparameters (embedding LR 0.3) that previously yielded the best result.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

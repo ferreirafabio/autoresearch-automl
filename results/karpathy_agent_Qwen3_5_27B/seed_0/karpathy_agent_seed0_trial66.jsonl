@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774058804.162975,
+  "elapsed_s": 386.339,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 66,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26597,
+  "thinking_length": 0,
+  "description": "Revert to the proven optimal hyperparameters (Matrix LR=0.11, Embedding LR=1.4) and increase the total batch size to 2^20 to improve gradient stability, while carefully reducing the device batch size to 100 to prevent OOM and ensure the script runs without crashing.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774169830.9670494,
+  "elapsed_s": 390.288,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 209,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26343,
+  "thinking_length": 0,
+  "description": "Revert to the stable Depth 10 baseline but increase Matrix LR to 0.045 and Embedding LR to 0.75 to aggressively accelerate convergence within the 5-minute budget, aiming to break the 0.9807 record by pushing the optimization speed while maintaining the architecture that has proven robust against OOM.",
+  "val_bpb": 0.982826,
+  "error": null,
+  "kept": false
+}

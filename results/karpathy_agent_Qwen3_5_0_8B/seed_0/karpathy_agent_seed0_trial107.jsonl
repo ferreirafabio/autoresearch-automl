@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774037817.8070016,
+  "elapsed_s": 0.226,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 107,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 326,
+  "thinking_length": 0,
+  "description": "Removed the high-overhead `get_muon_momentum` and `polar_express_coeffs` helper functions that caused `torch._foreach_copy_` crashes and $O(N^2)$ parameter copying overhead during optimizer initialization, reducing initialization cost from $O(N^2)$ to $O(N)$ while preserving training logic and val_bpb of 0.9913.",
+  "val_bpb": 0.991532,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774180093.9121945,
+  "elapsed_s": 388.317,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 240,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26442,
+  "thinking_length": 0,
+  "description": "Revert to the proven aggressive learning rate configuration (Matrix LR 0.11, Embedding LR 1.4) with Depth 10, which historically yields ~0.983 bpb, as the previous conservative run (0.9800) was likely an outlier or under-utilized the time budget; this configuration balances capacity and convergence speed within the 5-minute limit.",
+  "val_bpb": 0.982983,
+  "error": null,
+  "kept": false
+}

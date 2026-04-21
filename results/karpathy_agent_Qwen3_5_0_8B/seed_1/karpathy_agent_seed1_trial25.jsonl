@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774011147.033598,
+  "elapsed_s": 14.085,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 25,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26059,
+  "thinking_length": 0,
+  "description": "Replaced the heavy, redundant hyperparameter initialization logic (`get_muon_momentum`, `get_weight_decay`, and complex `setup_optimizer` wrapper) with direct parameter updates inside the `MuonAdamW.__init__` class. This eliminates the unnecessary `torch._foreach_copy_` overhead and optimizer state mismatches that were causing the crash.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

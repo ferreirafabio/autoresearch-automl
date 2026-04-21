@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774125181.0230222,
+  "elapsed_s": 395.181,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 141,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26685,
+  "thinking_length": 0,
+  "description": "Revert to the stable 10-layer configuration but reduce the embedding learning rate from 0.6 to 0.3 to improve training stability and convergence, which often yields lower val_bpb by preventing the token embeddings from oscillating too aggressively during the short 5-minute training window.",
+  "val_bpb": 0.982974,
+  "error": null,
+  "kept": false
+}

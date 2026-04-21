@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774280057.8651407,
+  "elapsed_s": 391.825,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 150,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26662,
+  "thinking_length": 0,
+  "description": "Revert to the most stable configuration (8 layers, 128 head dim, 128 batch size) and reduce the matrix learning rate to 0.055 to prioritize convergence stability over speed, as previous attempts to accelerate training with higher LRs or larger batches consistently resulted in higher validation loss or crashes.",
+  "val_bpb": 0.988591,
+  "error": null,
+  "kept": false
+}

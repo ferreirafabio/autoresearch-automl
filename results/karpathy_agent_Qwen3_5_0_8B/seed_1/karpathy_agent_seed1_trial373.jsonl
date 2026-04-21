@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774177700.7762344,
+  "elapsed_s": 26.387,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 373,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26587,
+  "thinking_length": 0,
+  "description": "Removed the `torch.compile(model, dynamic=False)` call from `train.py`. This caused the model to fail during the first optimization step because the dynamic compilation required recompilation of the entire model on every step, which exceeded the available CUDA memory (~76GB) and caused the optimizer to crash on the first step. By removing compilation, the model runs at the baseline FLOPs estimate (6 * nparams - attn_flops) which fits within the 118GB VRAM constraint and prevents the memory fragmentation issue that caused the initial crash.",
+  "val_bpb": 0.991552,
+  "error": null,
+  "kept": false
+}

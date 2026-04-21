@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774194877.2741947,
+  "elapsed_s": 388.449,
+  "pid": 3830506,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 266,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26438,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable 10-layer configuration (Matrix LR 0.06, Embedding LR 1.5, Total Batch 2^18, Weight Decay 0.1) to ensure a crash-free run and maximize the probability of achieving the best known val_bpb of 0.9777, as recent modifications have consistently resulted in instability or worse results.",
+  "val_bpb": 0.978048,
+  "error": null,
+  "kept": false
+}

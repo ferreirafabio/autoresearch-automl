@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774183888.1119516,
+  "elapsed_s": 0.219,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 392,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 380,
+  "thinking_length": 0,
+  "description": "SYNTAX ERROR (reverted): Removed the `torch.compile(model, dynamic=False)` call from the `setup_optimizer` and training loop, which caused OOM fragmentation and optimizer crashes during the first optimization step by forcing a single static compilation step instead of recompiling the entire model on every step.",
+  "val_bpb": 0.991159,
+  "error": null,
+  "kept": false
+}

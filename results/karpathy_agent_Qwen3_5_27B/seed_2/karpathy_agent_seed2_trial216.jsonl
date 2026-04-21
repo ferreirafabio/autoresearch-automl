@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774324232.6981037,
+  "elapsed_s": 395.392,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 216,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26614,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer, 128-head-dim, 128-batch-size configuration with 0% warmup and 0.06 Matrix LR, as recent runs consistently achieved ~0.9878-0.9885, indicating this aggressive setting is the optimal path without the instability of higher LRs or the suboptimal convergence of lower LRs.",
+  "val_bpb": 0.987971,
+  "error": null,
+  "kept": false
+}

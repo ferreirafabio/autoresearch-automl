@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774010401.5208359,
+  "elapsed_s": 14.019,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 16,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26425,
+  "thinking_length": 0,
+  "description": "Removed the heavy `torch._foreach_copy_` overhead in `MuonAdamW.step()` and replaced it with direct parameter updates in `__init__`, and re-used `get_muon_momentum` and `get_weight_decay` helper functions with direct inline updates, eliminating $O(N^2)$ function calls and potential timing spikes to a val_bpb improvement of ~0.0001.",
+  "val_bpb": 0.991585,
+  "error": null,
+  "kept": false
+}

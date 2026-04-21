@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774105782.571469,
+  "elapsed_s": 382.294,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 134,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26320,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable Depth=8 configuration with a large batch size (2^19) and optimized hyperparameters to maximize gradient signal-to-noise ratio and ensure robust convergence, avoiding the instability and OOM crashes observed in deeper models.",
+  "val_bpb": 0.990219,
+  "error": null,
+  "kept": false
+}

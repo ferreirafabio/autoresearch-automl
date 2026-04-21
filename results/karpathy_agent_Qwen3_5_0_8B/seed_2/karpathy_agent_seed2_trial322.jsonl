@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774271331.1284926,
+  "elapsed_s": 13.325,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 322,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 25063,
+  "thinking_length": 0,
+  "description": "Replaced the heavy `torch.compile(model, dynamic=False)` call with a manual, non-caching implementation of the `MuonAdamW` optimizer in `setup_optimizer` to eliminate unnecessary CPU tensor compilation overhead during fused optimizer steps while preserving the existing architecture and val_bpb optimization.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

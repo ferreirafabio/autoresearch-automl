@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774186665.015036,
+  "elapsed_s": 13.992,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 405,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26299,
+  "thinking_length": 0,
+  "description": "Replaced the non-essential `torch.compile(model, dynamic=False)` call with a single static compilation step to resolve OOM fragmentation and optimizer crashes caused by recompilation on every step, allowing the model to run within the 118GB VRAM constraint.",
+  "val_bpb": 0.991357,
+  "error": null,
+  "kept": false
+}

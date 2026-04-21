@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774021926.2379625,
+  "elapsed_s": 385.887,
+  "pid": 2684818,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 24,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26694,
+  "thinking_length": 0,
+  "description": "Revert to the 8-layer/128-head-dim architecture with a reduced Device Batch Size of 64 to ensure stable gradient accumulation and avoid the slight instability seen at 128, while increasing the Matrix Learning Rate to 0.05 and reducing Weight Decay to 0.15 to aggressively chase the 0.9915 baseline with a faster convergence rate.",
+  "val_bpb": 0.997008,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774149864.9826128,
+  "elapsed_s": 391.261,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 178,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26717,
+  "thinking_length": 0,
+  "description": "Increase the model depth from 10 to 12 layers and the embedding learning rate back to 0.6 to maximize the model's capacity and convergence speed within the 5-minute budget, leveraging the stability provided by the higher weight decay (0.24) and the proven baseline architecture.",
+  "val_bpb": null,
+  "error": "GPU out-of-memory",
+  "kept": false
+}

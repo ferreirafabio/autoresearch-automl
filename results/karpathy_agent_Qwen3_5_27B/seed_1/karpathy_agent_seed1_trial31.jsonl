@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774027015.5123289,
+  "elapsed_s": 385.004,
+  "pid": 2684818,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 31,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26484,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer/128-head-dim architecture with Device Batch Size 128, but refine the Matrix Learning Rate to 0.032 and Weight Decay to 0.22 to push stability slightly further and beat the 0.9915 baseline.",
+  "val_bpb": 0.99183,
+  "error": null,
+  "kept": false
+}

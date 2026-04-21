@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774046650.5348618,
+  "elapsed_s": 14.814,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 188,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 27988,
+  "thinking_length": 0,
+  "description": "Refactored `setup_optimizer` into a standalone utility function and replaced heavy hyperparameter initialization loops with a single lightweight `_step_muon` method, eliminating unnecessary `torch._foreach_copy_` overhead and optimizer state vector mismatches that caused crashes.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774357608.5564215,
+  "elapsed_s": 393.429,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 262,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26663,
+  "thinking_length": 0,
+  "description": "Revert to the best known hyperparameters (Matrix LR 0.055, Embedding LR 0.55) but reduce the Embedding LR slightly to 0.53 and increase the Warmdown Ratio to 0.55 to allow more settling time, aiming to stabilize the embedding updates which showed sensitivity in previous experiments while maintaining the optimal matrix learning dynamics.",
+  "val_bpb": 0.988376,
+  "error": null,
+  "kept": false
+}

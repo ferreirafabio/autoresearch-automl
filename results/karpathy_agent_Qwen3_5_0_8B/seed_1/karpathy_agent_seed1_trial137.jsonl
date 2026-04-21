@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774034676.527061,
+  "elapsed_s": 13.994,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 137,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26379,
+  "thinking_length": 0,
+  "description": "Removed the heavy, state-vector-mismatched hyperparameter initialization loops from `MuonAdamW.__init__` and refactored `setup_optimizer` into a standalone utility function, eliminating unnecessary `torch._foreach_copy_` overhead, optimizer state vector mismatches, and compiler state vector mismatches that caused the optimizer to crash.",
+  "val_bpb": 0.991801,
+  "error": null,
+  "kept": false
+}

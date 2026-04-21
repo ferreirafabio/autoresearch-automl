@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774011273.8244889,
+  "elapsed_s": 390.006,
+  "pid": 248059,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 10,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26725,
+  "thinking_length": 0,
+  "description": "Increase model capacity by adding 2 layers (10 total) while maintaining the 768 hidden dimension and 128 head dimension proven to be stable, relying on the high VRAM budget to accommodate the extra parameters without OOM, and slightly increasing the matrix learning rate to accelerate convergence for the deeper network.",
+  "val_bpb": 1.010654,
+  "error": null,
+  "kept": false
+}

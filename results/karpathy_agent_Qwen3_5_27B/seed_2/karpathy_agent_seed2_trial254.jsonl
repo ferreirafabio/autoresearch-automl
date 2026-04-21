@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774351811.065034,
+  "elapsed_s": 391.176,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 254,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26689,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer depth and the proven Matrix Learning Rate of 0.055, but increase the Embedding Learning Rate from 0.55 to 0.60 to accelerate the convergence of the embedding space, which is often the bottleneck in short-training-time regimes, while maintaining the stable weight decay and momentum schedules that previously yielded the best result of 0.9879.",
+  "val_bpb": 0.988815,
+  "error": null,
+  "kept": false
+}

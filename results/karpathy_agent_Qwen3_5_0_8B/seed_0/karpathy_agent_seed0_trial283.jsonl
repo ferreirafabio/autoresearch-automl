@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774104937.6109252,
+  "elapsed_s": 14.001,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 283,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26407,
+  "thinking_length": 0,
+  "description": "Replaced the unstable `spectral` MLP initialization logic with a standard residual MLP initialized correctly to `self.x`, `self.x0`, `self.y`, and `self.lm_head` in the `Block` class, fixing the MuonAdamW optimizer initialization failure on step 0 that caused a val_bpb drop.",
+  "val_bpb": 0.991202,
+  "error": null,
+  "kept": false
+}

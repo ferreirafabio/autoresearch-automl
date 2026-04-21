@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774098150.835349,
+  "elapsed_s": 390.356,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 103,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26685,
+  "thinking_length": 0,
+  "description": "Revert to the high-throughput 2^19 global batch size and 8-layer/128-dim architecture that previously yielded the best result (0.9830), while slightly reducing the Muon learning rate to 0.033 to ensure stability with the larger batch size, as recent OOMs and performance degradation were likely caused by memory fragmentation and aggressive hyperparameters.",
+  "val_bpb": 0.991761,
+  "error": null,
+  "kept": false
+}

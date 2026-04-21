@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774018311.8438098,
+  "elapsed_s": 385.568,
+  "pid": 2684818,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 19,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26595,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer/128-head-dim architecture with a safe device batch size of 64, but refine the learning rate schedule by increasing the Matrix Learning Rate to 0.048 and reducing Weight Decay to 0.16 to find a slightly better balance between convergence speed and stability, aiming to beat the best val_bpb of 0.9915.",
+  "val_bpb": 1.002847,
+  "error": null,
+  "kept": false
+}

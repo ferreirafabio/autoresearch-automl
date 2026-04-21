@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774318752.444448,
+  "elapsed_s": 393.573,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 208,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26641,
+  "thinking_length": 0,
+  "description": "Increase Matrix Learning Rate to 0.07 to explore the aggressive regime further, as the current best (0.9878) suggests we are in a region where higher LRs might escape the local optimum, while keeping the stable 8-layer, 128-head-dim, 128-batch-size configuration with 0% warmup that has proven robust.",
+  "val_bpb": 0.988544,
+  "error": null,
+  "kept": false
+}

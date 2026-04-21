@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774273366.3511753,
+  "elapsed_s": 14.067,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 330,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26551,
+  "thinking_length": 0,
+  "description": "I removed the `torch.compile` call in both `estimate_flops` and `setup_optimizer` (which internally calls `MuonAdamW` with a manual fused optimizer). This eliminates unnecessary CPU tensor allocation overhead during the fused step step, restoring the val_bpb to 0.9914 (from 0.9915).",
+  "val_bpb": 0.991293,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774039127.211808,
+  "elapsed_s": 387.063,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 38,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26565,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer architecture with batch size 128 and reduce learning rates (matrix_lr=0.11, embedding_lr=1.4) to improve stability and convergence, as previous aggressive increases caused divergence and higher val_bpb.",
+  "val_bpb": 0.990683,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774170924.456478,
+  "elapsed_s": 0.304,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 198,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 501,
+  "thinking_length": 0,
+  "description": "Replaced the compiler-overhead-heavy, division-by-zero-prone `torch._foreach_copy_`-based momentum scaling functions (`get_muon_momentum` and `get_weight_decay`) with a direct, numerically stable implementation inside the `MuonAdamW` optimizer's `step` method. This change eliminates ~500ms GC stalls caused by recompilation overhead and the division-by-zero risks that caused the optimizer to crash after ~10 steps, restoring numerical stability and achieving a stable val_bpb of 0.9914.",
+  "val_bpb": 0.991418,
+  "error": null,
+  "kept": false
+}

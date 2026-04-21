@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774300212.2146893,
+  "elapsed_s": 386.493,
+  "pid": 2555653,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 180,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26712,
+  "thinking_length": 0,
+  "description": "Revert to the stable Depth=8 configuration with Matrix LR=0.08 and Embedding LR=0.6, but reduce the device batch size from 128 to 112 to ensure a safe margin from the VRAM limit (~76GB) and prevent the \"AssertionError\" crashes observed when pushing batch size to 160, while maintaining high throughput and convergence speed within the 5-minute budget.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

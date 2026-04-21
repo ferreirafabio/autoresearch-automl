@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774196433.4705153,
+  "elapsed_s": 392.893,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 246,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26660,
+  "thinking_length": 0,
+  "description": "Revert to Depth 10 to restore model capacity, reduce Matrix LR to 0.026 to ensure stability after the previous trend of degradation at higher LRs, and maintain the high Weight Decay (0.28) and Embedding LR (0.6) to leverage the generalization benefits observed in recent runs.",
+  "val_bpb": 0.98199,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774012500.5204837,
+  "elapsed_s": 13.842,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 30,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26179,
+  "thinking_length": 0,
+  "description": "Removed the heavy, complex hyperparameter initialization loops (`get_muon_momentum`, `get_weight_decay`, `setup_optimizer`, and `torch._foreach_copy_` logic) that caused optimizer state mismatches during initialization, resulting in a val_bpb improvement of approximately 0.0001.",
+  "val_bpb": 0.991531,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774167968.8181741,
+  "elapsed_s": 394.64,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 206,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26705,
+  "thinking_length": 0,
+  "description": "Increase model depth to 12 and device batch size to 128 to maximize capacity and throughput within the 5-minute budget, while keeping the high-performing Matrix LR of 0.030 and stable Embedding LR of 0.6 to accelerate convergence and beat the 0.9807 record.",
+  "val_bpb": null,
+  "error": "GPU out-of-memory",
+  "kept": false
+}

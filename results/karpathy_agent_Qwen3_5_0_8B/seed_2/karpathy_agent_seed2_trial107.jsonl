@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774143802.5133913,
+  "elapsed_s": 14.242,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 107,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26984,
+  "thinking_length": 0,
+  "description": "Replaced the dangerous `get_muon_momentum` and `get_weight_decay` helper functions with direct, numerically stable `step` method updates inside the `MuonAdamW` optimizer class. These helper functions contained `torch._foreach_copy_` overhead, incorrect momentum scaling factors, division-by-zero risks (e.g., `step_size` becoming 0 or negative), and a normalization error that caused the script to crash. By removing these complex, memory-hungry, and unstable helper functions and relying directly on `torch.compile` for the optimizer logic, the script now eliminates overhead, prevents crashes on early training runs, prevents division-by-zero risks, and restores the optimizer's efficiency and numerical stability.",
+  "val_bpb": 0.991347,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774153161.788838,
+  "elapsed_s": 391.241,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 183,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26581,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable configuration (Depth 10, Embedding LR 0.6, Weight Decay 0.24, Batch Size 2^18) that consistently yields ~0.982 val_bpb, correcting the recent under-trained run (LR 0.5) and the OOM crash (Depth 12), while removing the unstable Matrix LR increase to ensure a reliable baseline run.",
+  "val_bpb": 0.982373,
+  "error": null,
+  "kept": false
+}

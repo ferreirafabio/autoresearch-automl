@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774121947.6516905,
+  "elapsed_s": 389.462,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 137,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26592,
+  "thinking_length": 0,
+  "description": "Revert to the historically stable configuration (2^19 global batch, 0.033 Muon LR) which consistently yields ~0.991 val_bpb, as the 0.9830 result is likely an outlier or artifact, and maximizing stable gradient steps is the proven strategy for this time budget.",
+  "val_bpb": 0.991222,
+  "error": null,
+  "kept": false
+}

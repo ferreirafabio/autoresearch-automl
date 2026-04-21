@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774293107.168996,
+  "elapsed_s": 391.954,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 169,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26635,
+  "thinking_length": 0,
+  "description": "Revert to the 0.06 Matrix LR and 2% warmup configuration that previously yielded the best result (0.9881), but increase the Device Batch Size from 128 to 136 to utilize available VRAM headroom, improving gradient stability and convergence without triggering OOM or divergence.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

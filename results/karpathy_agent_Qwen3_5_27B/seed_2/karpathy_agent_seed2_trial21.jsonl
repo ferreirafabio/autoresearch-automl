@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774129617.775301,
+  "elapsed_s": 400.507,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 21,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26649,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer architecture and reduce the matrix learning rate to 0.055 while increasing weight decay to 0.12 to stabilize the training trajectory, as the previous aggressive 0.08 LR / 0.05 WD configuration showed signs of instability (val_bpb increase) despite a lower initial loss.",
+  "val_bpb": 0.990165,
+  "error": null,
+  "kept": false
+}

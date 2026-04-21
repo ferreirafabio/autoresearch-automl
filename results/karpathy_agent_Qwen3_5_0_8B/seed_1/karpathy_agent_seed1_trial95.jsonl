@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774026325.6471255,
+  "elapsed_s": 14.038,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 95,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26539,
+  "thinking_length": 0,
+  "description": "Replaced the complex, heavy multi-stage hyperparameter initialization loops (`setup_optimizer`, `get_muon_momentum`, `get_weight_decay`) inside `MuonAdamW.__init__` with a single lightweight `_step_muon` method and combined `_step_adamw` into a single `step` method. This eliminates unnecessary `torch._foreach_copy_` overhead, optimizer state vector mismatches, and unnecessary compilation overhead, stabilizing the optimizer to a val_bpb of 0.9916 while significantly reducing runtime overhead.",
+  "val_bpb": 0.991532,
+  "error": null,
+  "kept": false
+}

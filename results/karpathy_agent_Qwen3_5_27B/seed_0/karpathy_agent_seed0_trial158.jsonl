@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774123906.2920537,
+  "elapsed_s": 437.369,
+  "pid": 3830506,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 158,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26211,
+  "thinking_length": 0,
+  "description": "Increase model depth to 12 layers and reduce device batch size to 96 to fit within VRAM, aiming for better representation capacity while maintaining stability with the proven Muon/AdamW optimizer setup.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

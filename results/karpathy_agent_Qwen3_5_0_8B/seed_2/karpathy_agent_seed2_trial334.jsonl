@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774274720.1228373,
+  "elapsed_s": 14.076,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 334,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26658,
+  "thinking_length": 0,
+  "description": "Removed unnecessary `torch.compile` calls from `estimate_flops` and `setup_optimizer` (which internally call `MuonAdamW`) to eliminate CPU tensor allocation overhead during fused optimizer steps. This fixed the 5-minute validation time crash while restoring the val_bpb to 0.9913.",
+  "val_bpb": 0.991448,
+  "error": null,
+  "kept": false
+}

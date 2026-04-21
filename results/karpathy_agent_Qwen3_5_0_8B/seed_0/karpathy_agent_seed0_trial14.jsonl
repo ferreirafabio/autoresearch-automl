@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774009730.9629936,
+  "elapsed_s": 0.242,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 14,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 374,
+  "thinking_length": 0,
+  "description": "SYNTAX ERROR (reverted): Removed the complex, high-overhead `get_muon_momentum` and `get_weight_decay` helper functions that were causing runtime crashes and $O(N^2)$ overhead during the `MuonAdamW.__init__` initialization loop, replacing their usage with direct parameter updates in the `__init__` method.",
+  "val_bpb": 0.991562,
+  "error": null,
+  "kept": false
+}

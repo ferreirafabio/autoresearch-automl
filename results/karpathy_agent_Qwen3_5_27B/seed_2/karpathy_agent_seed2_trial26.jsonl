@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774132910.981844,
+  "elapsed_s": 390.411,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 26,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26704,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer/128-head configuration with the best-performing hyperparameters (Matrix LR 0.06, WD 0.1) and device batch size 128, as this combination has consistently yielded the lowest val_bpb (0.9905) without instability, avoiding the risks of aggressive LR/low WD or capacity changes that have failed or underperformed in previous attempts.",
+  "val_bpb": 0.990798,
+  "error": null,
+  "kept": false
+}

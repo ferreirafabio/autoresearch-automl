@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774178544.7007535,
+  "elapsed_s": 395.093,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 221,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26642,
+  "thinking_length": 0,
+  "description": "Revert to the most stable baseline (Depth 10, Batch 2^18, Embedding LR 0.6, Matrix LR 0.025, Weight Decay 0.24) to ensure a reliable run and maximize the chance of beating the 0.9807 record, as previous aggressive LR increases and depth changes consistently crashed or under-trained.",
+  "val_bpb": 0.982207,
+  "error": null,
+  "kept": false
+}

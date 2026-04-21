@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774188147.486458,
+  "elapsed_s": 387.773,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 252,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26412,
+  "thinking_length": 0,
+  "description": "Revert to the aggressive Matrix LR (0.11) and Embedding LR (1.4) with Depth 10 and the proven WARMUP_RATIO=0.05, as historical data and recent experiments indicate this configuration converges faster to a lower loss floor within the 5-minute budget, while the conservative 0.06 LR likely under-utilizes the available time.",
+  "val_bpb": 0.985767,
+  "error": null,
+  "kept": false
+}

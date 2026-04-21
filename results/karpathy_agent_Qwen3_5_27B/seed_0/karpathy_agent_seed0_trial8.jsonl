@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774009807.854653,
+  "elapsed_s": 398.859,
+  "pid": 248059,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 8,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26654,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer architecture but optimize the window attention pattern to 'LLLL' (full context for all layers) to improve global context modeling, while slightly increasing the matrix learning rate and reducing weight decay further to accelerate convergence within the 5-minute budget.",
+  "val_bpb": 0.990863,
+  "error": null,
+  "kept": false
+}

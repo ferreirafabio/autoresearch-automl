@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774294016.724334,
+  "elapsed_s": 415.541,
+  "pid": 2556550,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 304,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26664,
+  "thinking_length": 0,
+  "description": "Reduced depth to 8 layers to fit a larger batch size (256) and slightly lower matrix LR (0.03) to stabilize the shallower, wider model, aiming for better convergence within the 5-minute budget.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

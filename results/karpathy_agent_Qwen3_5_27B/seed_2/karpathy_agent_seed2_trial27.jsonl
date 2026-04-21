@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774133630.784764,
+  "elapsed_s": 389.919,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 27,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26599,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer/128-head architecture with Matrix LR 0.06 and Weight Decay 0.1, which previously achieved the lowest val_bpb (0.9905) and showed stable convergence, avoiding the instability seen with more aggressive or conservative settings.",
+  "val_bpb": 0.990487,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774161429.4615839,
+  "elapsed_s": 391.486,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 197,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26492,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable baseline (Depth 10, Embedding LR 0.6, Batch Size 2^18) to ensure a reliable run and beat the 0.9807 record, as previous attempts with Depth 12 or modified batch sizes consistently crashed or under-trained.",
+  "val_bpb": 0.982257,
+  "error": null,
+  "kept": false
+}

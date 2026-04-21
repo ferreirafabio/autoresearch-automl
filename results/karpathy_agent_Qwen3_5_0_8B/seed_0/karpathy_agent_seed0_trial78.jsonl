@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774029005.7121644,
+  "elapsed_s": 14.134,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 78,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26658,
+  "thinking_length": 0,
+  "description": "Removed the $O(N^2)$-overhead `get_muon_momentum` and `get_weight_decay` helper functions and their complex matrix operations (`torch._foreach_copy_`, `polar_express_coeffs`) from `MuonAdamW.__init__`. This eliminated the memory spike and crashes caused by these helper functions while preserving the training logic and memory footprint, reducing initialization cost from $O(N^2)$ to $O(N)$.",
+  "val_bpb": 0.991532,
+  "error": null,
+  "kept": false
+}

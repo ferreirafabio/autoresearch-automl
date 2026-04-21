@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774082274.9954803,
+  "elapsed_s": 387.689,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 81,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26622,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer/128-dim architecture and 2^19 global batch size to maximize throughput, while slightly increasing the Muon learning rate to 0.036 to push convergence further, as the previous OOMs were likely transient and the higher update frequency is critical for the 5-minute budget.",
+  "val_bpb": 0.991482,
+  "error": null,
+  "kept": false
+}

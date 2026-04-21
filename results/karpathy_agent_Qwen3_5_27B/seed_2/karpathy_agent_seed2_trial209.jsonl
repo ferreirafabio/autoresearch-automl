@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774319473.5938156,
+  "elapsed_s": 393.959,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 209,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26608,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer, 128-head-dim configuration with 0% warmup and 0.06 Matrix LR, but reduce the soft-capping constant from 15 to 10 to constrain the output distribution more tightly, which often helps prevent overconfidence and improves bits-per-byte on small-context pretraining.",
+  "val_bpb": 0.988298,
+  "error": null,
+  "kept": false
+}

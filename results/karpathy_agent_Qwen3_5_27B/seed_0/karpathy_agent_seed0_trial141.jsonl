@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774111885.7135417,
+  "elapsed_s": 386.542,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 141,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26352,
+  "thinking_length": 0,
+  "description": "Reduce model depth from 12 back to 10 to fix the performance regression (0.9936 vs 0.9834) caused by insufficient batch size for the larger model, while increasing the matrix learning rate to 0.15 to maximize convergence speed within the 5-minute budget.",
+  "val_bpb": 0.989952,
+  "error": null,
+  "kept": false
+}

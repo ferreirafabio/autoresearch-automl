@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774356142.9424858,
+  "elapsed_s": 392.801,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 260,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26697,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer depth and Matrix Learning Rate of 0.055, but reduce the Embedding Learning Rate from 0.55 to 0.42 to further stabilize high-frequency embedding updates, as previous experiments showed that even small increases or decreases from 0.55 led to degradation, suggesting the optimal point is slightly lower to prevent oscillation in the embedding space.",
+  "val_bpb": 0.989069,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774014094.3622177,
+  "elapsed_s": 14.035,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 28,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26530,
+  "thinking_length": 0,
+  "description": "Removed the two complex, high-overhead helper functions (`get_muon_momentum` and `get_weight_decay`) from `MuonAdamW.__init__` and replaced their usage with direct parameter updates within the `__init__` method. This eliminated the $O(N^2)$ parameter copying overhead associated with helper function calls and the associated copy operations during optimizer initialization.",
+  "val_bpb": 0.991554,
+  "error": null,
+  "kept": false
+}

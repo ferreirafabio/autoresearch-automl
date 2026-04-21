@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774162876.0991836,
+  "elapsed_s": 393.871,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 199,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26640,
+  "thinking_length": 0,
+  "description": "Revert to the stable baseline configuration (Depth 10, Embedding LR 0.6, Matrix LR 0.025, Weight Decay 0.24, Batch Size 2^18) which consistently yields ~0.982 val_bpb, providing a reliable foundation to attempt beating the 0.9807 record.",
+  "val_bpb": 0.981861,
+  "error": null,
+  "kept": false
+}

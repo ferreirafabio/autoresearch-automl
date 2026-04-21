@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774305925.6057105,
+  "elapsed_s": 391.6,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 189,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26605,
+  "thinking_length": 0,
+  "description": "Revert to the most stable and historically best-performing configuration (8 layers, 128 head dim, 128 batch size, 0.06 Matrix LR) with a 2% warmup, as this specific setup has consistently yielded the best val_bpb (0.9881) and avoids the instability and crashes seen with other variations.",
+  "val_bpb": 0.990742,
+  "error": null,
+  "kept": false
+}

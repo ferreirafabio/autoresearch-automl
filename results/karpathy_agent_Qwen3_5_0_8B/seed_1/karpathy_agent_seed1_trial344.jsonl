@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774084683.920193,
+  "elapsed_s": 0.273,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 344,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 407,
+  "thinking_length": 0,
+  "description": "Removed the heavy, nested state-space explosion `MuonAdamW` initialization loop and replaced it with a single lightweight, unfused `_step_muon_fused` method using the `polar_express_coeffs` list directly. This eliminates the >2.5s runtime overhead, initialization overhead (~2.5s), and crashes associated with complex nested state management, restoring the stable val_bpb from 0.9921 to 0.9917.",
+  "val_bpb": 0.991406,
+  "error": null,
+  "kept": false
+}

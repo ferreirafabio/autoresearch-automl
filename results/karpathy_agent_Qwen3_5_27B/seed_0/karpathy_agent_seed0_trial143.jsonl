@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774113032.0221276,
+  "elapsed_s": 387.338,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 143,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26451,
+  "thinking_length": 0,
+  "description": "Increase model depth to 12 (GPT-2 Small scale) and reduce device batch size to 96 to fit the larger model in VRAM, while adjusting learning rates to ensure stable convergence within the 5-minute budget, aiming to leverage increased capacity for lower perplexity.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

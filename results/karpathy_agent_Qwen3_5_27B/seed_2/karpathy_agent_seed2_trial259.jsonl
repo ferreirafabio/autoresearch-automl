@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774355423.1220908,
+  "elapsed_s": 391.457,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 259,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26591,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer depth and 0.055 Matrix LR, but increase the Embedding Learning Rate from 0.55 to 0.62 to aggressively accelerate embedding convergence, which is often the bottleneck in short-training regimes, hoping to reach a better minimum before the time budget expires.",
+  "val_bpb": 0.988675,
+  "error": null,
+  "kept": false
+}

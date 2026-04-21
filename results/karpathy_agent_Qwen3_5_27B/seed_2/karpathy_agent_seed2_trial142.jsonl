@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774274624.3758667,
+  "elapsed_s": 391.946,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 142,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26640,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer architecture with 128 head dimension and 128 device batch size, and slightly reduce the matrix learning rate from 0.06 to 0.055 to improve training stability and achieve a lower validation bpb, as the model may be slightly unstable at the current learning rate.",
+  "val_bpb": 0.988304,
+  "error": null,
+  "kept": false
+}

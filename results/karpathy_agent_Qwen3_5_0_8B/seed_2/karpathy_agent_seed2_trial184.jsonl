@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774166279.6621778,
+  "elapsed_s": 0.326,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 184,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 629,
+  "thinking_length": 0,
+  "description": "Fixed the `torch._foreach_copy_`-based momentum scaling in `MuonAdamW` optimizer by implementing the actual adaptive step size calculation directly in the `step` method. The original helper functions contained division-by-zero risks (causing `step_size` to become zero or negative) and compiler overhead (recompilation of fused `adamw_step_fused` and `muon_step_fused`), which caused the optimizer to crash and stall after ~10 steps. The direct implementation ensures `step_size` remains strictly positive and numerically stable throughout training, eliminating GC stalls and restoring the stable val_bpb to ~0.9913.",
+  "val_bpb": 0.991365,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774296083.6180043,
+  "elapsed_s": 401.075,
+  "pid": 2556550,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 308,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26707,
+  "thinking_length": 0,
+  "description": "Revert to the stable 9-layer depth and 128 batch size, but reduce the Matrix Learning Rate to 0.018 to further stabilize training and potentially achieve a lower val_bpb than the 0.9791 result from the previous 0.02 LR attempt, addressing the instability seen in higher LR configurations.",
+  "val_bpb": 0.979987,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774268256.7981462,
+  "elapsed_s": 10.292,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 309,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 20136,
+  "thinking_length": 0,
+  "description": "Replaced the heavy `torch.compile` optimizer setup with a manual, non-caching `MuonAdamW` implementation in `setup_optimizer` and `estimate_flops` to eliminate unnecessary CPU tensor compilation overhead during fused optimizer steps. This fix addresses the \"CRASHED\" memory allocation errors observed at step 10-15 caused by improper tensor management during compilation.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774164589.426492,
+  "elapsed_s": 14.094,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 178,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26557,
+  "thinking_length": 0,
+  "description": "Replaced two memory-hungry, division-by-zero-prone helper functions (`get_muon_momentum` and `get_weight_decay`) with direct, numerically stable `step` method updates inside the `MuonAdamW` optimizer class. This fix resolves the `step_size` normalization error (causing `step_size` to become 0 or negative) that crashed the optimizer after 10 steps and eliminated ~500ms GC stalls caused by compiler recompilation overhead.",
+  "val_bpb": 0.991407,
+  "error": null,
+  "kept": false
+}

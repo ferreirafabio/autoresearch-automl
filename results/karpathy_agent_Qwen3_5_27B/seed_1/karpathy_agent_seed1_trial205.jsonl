@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774167242.8643527,
+  "elapsed_s": 394.499,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 205,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26620,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable baseline (Depth 10, Embedding LR 0.6, Weight Decay 0.24, Batch Size 2^18) and slightly increase Matrix LR to 0.030 to accelerate convergence, aiming to beat the 0.9807 record while maintaining stability.",
+  "val_bpb": 0.981795,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774072762.669932,
+  "elapsed_s": 385.489,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 86,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26435,
+  "thinking_length": 0,
+  "description": "Revert to the proven optimal Total Batch Size (2^19) to maximize gradient signal-to-noise ratio and stability, as the previous reduction to 2^18 yielded a worse result (0.9881 vs 0.9891) likely due to noisy gradients preventing convergence to the sharper minimum, while maintaining the optimal Depth (8), Matrix LR (0.11), and Embedding LR (1.4).",
+  "val_bpb": 0.990107,
+  "error": null,
+  "kept": false
+}

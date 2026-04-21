@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774302307.1007345,
+  "elapsed_s": 393.37,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 184,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26766,
+  "thinking_length": 0,
+  "description": "Revert to the historically best-performing configuration (8 layers, 128 head dim, 128 batch size, 0.06 Matrix LR) with 0% warmup, as the most recent run with this exact setup achieved 0.9883, approaching the best result of 0.9881, and the trend suggests this aggressive setting is the most reliable path to the optimum without the instability of higher LRs or the suboptimal convergence of lower LRs.",
+  "val_bpb": 0.988391,
+  "error": null,
+  "kept": false
+}

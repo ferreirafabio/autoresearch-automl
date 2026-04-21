@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774197984.1309836,
+  "elapsed_s": 391.365,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 121,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26677,
+  "thinking_length": 0,
+  "description": "Reduce model depth from 8 to 6 layers to increase training speed and data coverage within the 5-minute budget, while compensating for reduced capacity by increasing the Matrix LR to 0.08 and slightly reducing the batch size to 112 to maintain stability and avoid OOM.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

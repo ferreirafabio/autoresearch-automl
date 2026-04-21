@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774338201.8422098,
+  "elapsed_s": 395.215,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 236,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26732,
+  "thinking_length": 0,
+  "description": "Revert to the robust 8-layer/128-dim baseline with softcap=13 and Matrix LR=0.06, but reduce the Embedding Learning Rate from 0.6 to 0.45 to further stabilize token embedding updates under the 0% warmup schedule, potentially allowing the model to settle into a deeper minimum by reducing oscillation in the embedding space which has been a consistent bottleneck in previous high-LR attempts.",
+  "val_bpb": 0.987945,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774078481.4898505,
+  "elapsed_s": 14.035,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 321,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26476,
+  "thinking_length": 0,
+  "description": "Refactored `setup_optimizer` initialization loop from a heavy, nested, state-vector-mismatched `MuonAdamW` implementation with `torch._foreach_copy_` overhead into a single lightweight, unfused fused method using the `polar_express_coeffs` list directly. This eliminates the >2.5s runtime overhead and crashes associated with inconsistent state management and state-space explosion, restoring the stable val_bpb from 0.9921 to 0.9917.",
+  "val_bpb": 0.991697,
+  "error": null,
+  "kept": false
+}

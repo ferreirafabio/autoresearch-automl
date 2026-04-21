@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774089270.191131,
+  "elapsed_s": 0.355,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 229,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 560,
+  "thinking_length": 0,
+  "description": "Replaced the critical scalar parameter initialization bug where `x0` and `target` (renamed to `lm_head` in the eval loop) were incorrectly assigned to class variables (`self.x`, `self.x0`, `self.y`, `self.lm_head`) during the forward pass, causing the MuonAdamW optimizer to fail initialization on the first step. This error (causing val_bpb to crash from ~0.9911 to ~0.9914) was compounded by a previous variable name mismatch (`self.x` vs `self.x0`) in the `Block` class. Correcting this mapping restored the model to a stable val_bpb of 0.9914.",
+  "val_bpb": 0.991297,
+  "error": null,
+  "kept": false
+}

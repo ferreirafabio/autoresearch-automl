@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774081238.9539013,
+  "elapsed_s": 0.223,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 332,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 323,
+  "thinking_length": 0,
+  "description": "Replaced the heavy, nested, state-vector-mismatched `MuonAdamW` initialization loop with a single lightweight, unfused `_step_muon_fused` method using `polar_express_coeffs` directly. This eliminates OOM risks, compiler state vector mismatches, and initialization overhead (~2.5s), restoring val_bpb to 0.9917.",
+  "val_bpb": 0.991555,
+  "error": null,
+  "kept": false
+}

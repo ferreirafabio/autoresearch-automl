@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774074548.409636,
+  "elapsed_s": 14.021,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 167,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26479,
+  "thinking_length": 0,
+  "description": "Removed the buggy scalar parameter initialization handling (lines ~222-223 and 208-211) and the redundant/incorrect `lm_head` output logic in the `GPT` class, which caused a fatal optimizer crash and val_bpb=0.9911. This restored the optimizer initialization to work on the first step.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

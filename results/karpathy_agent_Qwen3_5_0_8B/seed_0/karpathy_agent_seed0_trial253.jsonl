@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774096066.8499868,
+  "elapsed_s": 13.972,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 253,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26335,
+  "thinking_length": 0,
+  "description": "Replaced unstable `spectral` MLP initialization and scaling logic with a standard residual MLP initialized correctly to `self.x` and `self.x0` (and `self.y`), fixing the MuonAdamW optimizer initialization failure on the first step that was causing the crash and dropping the val_bpb.",
+  "val_bpb": 0.991304,
+  "error": null,
+  "kept": false
+}

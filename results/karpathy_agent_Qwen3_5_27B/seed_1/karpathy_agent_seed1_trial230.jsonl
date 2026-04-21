@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774185118.5244539,
+  "elapsed_s": 393.871,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 230,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26683,
+  "thinking_length": 0,
+  "description": "Revert to Depth 10 to restore model capacity (the Depth 9 model underfitted despite fast convergence) and slightly reduce Matrix LR to 0.030 to ensure stability while maintaining the aggressive optimization speed that enabled the previous record.",
+  "val_bpb": 0.981694,
+  "error": null,
+  "kept": false
+}

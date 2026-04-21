@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774295492.7017844,
+  "elapsed_s": 385.805,
+  "pid": 2555653,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 173,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26692,
+  "thinking_length": 0,
+  "description": "Revert to the successful Depth=8 configuration but reduce the Matrix Learning Rate from 0.08 to 0.06 to improve training stability, as the previous high LR likely caused the \"AssertionError\" crashes observed in deeper experiments and may have induced instability even at Depth=8, preventing the model from fully converging to the ~0.988 target.",
+  "val_bpb": 0.989074,
+  "error": null,
+  "kept": false
+}

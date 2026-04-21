@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774144940.92937,
+  "elapsed_s": 391.161,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 169,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26660,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer architecture with global batch size 2^19 and Muon LR 0.033 to ensure convergence stability within the 5-minute budget, as the 10-layer model consistently failed to converge sufficiently in previous runs while the 8-layer configuration reliably achieves ~0.991 BPB.",
+  "val_bpb": 0.991806,
+  "error": null,
+  "kept": false
+}

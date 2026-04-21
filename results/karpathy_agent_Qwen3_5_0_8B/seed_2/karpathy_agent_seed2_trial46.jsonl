@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774123964.9004784,
+  "elapsed_s": 14.02,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 46,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26516,
+  "thinking_length": 0,
+  "description": "Removed the non-functional, memory-hungry helper functions (`get_muon_momentum`, `get_weight_decay`) that contained `torch._foreach_copy_` overhead and division-by-zero risks, replacing them with direct, numerically stable parameter updates inside the `step` method. This eliminated the overhead and crashes while maintaining identical performance due to the stable optimizer logic.",
+  "val_bpb": 0.991312,
+  "error": null,
+  "kept": false
+}

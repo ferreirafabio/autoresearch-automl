@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774152901.4899302,
+  "elapsed_s": 392.238,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 55,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26677,
+  "thinking_length": 0,
+  "description": "Revert to the empirically proven \"Gold Standard\" configuration (Depth=8, Matrix LR=0.06, Weight Decay=0.1, Batch=128) which consistently yields the lowest val_bpb (~0.9901) and stable convergence, avoiding the instability of deeper models (OOM) or shallower models (underfitting) and the sensitivity of aggressive/conservative LR tweaks observed in previous runs.",
+  "val_bpb": 0.990516,
+  "error": null,
+  "kept": false
+}

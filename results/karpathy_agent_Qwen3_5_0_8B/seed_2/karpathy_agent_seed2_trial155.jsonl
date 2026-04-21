@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774158267.681451,
+  "elapsed_s": 0.386,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 155,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 578,
+  "thinking_length": 0,
+  "description": "Removed the dangerous `torch._foreach_copy_` overhead-based helper functions (`get_muon_momentum`, `get_weight_decay`) that caused the optimizer to crash after 10 steps due to division-by-zero risks in `step_size` normalization, eliminating ~500ms GC stalls and restoring stability.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

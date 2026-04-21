@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774207232.7053409,
+  "elapsed_s": 387.936,
+  "pid": 3830506,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 285,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26393,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 9 layers and increase device batch size to 144 to improve gradient signal-to-noise ratio and training stability, as the 10-layer configuration with batch 128 has shown consistent instability and slightly higher validation loss in recent runs.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774083711.2912922,
+  "elapsed_s": 389.596,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 83,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26691,
+  "thinking_length": 0,
+  "description": "Revert to the 2^19 global batch size to maximize gradient steps (the primary driver of the 0.9830 result), increase the Muon learning rate to 0.037 to accelerate convergence within the 5-minute budget, and slightly reduce the embedding learning rate to 0.5 to improve stability given the higher throughput and larger batch size.",
+  "val_bpb": 0.992644,
+  "error": null,
+  "kept": false
+}

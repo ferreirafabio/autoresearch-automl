@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774184543.2350476,
+  "elapsed_s": 13.45,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 394,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26099,
+  "thinking_length": 0,
+  "description": "Removed all non-essential `torch.compile(model, dynamic=False)` calls, excessive GC freeze/enable/enable calls, and unnecessary optimizer parameter updates (specifically `unembedding_lr`, `embedding_lr`, and `scalar_lr` in `setup_optimizer` and `step` methods), replacing complex logic with a single static compilation step to resolve memory fragmentation and optimizer crashes caused by recompilation on every step.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

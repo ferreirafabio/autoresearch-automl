@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774115589.7812152,
+  "elapsed_s": 392.134,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 147,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26529,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable configuration (Depth 10, Batch 128, Matrix LR 0.11) to ensure training stability and avoid OOM crashes, as recent attempts to increase depth or batch size have consistently failed or regressed; the slight variance in recent results (0.9841-0.9842) suggests we are hitting the stochastic limit of this specific configuration under the 5-minute budget, so stability is prioritized over risky architectural changes.",
+  "val_bpb": 0.983759,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774030447.331432,
+  "elapsed_s": 11.872,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 113,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 23309,
+  "thinking_length": 0,
+  "description": "Consolidated and refactored the `MuonAdamW.__init__` initialization loop into a single lightweight `_step_muon` method and a combined `step` method, removing the heavy, state-vector-mismatched hyperparameter initialization loops that caused the optimizer to crash.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

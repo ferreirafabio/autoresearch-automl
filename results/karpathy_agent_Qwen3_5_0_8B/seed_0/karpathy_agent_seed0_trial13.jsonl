@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774009389.0251389,
+  "elapsed_s": 14.128,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 13,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26749,
+  "thinking_length": 0,
+  "description": "Removed the complex, high-overhead `get_muon_momentum` and `get_weight_decay` helper functions that were causing $O(N^2)$ overhead and runtime crashes in `MuonAdamW.__init__` during the optimizer initialization loop. Moved their usage directly into the `__init__` method, reducing the overhead from $O(N^2)$ helper function calls to $O(N)$ direct parameter updates. This optimization preserved the core training logic, memory footprint, and FLOP estimates while eliminating crashes.",
+  "val_bpb": 0.991439,
+  "error": null,
+  "kept": false
+}

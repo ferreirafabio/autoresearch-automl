@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774147386.7133412,
+  "elapsed_s": 388.885,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 192,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26346,
+  "thinking_length": 0,
+  "description": "Increase model depth to 12 and reduce device batch size to 64 to leverage the full 76GB VRAM for a larger capacity model, using the proven aggressive learning rates (Matrix 0.11, Embedding 1.4) that ensure rapid convergence within the 5-minute budget.",
+  "val_bpb": 0.99158,
+  "error": null,
+  "kept": false
+}

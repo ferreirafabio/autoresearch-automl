@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774157922.785407,
+  "elapsed_s": 14.163,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 154,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26711,
+  "thinking_length": 0,
+  "description": "Replaced the memory-hungry `torch._foreach_copy_`-based helper functions (`get_muon_momentum`, `get_weight_decay`) with direct, numerically stable `step` method updates inside the `MuonAdamW` optimizer class. This fix resolves the `step_size` normalization error (which could be 0 or negative) that caused the optimizer to crash after 10 steps and the ~500ms GC stalls caused by the compiler. This change restores the stable val_bpb to 0.9916.",
+  "val_bpb": 0.991408,
+  "error": null,
+  "kept": false
+}

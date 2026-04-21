@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774168377.3677657,
+  "elapsed_s": 393.753,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 207,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26654,
+  "thinking_length": 0,
+  "description": "Revert to the stable Depth 10 baseline but increase the Matrix LR to 0.035 and Embedding LR to 0.65 to aggressively accelerate convergence and reduce val_bpb, while maintaining the stable Weight Decay and Batch Size that prevented previous OOM crashes.",
+  "val_bpb": 0.981183,
+  "error": null,
+  "kept": false
+}
