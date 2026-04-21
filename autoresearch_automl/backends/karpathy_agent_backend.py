@@ -171,6 +171,15 @@ class KarpathyAgentBackend(HPOBackend):
             return config, self._max_budget
 
         except Exception as e:
+            # Fail HARD on connection/timeout errors — silently reusing the
+            # current-best source as "LLM output" would pollute results.
+            from openai import APIConnectionError, APITimeoutError
+            if isinstance(e, (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError)):
+                logger.error(
+                    "LLM server unreachable (%s) - failing hard instead of "
+                    "reusing last-best source (would pollute results).", e
+                )
+                raise
             logger.warning("Karpathy agent LLM call failed: %s. Using current best source.", e)
             self._pending_source = self._current_best_source
             self._pending_description = f"LLM FAILED: {e}"

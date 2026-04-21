@@ -129,6 +129,17 @@ class CentaurBackend(HPOBackend):
             self._trial_count += 1
             return config, self._max_budget
         except Exception as e:
+            # Fail HARD on connection/timeout errors — silently falling back
+            # to pure-CMA suggestions would pollute "Centaur" results with
+            # trials that are actually CMA-only, indistinguishable in the
+            # logged trials.jsonl.
+            from openai import APIConnectionError, APITimeoutError
+            if isinstance(e, (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError)):
+                logger.error(
+                    "LLM server unreachable (%s) - failing hard instead of "
+                    "falling back to pure CMA (would pollute results).", e
+                )
+                raise
             logger.warning("LLM suggestion failed (%s), falling back to CMA-ES config", e)
             self._active_source = "cma"
             self._trial_count += 1
