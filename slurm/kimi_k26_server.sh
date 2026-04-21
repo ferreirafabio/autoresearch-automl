@@ -46,6 +46,10 @@ export VLLM_ENABLE_CUDA_COMPATIBILITY=1
 # a newer driver than 570.211.01 (cudaErrorInsufficientDriver).
 # Falls back to vLLM's native RoPE implementation.
 export VLLM_DISABLE_FLASHINFER_ROPE=1
+# Force Triton WNA16 MoE kernel instead of vLLM's moe_wna16_gemm CUDA kernel,
+# which has BLOCK_SIZE_K//group_size constraint that crashes for Kimi K2.6
+# (group_size=32, small batches typical for HPO inference).
+export VLLM_DISABLE_MOE_WNA16_CUDA=1
 
 HOSTNAME_SHORT="$(hostname -s)"
 # Use IP not hostname in the endpoint file to bypass cluster proxy/DNS issues
@@ -88,7 +92,7 @@ python -m vllm.entrypoints.openai.api_server \
     --dtype auto \
     --trust-remote-code \
     --gpu-memory-utilization 0.90 \
-    --max-model-len 16384 \
+    --max-model-len 65536 \
     --tool-call-parser kimi_k2 \
     --reasoning-parser kimi_k2 \
     --enforce-eager \
