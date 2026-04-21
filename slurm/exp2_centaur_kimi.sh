@@ -25,8 +25,9 @@ RESULTS_DIR="/work/dlclarge1/ferreira-autoresearch-automl/results/kimi_k26_bench
 source "${PROJECT_DIR}/.venv/bin/activate"
 cd "$PROJECT_DIR"
 
-export no_proxy="127.0.0.1,localhost"
-export NO_PROXY="127.0.0.1,localhost"
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+export no_proxy="127.0.0.1,localhost,dlc2gpu18,dlc2gpu19,dlc2gpu20,dlc2gpu21,10.5.166.0/24,.dlc2gpu"
+export NO_PROXY="127.0.0.1,localhost,dlc2gpu18,dlc2gpu19,dlc2gpu20,dlc2gpu21,10.5.166.0/24,.dlc2gpu"
 
 # Wait for Kimi endpoint file (server may still be loading; poll up to 30 min)
 echo "Waiting for Kimi K2.6 endpoint file..."
