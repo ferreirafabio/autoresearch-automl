@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=kimi-k26-server
-#SBATCH --partition=mldlc2_gpu-h200
+#SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=8
 #SBATCH --nodes=1
 #SBATCH --time=24:00:00
