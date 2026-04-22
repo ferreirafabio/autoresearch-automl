@@ -68,10 +68,10 @@ class ObjectiveFunction:
 
         start_time = time.time()
         try:
-            # Timeout: budget + 300s grace for startup/compilation overhead
+            # Timeout: budget + grace for startup/compilation overhead
             # (train.py excludes first 10 steps from time budget for torch.compile)
-            # program.md says kill after 10 minutes total
-            timeout = max(budget + 300, 600)
+            # 600s grace tolerates contention from 9 parallel HPO jobs on shared FS.
+            timeout = max(budget + 600, 900)
             proc = subprocess.run(
                 self.run_command,
                 capture_output=True,
