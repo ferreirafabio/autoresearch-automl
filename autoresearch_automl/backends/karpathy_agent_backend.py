@@ -103,7 +103,7 @@ class KarpathyAgentBackend(HPOBackend):
 
         if self._llm_client is None:
             from openai import OpenAI
-            self._llm_client = OpenAI()
+            self._llm_client = OpenAI(timeout=1800.0)  # 30 min; Kimi K2.6 decode can take >10min for long outputs
 
     def suggest(self) -> tuple[dict[str, Any], float]:
         """Suggest next config by generating modified train.py source.

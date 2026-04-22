@@ -227,7 +227,7 @@ class CentaurBackend(HPOBackend):
     def _suggest_llm(self, cma_config: dict) -> dict[str, Any]:
         if self._llm_client is None:
             from openai import OpenAI
-            self._llm_client = OpenAI()
+            self._llm_client = OpenAI(timeout=1800.0)  # 30 min; Kimi K2.6 decode can take >10min for long outputs
 
         cma_state = self._extract_cma_state()
         cma_analysis = self._format_cma_analysis(cma_state, cma_config)
