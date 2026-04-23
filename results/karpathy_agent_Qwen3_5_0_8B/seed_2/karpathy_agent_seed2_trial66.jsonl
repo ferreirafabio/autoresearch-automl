@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774130658.8608227,
+  "elapsed_s": 14.024,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 66,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26437,
+  "thinking_length": 0,
+  "description": "Replaced the unstable, memory-hungry `get_muon_momentum` and `get_weight_decay` helper functions with direct, numerically stable `step` method updates inside `MuonAdamW`, eliminating `torch._foreach_copy_` overhead and division-by-zero risks that caused training crashes and a drop in val_bpb to 0.9913.",
+  "val_bpb": 0.991334,
+  "error": null,
+  "kept": false
+}

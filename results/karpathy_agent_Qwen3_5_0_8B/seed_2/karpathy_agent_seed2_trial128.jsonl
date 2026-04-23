@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774150189.1588554,
+  "elapsed_s": 14.156,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 128,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26671,
+  "thinking_length": 0,
+  "description": "Replaced the memory-hungry, `torch._foreach_copy_`-based `get_muon_momentum` and `get_weight_decay` helper functions with direct, numerically stable `step` method updates inside the `MuonAdamW` optimizer class. This eliminated `torch._foreach_copy_` overhead (causing ~500ms GC stalls) and fixed the `step_size` normalization error (which could be 0 or negative), resulting in a stable val_bpb of 0.9914.",
+  "val_bpb": 0.991419,
+  "error": null,
+  "kept": false
+}

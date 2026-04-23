@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774101786.3970838,
+  "elapsed_s": 382.215,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 128,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26391,
+  "thinking_length": 0,
+  "description": "Revert to the stable Depth=8 configuration with a large batch size (2^19) and optimized hyperparameters (Matrix LR 0.11, Embedding LR 1.4) to maximize gradient signal-to-noise ratio and ensure robust convergence, as previous attempts to increase depth consistently failed due to optimization instability and VRAM constraints.",
+  "val_bpb": 0.990088,
+  "error": null,
+  "kept": false
+}

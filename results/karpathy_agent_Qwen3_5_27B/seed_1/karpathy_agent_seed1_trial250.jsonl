@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774199339.778611,
+  "elapsed_s": 395.478,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 250,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26750,
+  "thinking_length": 0,
+  "description": "Revert to the proven Depth 9 architecture (which underfitted less than Depth 10 in previous high-regularization runs) and increase Matrix LR to 0.038 to maximize convergence speed within the 5-minute budget, leveraging the high Weight Decay (0.24) and Embedding LR (0.6) that previously yielded the 0.9785 record.",
+  "val_bpb": 0.981669,
+  "error": null,
+  "kept": false
+}

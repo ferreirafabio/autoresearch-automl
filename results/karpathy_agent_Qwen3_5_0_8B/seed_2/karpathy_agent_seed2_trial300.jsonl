@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774266521.418866,
+  "elapsed_s": 11.682,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 300,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 22890,
+  "thinking_length": 0,
+  "description": "Eliminated the heavy `torch.compile(model, dynamic=False)` call entirely. This caused a memory allocation crash in `setup_optimizer` where the fused optimizer step attempted to allocate tensors that were no longer needed, likely due to improper tensor sharing logic during compilation.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

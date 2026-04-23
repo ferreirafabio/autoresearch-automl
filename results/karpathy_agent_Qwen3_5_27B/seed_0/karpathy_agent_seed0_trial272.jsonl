@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774198863.5299275,
+  "elapsed_s": 386.943,
+  "pid": 3830506,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 272,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26395,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 8 layers and increase device batch size to 192 to improve training stability and signal-to-noise ratio while staying within VRAM limits, addressing the consistent instability of 10-layer configurations.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

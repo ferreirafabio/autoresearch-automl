@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774275092.789297,
+  "elapsed_s": 14.023,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 336,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26502,
+  "thinking_length": 0,
+  "description": "Removed the `torch.compile(model, dynamic=False)` call in `estimate_flops` and `setup_optimizer` to eliminate unnecessary CPU tensor allocation overhead during fused optimizer steps, which was causing a 5-minute validation time crash.",
+  "val_bpb": 0.991272,
+  "error": null,
+  "kept": false
+}

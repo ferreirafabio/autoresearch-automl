@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774066374.3878717,
+  "elapsed_s": 387.162,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 59,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26527,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 6 layers and increase head dimension to 128 to create a wider, shallower network that fits comfortably within VRAM limits, while adjusting the Muon learning rate and weight decay to match the new capacity and stabilize training dynamics.",
+  "val_bpb": 1.027531,
+  "error": null,
+  "kept": false
+}

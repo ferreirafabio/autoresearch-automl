@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774178425.939101,
+  "elapsed_s": 13.941,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 375,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26292,
+  "thinking_length": 0,
+  "description": "Removed `torch.compile(model, dynamic=False)` to prevent OOM fragmentation and optimizer crashes by avoiding recompilation of the entire model on every step, replacing it with a static compilation that fits within the available 118GB VRAM constraint.",
+  "val_bpb": 0.991186,
+  "error": null,
+  "kept": false
+}

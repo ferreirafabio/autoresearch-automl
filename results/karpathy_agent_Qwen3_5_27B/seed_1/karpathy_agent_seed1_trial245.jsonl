@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774195707.6640272,
+  "elapsed_s": 393.137,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 245,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26610,
+  "thinking_length": 0,
+  "description": "Revert to Depth 10 and reduce Matrix LR to 0.027 to find a stable convergence point lower than the previously tested 0.028, while maintaining the high Weight Decay (0.28) and Embedding LR (0.6) that showed promise in generalization.",
+  "val_bpb": 0.982145,
+  "error": null,
+  "kept": false
+}

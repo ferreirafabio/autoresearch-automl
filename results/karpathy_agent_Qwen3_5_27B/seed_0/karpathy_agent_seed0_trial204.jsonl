@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774155734.5823274,
+  "elapsed_s": 389.672,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 204,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26463,
+  "thinking_length": 0,
+  "description": "Revert to the proven aggressive Matrix LR (0.11) and Embedding LR (1.4) with Depth 10, as the current best result (0.9800) from the conservative 0.08 LR likely under-utilized the 5-minute budget by converging too slowly, and historical data consistently shows the aggressive setup achieves better convergence (~0.983 bpb) within the time limit.",
+  "val_bpb": 0.983654,
+  "error": null,
+  "kept": false
+}

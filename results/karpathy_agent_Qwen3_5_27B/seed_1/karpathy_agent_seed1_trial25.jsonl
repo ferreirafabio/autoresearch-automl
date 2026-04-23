@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774022639.8676927,
+  "elapsed_s": 385.171,
+  "pid": 2684818,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 25,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26557,
+  "thinking_length": 0,
+  "description": "Revert to the most stable configuration (8-layer, 128 head-dim, batch 128) that achieved 0.9917, but refine the Matrix Learning Rate to 0.036 and Weight Decay to 0.195 to find a slightly more stable convergence point and beat the 0.9915 baseline.",
+  "val_bpb": 0.99179,
+  "error": null,
+  "kept": false
+}

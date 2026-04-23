@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774297545.9477913,
+  "elapsed_s": 398.699,
+  "pid": 2556550,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 310,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26715,
+  "thinking_length": 0,
+  "description": "Revert to the stable 9-layer depth and 128 batch size configuration that achieved the best result (0.9785), but fine-tune the Matrix Learning Rate to 0.022 (between the successful 0.02 and the unstable 0.025/0.035 attempts) to potentially improve convergence without triggering the instability seen in higher LR configurations.",
+  "val_bpb": 0.97878,
+  "error": null,
+  "kept": false
+}

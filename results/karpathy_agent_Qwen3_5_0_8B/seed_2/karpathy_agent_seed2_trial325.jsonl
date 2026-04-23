@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774272007.2584367,
+  "elapsed_s": 13.972,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 325,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26371,
+  "thinking_length": 0,
+  "description": "Replaced the unnecessary `torch.compile` call in `estimate_flops` and `setup_optimizer` with a manual, non-caching implementation to eliminate CPU tensor compilation overhead during fused optimizer steps, restoring the val_bpb to 0.9914.",
+  "val_bpb": 0.991472,
+  "error": null,
+  "kept": false
+}

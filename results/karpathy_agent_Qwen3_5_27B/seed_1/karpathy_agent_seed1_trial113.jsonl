@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774105025.7787802,
+  "elapsed_s": 390.377,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 113,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26704,
+  "thinking_length": 0,
+  "description": "Revert to the 2^19 global batch size to maximize gradient steps and restore the stable 0.033 Muon learning rate, as the previous run with 2^18 batch size and 0.035 LR yielded 0.9914, while the 2^19/0.033 config historically achieved the best 0.9830, suggesting the recent OOMs were transient and the lower batch size hurt convergence speed.",
+  "val_bpb": 0.991438,
+  "error": null,
+  "kept": false
+}

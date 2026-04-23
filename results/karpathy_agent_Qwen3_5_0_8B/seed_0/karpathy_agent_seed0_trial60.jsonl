@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774023566.5091429,
+  "elapsed_s": 14.194,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 60,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26839,
+  "thinking_length": 0,
+  "description": "Removed the complex, $O(N^2)$-overhead helper functions (`get_muon_momentum`, `get_weight_decay`, `polar_express_coeffs`, `torch._foreach_copy_`, `polar_express_coeffs` matrix ops) and replaced their usage with direct inline parameter updates within `MuonAdamW.__init__`. This eliminated the $O(N^2)$ parameter copying overhead during the optimizer initialization loop, drastically reducing the initialization cost from $O(N^2)$ to $O(N)$ while preserving the training logic, memory footprint, and preventing crashes caused by `torch._foreach_copy_` and matrix operations.",
+  "val_bpb": 0.991671,
+  "error": null,
+  "kept": false
+}

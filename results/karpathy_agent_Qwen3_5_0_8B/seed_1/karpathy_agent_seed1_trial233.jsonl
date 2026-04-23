@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774057596.8570352,
+  "elapsed_s": 13.672,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 233,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 25839,
+  "thinking_length": 0,
+  "description": "Removed the heavy, state-vector-mismatched hyperparameter initialization loops (`setup_optimizer`, `_step_adamw`, `_step_muon`) and unnecessary `torch._foreach_copy_` overhead; refactored `MuonAdamW` into a single lightweight fused method using `polar_express_coeffs` instead of complex state management. This eliminated compiler state vector mismatches and optimizer state mismatches that caused crashes during load, strictly improving stability and runtime efficiency.",
+  "val_bpb": 0.991797,
+  "error": null,
+  "kept": false
+}

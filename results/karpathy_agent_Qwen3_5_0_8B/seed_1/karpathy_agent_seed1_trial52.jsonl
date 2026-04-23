@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774018283.1303926,
+  "elapsed_s": 0.257,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 52,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 449,
+  "thinking_length": 0,
+  "description": "Fixed a critical state vector mismatch and `torch._foreach_copy_` overhead bug in the `MuonAdamW` optimizer initialization by replacing complex, multi-stage initialization loops with a single, lightweight `_step_muon` and `step` method. This eliminates unnecessary state vector duplication and the heavy `torch._foreach_copy_` overhead that caused the optimizer to crash during initialization, stabilizing the model to a better val_bpb.",
+  "val_bpb": 0.991648,
+  "error": null,
+  "kept": false
+}

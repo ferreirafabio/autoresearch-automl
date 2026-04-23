@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774118473.6560183,
+  "elapsed_s": 390.207,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 151,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26474,
+  "thinking_length": 0,
+  "description": "Revert to the proven aggressive Matrix LR (0.11) to maximize convergence within the 5-minute budget, as the lower LR (0.08) likely under-utilized the time, while maintaining the stable Depth 10 and Batch 128 configuration that avoids OOM crashes and consistently yields results in the 0.983-0.985 range, which is the current performance ceiling for this setup.",
+  "val_bpb": 0.984433,
+  "error": null,
+  "kept": false
+}

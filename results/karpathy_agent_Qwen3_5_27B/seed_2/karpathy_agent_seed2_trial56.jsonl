@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774153621.2042253,
+  "elapsed_s": 393.458,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 56,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26708,
+  "thinking_length": 0,
+  "description": "Revert to the empirically proven \"Gold Standard\" configuration (Depth=8, Matrix LR=0.06, Weight Decay=0.1, Batch=128) which consistently yields the lowest val_bpb (~0.9901-0.9905) and stable convergence, as recent capacity increases (Depth=10, 12) failed due to time budget or OOM, and shallower models (Depth=6) underfit, while aggressive/conservative LR tweaks on Depth=8 degraded performance.",
+  "val_bpb": 0.990528,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774118133.7171226,
+  "elapsed_s": 14.068,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 25,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26595,
+  "thinking_length": 0,
+  "description": "Removed the non-functional `get_muon_momentum` and `get_weight_decay` helper functions which caused `torch._foreach_copy_` calls to fail and previously crashed the training loop. By replacing them with direct parameter updates within the `step` method, we eliminated the runtime overhead while maintaining numerical stability.",
+  "val_bpb": 0.991416,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774105023.228901,
+  "elapsed_s": 383.391,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 133,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26356,
+  "thinking_length": 0,
+  "description": "Increase model capacity by raising Depth to 12 and reducing Head_Dim to 96 to fit within VRAM, while adjusting learning rates and weight decay to stabilize the deeper network and maximize gradient signal within the 5-minute budget.",
+  "val_bpb": 0.991672,
+  "error": null,
+  "kept": false
+}

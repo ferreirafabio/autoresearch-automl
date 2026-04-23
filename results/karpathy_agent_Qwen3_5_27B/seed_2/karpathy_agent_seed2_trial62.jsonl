@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774157625.586193,
+  "elapsed_s": 392.324,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 62,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26679,
+  "thinking_length": 0,
+  "description": "Revert to the empirically proven \"Gold Standard\" configuration (Depth=8, Matrix LR=0.06, Weight Decay=0.1, Batch=128) which consistently achieves the lowest val_bpb (~0.9901) and stable convergence, as all previous attempts to increase capacity (OOM/Time), reduce capacity (underfit), or tweak learning rates (instability) have failed to improve upon this baseline.",
+  "val_bpb": 0.990576,
+  "error": null,
+  "kept": false
+}

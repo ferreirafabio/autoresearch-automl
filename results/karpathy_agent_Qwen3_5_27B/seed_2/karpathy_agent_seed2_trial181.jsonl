@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774300602.775834,
+  "elapsed_s": 386.244,
+  "pid": 2555653,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 181,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26636,
+  "thinking_length": 0,
+  "description": "Revert to the stable Depth=8 configuration with Matrix LR=0.08 and Embedding LR=0.6, but increase the device batch size from 112 back to 128 to maximize throughput and token exposure within the 5-minute budget, as the previous crash at 160 suggests 128 is the safe upper limit for this model size and architecture.",
+  "val_bpb": 0.988274,
+  "error": null,
+  "kept": false
+}

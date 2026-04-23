@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774147389.1580038,
+  "elapsed_s": 392.172,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 47,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26642,
+  "thinking_length": 0,
+  "description": "Revert to the empirically proven \"Gold Standard\" configuration (Depth=8, Matrix LR=0.06, WD=0.1, Batch=128) which has consistently yielded the best val_bpb (~0.9904-0.9905) and stable convergence, as recent aggressive (0.07 LR) and conservative (0.055 LR) attempts degraded performance or caused instability.",
+  "val_bpb": 0.990471,
+  "error": null,
+  "kept": false
+}

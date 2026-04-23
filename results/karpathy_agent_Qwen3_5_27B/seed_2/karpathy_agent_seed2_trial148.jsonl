@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774278619.6118157,
+  "elapsed_s": 390.555,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 148,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26585,
+  "thinking_length": 0,
+  "description": "Reduce matrix learning rate from 0.06 to 0.058 to improve training stability and convergence, as previous experiments suggest the model is near the stability limit and a slightly lower LR may achieve a better minimum within the 5-minute budget.",
+  "val_bpb": 0.988668,
+  "error": null,
+  "kept": false
+}

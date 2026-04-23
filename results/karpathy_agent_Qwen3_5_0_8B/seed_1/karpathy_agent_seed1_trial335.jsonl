@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774082236.2893116,
+  "elapsed_s": 13.917,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 335,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26283,
+  "thinking_length": 0,
+  "description": "Deleted the `setup_optimizer` initialization loop and replaced it with the single fused `_step_muon_fused` method use-pair, removing the OOM risks and initialization overhead associated with the nested, state-vector-mismatched MuonAdamW implementation.",
+  "val_bpb": 0.991526,
+  "error": null,
+  "kept": false
+}

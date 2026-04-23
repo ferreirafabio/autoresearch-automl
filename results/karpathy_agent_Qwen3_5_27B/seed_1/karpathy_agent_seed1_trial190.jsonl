@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774157317.057666,
+  "elapsed_s": 394.621,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 190,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26543,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable baseline configuration (Depth 10, Embedding LR 0.6, Weight Decay 0.24, Batch Size 2^18) that consistently yields ~0.982 val_bpb, correcting the recent under-trained runs (LR 0.5) and ensuring a reliable baseline before attempting further optimizations.",
+  "val_bpb": 0.982512,
+  "error": null,
+  "kept": false
+}

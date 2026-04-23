@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774099587.4089265,
+  "elapsed_s": 390.988,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 105,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26711,
+  "thinking_length": 0,
+  "description": "Revert to the high-throughput 2^19 global batch size and 8-layer/128-dim architecture with the stable 0.033 Muon learning rate to maximize gradient steps and ensure stability, as this setup previously yielded the best result (0.9830) and recent failures with higher LRs or batch sizes were likely due to memory fragmentation or instability.",
+  "val_bpb": null,
+  "error": "GPU out-of-memory",
+  "kept": false
+}

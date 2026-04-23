@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774077960.1678352,
+  "elapsed_s": 390.881,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 75,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26654,
+  "thinking_length": 0,
+  "description": "Revert to the larger global batch size (2^19) to maximize gradient steps and throughput, which was the primary driver of the previous best result (0.9830), while maintaining the aggressive Muon learning rate (0.035) and stable 8-layer/128-dim architecture; recent OOMs were likely due to memory fragmentation or anomalies, and higher throughput is critical for convergence in short runs.",
+  "val_bpb": 0.991443,
+  "error": null,
+  "kept": false
+}

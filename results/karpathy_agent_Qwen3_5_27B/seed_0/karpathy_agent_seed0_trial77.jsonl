@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774066348.525439,
+  "elapsed_s": 382.652,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 77,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26367,
+  "thinking_length": 0,
+  "description": "Revert to the proven optimal hyperparameters (Matrix LR=0.11, Embedding LR=1.4, Depth=8) that achieved the best val_bpb of 0.9891, as the current lower learning rates are under-training and previous attempts to fine-tune around this point have consistently yielded worse results due to instability.",
+  "val_bpb": 0.990211,
+  "error": null,
+  "kept": false
+}

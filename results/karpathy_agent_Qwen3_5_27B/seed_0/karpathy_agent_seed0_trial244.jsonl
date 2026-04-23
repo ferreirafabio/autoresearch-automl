@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774182647.5193274,
+  "elapsed_s": 390.73,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 244,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26537,
+  "thinking_length": 0,
+  "description": "Revert to the aggressive learning rate configuration (Matrix LR 0.11, Embedding LR 1.4) and Depth 10, which historically yields ~0.983 bpb, but introduce a more robust warmup schedule (WARMUP_RATIO=0.05) to stabilize the early training phase of the high-LR run, potentially preventing the oscillations that caused previous failures while aiming for faster convergence than the conservative 0.08 LR baseline.",
+  "val_bpb": 0.98493,
+  "error": null,
+  "kept": false
+}

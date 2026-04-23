@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774373487.144892,
+  "elapsed_s": 393.892,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 284,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26694,
+  "thinking_length": 0,
+  "description": "Revert to the most stable baseline configuration (Depth 8, Matrix LR 0.055, Embedding LR 0.55, Warmdown 0.5) and explicitly set the token embedding initialization standard deviation to 1.0 to maximize the probability of reproducing the 0.9879 best result, as previous attempts to \"tune\" or \"accelerate\" consistently led to instability and higher loss.",
+  "val_bpb": 0.988321,
+  "error": null,
+  "kept": false
+}

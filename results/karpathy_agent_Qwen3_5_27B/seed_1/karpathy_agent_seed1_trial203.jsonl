@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774165782.4820807,
+  "elapsed_s": 394.699,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 203,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26713,
+  "thinking_length": 0,
+  "description": "Increase model depth to 12 layers to improve capacity, reduce device batch size to 64 to fit within VRAM, and restore the high-velocity Embedding LR to 0.6 (and slightly increase Matrix LR to 0.03) to accelerate convergence within the 5-minute budget, aiming to beat the 0.9807 record with a more expressive model.",
+  "val_bpb": 0.988158,
+  "error": null,
+  "kept": false
+}

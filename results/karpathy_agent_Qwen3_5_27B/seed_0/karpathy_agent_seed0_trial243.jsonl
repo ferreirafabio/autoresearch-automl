@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774181924.2131817,
+  "elapsed_s": 390.872,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 243,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26469,
+  "thinking_length": 0,
+  "description": "Revert to the conservative Matrix LR (0.08) and Depth 10 configuration which achieved the best result (0.9800), as the repeated failures of the aggressive LR (0.11) to beat this baseline and the crashes associated with Depth 11 indicate that the conservative setting is the most stable and effective for the current 5-minute budget and VRAM constraints.",
+  "val_bpb": 0.979629,
+  "error": null,
+  "kept": false
+}

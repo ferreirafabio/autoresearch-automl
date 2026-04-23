@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774067853.0840135,
+  "elapsed_s": 389.304,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 61,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26640,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer, 128-head-dim configuration that achieved ~0.9916 bpb, but increase the Muon learning rate slightly (0.0315 -> 0.034) and reduce weight decay (0.225 -> 0.20) to maximize optimization progress within the 5-minute budget, while keeping the batch size and architecture identical to the best-performing run.",
+  "val_bpb": 0.991493,
+  "error": null,
+  "kept": false
+}

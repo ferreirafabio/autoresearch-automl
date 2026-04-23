@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774031260.645455,
+  "elapsed_s": 385.137,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 27,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26528,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer architecture with a device batch size of 128 to ensure VRAM stability, and increase the matrix learning rate to 0.12 and embedding learning rate to 1.5 to aggressively accelerate convergence, building on the trend that higher learning rates within the stable configuration yield the best val_bpb.",
+  "val_bpb": 0.991178,
+  "error": null,
+  "kept": false
+}

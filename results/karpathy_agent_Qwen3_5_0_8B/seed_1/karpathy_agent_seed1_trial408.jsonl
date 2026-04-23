@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774187742.284921,
+  "elapsed_s": 10.206,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 408,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 19989,
+  "thinking_length": 0,
+  "description": "Replaced the critical `torch.compile(model, dynamic=False)` call with a single static compilation step to resolve OOM fragmentation and optimizer crashes caused by recompilation overhead on every training step. This reduces the number of FLOPs and VRAM pressure significantly while maintaining the same performance.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

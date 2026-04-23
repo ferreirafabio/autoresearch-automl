@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774172549.5404902,
+  "elapsed_s": 392.412,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 84,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26832,
+  "thinking_length": 0,
+  "description": "Increase model depth from 8 to 9 layers while maintaining the proven \"Gold Standard\" learning rates and batch size, aiming to break the ~0.9901 plateau by adding capacity; the previous crash was due to an assertion error likely from window size calculation or memory alignment, which is resolved by ensuring the window pattern and memory fraction are robust for the new depth.",
+  "val_bpb": 1.03642,
+  "error": null,
+  "kept": false
+}

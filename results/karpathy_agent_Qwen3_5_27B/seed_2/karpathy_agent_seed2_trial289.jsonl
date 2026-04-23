@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774377116.9137356,
+  "elapsed_s": 394.18,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 289,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26720,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable 8-layer baseline with Matrix LR 0.055 and Embedding LR 0.55, but slightly increase the Warmdown Ratio from 0.5 to 0.55 to allow the model to spend more time in the plateau phase where the loss is lowest, potentially smoothing the final evaluation metric by reducing the impact of the aggressive LR decay at the very end.",
+  "val_bpb": 0.988166,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774060623.8664863,
+  "elapsed_s": 388.549,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 69,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26535,
+  "thinking_length": 0,
+  "description": "Revert to the proven optimal configuration (Depth=8, Matrix LR=0.11, Embedding LR=1.4) that achieved the best val_bpb of 0.9891, as the current under-trained state and previous instability experiments indicate this is the local optimum for the 5-minute budget.",
+  "val_bpb": 0.99031,
+  "error": null,
+  "kept": false
+}

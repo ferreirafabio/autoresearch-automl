@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774113423.1483054,
+  "elapsed_s": 386.438,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 144,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26341,
+  "thinking_length": 0,
+  "description": "Revert to the proven optimal configuration (Depth 10, Batch 128, Matrix LR 0.11) that achieved the best historical result of 0.9834, as recent attempts to increase depth or change batch sizes have consistently led to crashes or performance regressions.",
+  "val_bpb": 0.984097,
+  "error": null,
+  "kept": false
+}

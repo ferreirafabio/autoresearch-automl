@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774119487.9078028,
+  "elapsed_s": 14.232,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 29,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 27023,
+  "thinking_length": 0,
+  "description": "Replaced `torch._foreach_copy_` overhead and division-by-zero risks in `MuonAdamW` with direct, numerically stable parameter updates within the `step` method, accepting a marginal val_bpb increase of ~0.0002 to guarantee training safety.",
+  "val_bpb": 0.991395,
+  "error": null,
+  "kept": false
+}

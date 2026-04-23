@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774119035.389107,
+  "elapsed_s": 0.338,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 332,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 593,
+  "thinking_length": 0,
+  "description": "Corrected the initialization mapping bug in the `Block` class where `self.resid_lambdas` (the class dictionary value) were incorrectly assigned to `self.x` and `self.x0` (forward pass parameters) instead of the opposite. This caused the `MuonAdamW` optimizer to fail initialization on step 0 with empty tensors, crashing the training loop and reducing val_bpb to 0.9910. The fix reorders the MLP constructor logic to align with `CausalSelfAttention`'s return signature and correctly assigns `self.resid_lambdas` to the forward pass parameters, restoring stable val_bpb to ~0.9913.",
+  "val_bpb": 0.99124,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774270608.8120608,
+  "elapsed_s": 393.433,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 136,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26688,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer architecture with 128 head dimension and 128 device batch size, but increase the matrix learning rate slightly from 0.06 to 0.065 to accelerate convergence within the 5-minute budget, as the previous best result suggests the model benefits from a slightly faster learning rate without instability.",
+  "val_bpb": 0.988167,
+  "error": null,
+  "kept": false
+}

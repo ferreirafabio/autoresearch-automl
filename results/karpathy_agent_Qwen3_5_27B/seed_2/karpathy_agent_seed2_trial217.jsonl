@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774324955.9651947,
+  "elapsed_s": 391.704,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 217,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26585,
+  "thinking_length": 0,
+  "description": "Increase Depth to 12 and reduce Head Dim to 96 to increase model capacity within the same parameter budget, while reducing Matrix LR to 0.04 to stabilize the larger network and prevent divergence in the early steps of the 0% warmup schedule.",
+  "val_bpb": null,
+  "error": "GPU out-of-memory",
+  "kept": false
+}

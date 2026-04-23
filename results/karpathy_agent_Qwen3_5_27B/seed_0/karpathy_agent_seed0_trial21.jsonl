@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774027304.0113077,
+  "elapsed_s": 385.35,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 21,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26664,
+  "thinking_length": 0,
+  "description": "Revert to a stable 8-layer configuration with a conservative device batch size of 128, but increase the embedding and unembedding learning rates significantly (1.5x) to accelerate convergence within the 5-minute time budget, as deeper models have consistently failed due to VRAM constraints from Muon buffers and Flash Attention overhead.",
+  "val_bpb": 0.990735,
+  "error": null,
+  "kept": false
+}

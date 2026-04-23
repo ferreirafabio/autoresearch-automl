@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774121683.4668534,
+  "elapsed_s": 388.515,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 10,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26623,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 6 layers to lower activation memory overhead, enabling a significantly larger device batch size (256) to maximize throughput and convergence speed within the 5-minute budget, while maintaining the proven 128 head dimension and Muon/AdamW optimizer configuration.",
+  "val_bpb": 1.021921,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774184089.6731336,
+  "elapsed_s": 390.087,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 246,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26516,
+  "thinking_length": 0,
+  "description": "Revert to the aggressive learning rate (Matrix 0.11) and conservative warmup (0.02) which historically yields ~0.983 bpb, as the previous run with Matrix LR 0.06 likely under-utilized the time budget by converging too slowly; the 0.11 LR allows the model to reach a better minimum within the 5-minute window despite slightly higher initial variance.",
+  "val_bpb": 0.985871,
+  "error": null,
+  "kept": false
+}

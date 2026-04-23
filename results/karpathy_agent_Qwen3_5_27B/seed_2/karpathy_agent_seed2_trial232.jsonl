@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774335270.5541859,
+  "elapsed_s": 393.93,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 232,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26699,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer/128-dim baseline with softcap=13 and 0.06 Matrix LR, but reduce the Matrix Learning Rate to 0.058 to fine-tune the step size, as the current best (0.9878) suggests we are slightly overshooting the optimum with 0.06, and a marginal reduction often helps Muon converge to a deeper minimum without the instability of 0% warmup.",
+  "val_bpb": 0.98837,
+  "error": null,
+  "kept": false
+}

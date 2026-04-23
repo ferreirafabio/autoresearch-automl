@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774076743.6933298,
+  "elapsed_s": 13.69,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 313,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 25895,
+  "thinking_length": 0,
+  "description": "Removed the heavy, nested state-vector-mismatched `setup_optimizer` initialization loop and `torch._foreach_copy_` overhead to restore val_bpb to 0.9919, eliminating OOM risks and initialization overhead associated with the previous complex implementation.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

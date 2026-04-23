@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autoresearch-automl"
+version = "0.1.0"
+description = "Integrating AutoML into Karpathy's Autoresearch"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Fabio Ferreira"},
+]
+
+dependencies = [
+    "optuna>=4.0",
+    "cmaes>=0.12",
+    "optunahub>=0.1",
+    "ConfigSpace>=1.0",
+    "openai>=1.0",
+    "gitpython>=3.1",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+    "click>=8.1",
+]
+
+[project.optional-dependencies]
+smac = ["smac>=2.2"]
+dehb = ["dehb>=0.1"]
+bohb = ["hpbandster>=0.7.4"]
+vllm = ["vllm>=0.4"]
+all = ["smac>=2.2", "dehb>=0.1", "hpbandster>=0.7.4"]
+dev = ["pytest>=7.0", "pytest-cov", "ruff"]
+
+[project.scripts]
+autoresearch-automl = "autoresearch_automl.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["autoresearch_automl*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

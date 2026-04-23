@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774265724.1850755,
+  "elapsed_s": 13.987,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 296,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26465,
+  "thinking_length": 0,
+  "description": "Removed the `torch.compile(model, dynamic=False)` call; this was causing memory allocation errors during fused optimizer steps by applying CPU optimization to tensors that were no longer allocated.",
+  "val_bpb": 0.99141,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774266861.1123533,
+  "elapsed_s": 390.185,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 130,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26645,
+  "thinking_length": 0,
+  "description": "Reduce the matrix learning rate from 0.06 to 0.03 to improve training stability and prevent the loss from diverging or oscillating, which often leads to a lower validation bpb in the short 5-minute window, while keeping the proven 8-layer architecture and batch size that previously yielded the best results.",
+  "val_bpb": 0.990963,
+  "error": null,
+  "kept": false
+}

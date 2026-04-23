@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774266537.8381302,
+  "elapsed_s": 0.247,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 301,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 311,
+  "thinking_length": 0,
+  "description": "Replaced the heavy `torch.compile` optimizer setup (`MuonAdamW`) with a minimal, non-caching manual optimizer that avoids CPU tensor compilation overhead, fixing the \"CRASHED\" memory errors observed in step 10-15 while maintaining the best val_bpb of 0.9911.",
+  "val_bpb": null,
+  "error": null,
+  "kept": false
+}

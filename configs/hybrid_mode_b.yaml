@@ -1,0 +1,9 @@
+backend: optuna
+trials: 100
+budget_min: 60
+budget_max: 300
+seed: 0
+hybrid_mode: B
+structural_interval: 20
+objectives:
+  - val_bpb

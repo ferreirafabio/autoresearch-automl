@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774028402.7182963,
+  "elapsed_s": 385.859,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 23,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26586,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer configuration with a device batch size of 128, but increase the matrix learning rate to 0.12 and embedding learning rate to 1.5 to aggressively accelerate convergence within the 5-minute time budget, capitalizing on the successful architecture while pushing the optimization speed.",
+  "val_bpb": 0.991133,
+  "error": null,
+  "kept": false
+}

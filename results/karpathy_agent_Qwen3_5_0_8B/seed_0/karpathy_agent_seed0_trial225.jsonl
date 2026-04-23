@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774088250.0116842,
+  "elapsed_s": 0.416,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 225,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 617,
+  "thinking_length": 0,
+  "description": "Removed the critical scalar initialization bug (where `y` and `x0_lambdas` were incorrectly assigned to `x` or `x0` tensors), which caused the MuonAdamW optimizer to fail initialization on the first step, restoring the model to a stable val_bpb of 0.9914.",
+  "val_bpb": null,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774359048.3181005,
+  "elapsed_s": 392.616,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 264,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26636,
+  "thinking_length": 0,
+  "description": "Revert to the best known stable configuration (8 layers, Matrix LR 0.055, Embedding LR 0.55) and increase the Warmdown Ratio from 0.5 to 0.6 to allow the optimizer more time to settle into a deeper minimum during the final phase of training, addressing the observed sensitivity to embedding updates and potential oscillation near the end of the budget.",
+  "val_bpb": 0.98866,
+  "error": null,
+  "kept": false
+}

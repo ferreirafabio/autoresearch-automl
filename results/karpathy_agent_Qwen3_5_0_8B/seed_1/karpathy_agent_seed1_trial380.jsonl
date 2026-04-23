@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774179806.3148499,
+  "elapsed_s": 0.204,
+  "pid": 1130287,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 380,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 312,
+  "thinking_length": 0,
+  "description": "SYNTAX ERROR (reverted): Removed the `torch.compile(model, dynamic=False)` call to prevent OOM fragmentation and optimizer crashes caused by recompilation on every step, as well as unnecessary GC freeze/enable calls that degraded performance during the first optimization step.",
+  "val_bpb": 0.991451,
+  "error": null,
+  "kept": false
+}

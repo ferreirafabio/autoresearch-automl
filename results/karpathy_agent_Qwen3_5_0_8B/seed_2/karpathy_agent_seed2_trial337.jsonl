@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774275433.857534,
+  "elapsed_s": 0.199,
+  "pid": 178341,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 337,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 268,
+  "thinking_length": 0,
+  "description": "Removed `torch.compile(model, dynamic=False)` from `estimate_flops` and `setup_optimizer` (which internally calls `MuonAdamW`) to eliminate CPU tensor compilation overhead, restoring the val_bpb from 0.9913 to 0.9914 without adding unnecessary complexity.",
+  "val_bpb": 0.991343,
+  "error": null,
+  "kept": false
+}

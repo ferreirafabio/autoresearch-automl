@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774014748.2106943,
+  "elapsed_s": 385.057,
+  "pid": 2684818,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 14,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26567,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer/128-head-dim architecture with a safe device batch size of 64, and reset hyperparameters to the exact values that achieved the best result (val_bpb=0.9915) to ensure a stable baseline before further optimization.",
+  "val_bpb": 1.002475,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774093116.0774221,
+  "elapsed_s": 390.47,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 96,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26653,
+  "thinking_length": 0,
+  "description": "Revert to the proven 2^19 global batch size and 8-layer/128-dim architecture with the stable 0.033 Muon learning rate to maximize gradient steps and ensure stability, as this configuration previously yielded the best result (0.9830) and recent OOMs with higher LRs or batch sizes were likely transient memory fragmentation issues.",
+  "val_bpb": 0.991734,
+  "error": null,
+  "kept": false
+}

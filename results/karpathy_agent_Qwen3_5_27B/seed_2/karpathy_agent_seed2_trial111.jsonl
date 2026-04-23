@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774191093.9236324,
+  "elapsed_s": 390.764,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 111,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26668,
+  "thinking_length": 0,
+  "description": "Revert to the \"Gold Standard\" configuration (Depth=8, Matrix LR=0.06, Weight Decay=0.1, Batch=128) and add a random seed variation to break the deterministic training trajectory, which may help escape the local minimum causing the 0.9901-0.9912 plateau without risking instability from architectural changes.",
+  "val_bpb": 0.988832,
+  "error": null,
+  "kept": false
+}

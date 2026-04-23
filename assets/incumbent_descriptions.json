@@ -1,0 +1,130 @@
+{
+  "optuna": [
+    {
+      "trial": 0,
+      "val_bpb": 1.008423,
+      "description": "baseline"
+    },
+    {
+      "trial": 19,
+      "val_bpb": 0.995501,
+      "description": "WP SSSL\u2192LSSL, \u00bd batch +10"
+    },
+    {
+      "trial": 28,
+      "val_bpb": 0.980025,
+      "description": "depth 6\u21928 +9"
+    },
+    {
+      "trial": 78,
+      "val_bpb": 0.978607,
+      "description": "warmup 0.0009\u21920.018 +10"
+    },
+    {
+      "trial": 280,
+      "val_bpb": 0.978412,
+      "description": "WP SLSL\u2192SSSS +9"
+    },
+    {
+      "trial": 281,
+      "val_bpb": 0.977501,
+      "description": "emb LR 1.04\u21920.78 +8"
+    },
+    {
+      "trial": 294,
+      "val_bpb": 0.976117,
+      "description": "2\u00d7 unemb LR, emb LR 0.78\u21920.53 +7"
+    }
+  ],
+  "llambo_Qwen3_5_27B": [
+    {
+      "trial": 0,
+      "val_bpb": 1.009143,
+      "description": "baseline"
+    },
+    {
+      "trial": 10,
+      "val_bpb": 0.997441,
+      "description": "WP SSSL\u2192SSLL, batch 524K\u2192131K +12"
+    },
+    {
+      "trial": 175,
+      "val_bpb": 0.997017,
+      "description": "mat LR 0.048\u21920.017, \u00bd emb LR +7"
+    }
+  ],
+  "llambo_original_Qwen3_5_27B": [
+    {
+      "trial": 0,
+      "val_bpb": 1.009244,
+      "description": "baseline"
+    },
+    {
+      "trial": 2,
+      "val_bpb": 0.993381,
+      "description": "final LR 0\u21920.020 +9"
+    },
+    {
+      "trial": 19,
+      "val_bpb": 0.992836,
+      "description": "WP SSSL\u2192SSSS +12"
+    },
+    {
+      "trial": 67,
+      "val_bpb": 0.989443,
+      "description": "WP SSSS\u2192LLLL, 2\u00d7 dev batch +11"
+    }
+  ],
+  "karpathy_agent_hps_Qwen3_5_27B": [
+    {
+      "trial": 0,
+      "val_bpb": 1.008888,
+      "description": "baseline"
+    },
+    {
+      "trial": 1,
+      "val_bpb": 1.008421,
+      "description": "depth 8\u219212, \u00bd dev batch"
+    },
+    {
+      "trial": 6,
+      "val_bpb": 1.007574,
+      "description": "mat LR 0.040\u21920.045 +1"
+    },
+    {
+      "trial": 35,
+      "val_bpb": 1.007418,
+      "description": "wd 0.20\u21920.22"
+    },
+    {
+      "trial": 48,
+      "val_bpb": 0.995723,
+      "description": "depth 12\u219210"
+    },
+    {
+      "trial": 55,
+      "val_bpb": 0.995679,
+      "description": "wd 0.22\u21920.23"
+    },
+    {
+      "trial": 57,
+      "val_bpb": 0.995226,
+      "description": "wd 0.225\u21920.23"
+    },
+    {
+      "trial": 62,
+      "val_bpb": 0.995145,
+      "description": "wd 0.23\u21920.235"
+    },
+    {
+      "trial": 89,
+      "val_bpb": 0.994964,
+      "description": "wd 0.235\u21920.233"
+    },
+    {
+      "trial": 173,
+      "val_bpb": 0.994961,
+      "description": "wd 0.23\u21920.24"
+    }
+  ]
+}

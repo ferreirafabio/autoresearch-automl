@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774164524.8461196,
+  "elapsed_s": 392.215,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 72,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26764,
+  "thinking_length": 0,
+  "description": "Switch to a wider, shallower model (Depth=4, Dim=1536) with a higher Matrix LR (0.1) and increased batch size (256) to maximize the number of training steps and tokens processed within the 5-minute budget, addressing the plateau by leveraging higher throughput and faster convergence dynamics.",
+  "val_bpb": null,
+  "error": "GPU out-of-memory",
+  "kept": false
+}

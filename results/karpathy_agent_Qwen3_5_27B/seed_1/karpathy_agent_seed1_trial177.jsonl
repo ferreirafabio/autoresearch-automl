@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774149139.9502008,
+  "elapsed_s": 391.738,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 177,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26675,
+  "thinking_length": 0,
+  "description": "Increase the total batch size from 2^18 to 2^19 by reducing the device batch size from 128 to 64, while maintaining the stable Embedding LR of 0.5 and Weight Decay of 0.24, to process more tokens within the 5-minute budget and improve convergence without exceeding VRAM limits.",
+  "val_bpb": 1.003537,
+  "error": null,
+  "kept": false
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774120408.847803,
+  "elapsed_s": 14.166,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 337,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26779,
+  "thinking_length": 0,
+  "description": "The primary failure was the initialization mapping bug in the `Block` class: `self.x` and `self.x0` were incorrectly assigned to the forward pass parameters (`self.resid_lambdas`) instead of the class dictionary attributes (`self.resid_lambdas`), causing the `MuonAdamW` optimizer to fail on the first step. Additionally, the MLP forward signature was slightly misaligned ('norm(x)') compared to the `CausalSelfAttention` internal parameter ordering, though the optimizer fix was the dominant cause of the crash.",
+  "val_bpb": 0.991292,
+  "error": null,
+  "kept": false
+}

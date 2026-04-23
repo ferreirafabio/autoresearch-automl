@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774151713.9908433,
+  "elapsed_s": 391.316,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 181,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26643,
+  "thinking_length": 0,
+  "description": "Revert Embedding LR to 0.6 to maximize convergence speed within the tight 5-minute budget, as the previous run with 0.5 likely under-trained the model, while maintaining the improved Weight Decay of 0.24 for generalization.",
+  "val_bpb": 0.982253,
+  "error": null,
+  "kept": false
+}

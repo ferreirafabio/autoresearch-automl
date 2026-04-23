@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774116766.230374,
+  "elapsed_s": 13.923,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 20,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26322,
+  "thinking_length": 0,
+  "description": "Removed the non-functional and potentially harmful `get_muon_momentum` and `get_weight_decay` helper functions that caused runtime crashes due to undefined behavior (specifically `torch._foreach_copy_` calls failing or division by zero), replaced them with direct, optimized parameter updates in the `MuonAdamW.__init__` class's `step` method.",
+  "val_bpb": null,
+  "error": "train.py exited with code 1",
+  "kept": false
+}

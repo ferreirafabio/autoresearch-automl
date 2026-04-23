@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774266051.5558207,
+  "elapsed_s": 390.81,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 129,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26602,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer architecture with 128 head dimension and 128 device batch size, which consistently achieved the best val_bpb of 0.9884 without OOM or assertion errors, as deeper or shallower models in previous experiments either crashed or underperformed.",
+  "val_bpb": 0.988559,
+  "error": null,
+  "kept": false
+}

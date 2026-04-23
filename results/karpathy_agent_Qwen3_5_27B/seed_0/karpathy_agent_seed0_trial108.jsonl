@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774088185.3468652,
+  "elapsed_s": 382.076,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 108,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26379,
+  "thinking_length": 0,
+  "description": "Revert to the Depth=8 configuration with Total Batch Size 2^19 to restore gradient stability and signal-to-noise ratio, as the previous Depth=10 run with reduced batch size (2^18) likely suffered from optimization instability preventing convergence to a sharp minimum despite higher capacity.",
+  "val_bpb": 0.990595,
+  "error": null,
+  "kept": false
+}

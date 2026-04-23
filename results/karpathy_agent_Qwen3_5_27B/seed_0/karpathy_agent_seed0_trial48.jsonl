@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774046270.8872402,
+  "elapsed_s": 385.017,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 48,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26518,
+  "thinking_length": 0,
+  "description": "Revert to the stable 8-layer architecture and the hyperparameters (Matrix LR=0.11, Embedding LR=1.4) that previously achieved the best val_bpb of 0.9891, as subsequent fine-tuning attempts consistently yielded worse results, indicating we have likely found the local optimum for this setup.",
+  "val_bpb": 0.992902,
+  "error": null,
+  "kept": false
+}

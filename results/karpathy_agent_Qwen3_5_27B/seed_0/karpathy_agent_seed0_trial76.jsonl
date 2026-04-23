@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774065633.3407266,
+  "elapsed_s": 385.429,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 76,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26585,
+  "thinking_length": 0,
+  "description": "Revert to the proven optimal hyperparameters (Depth=8, Matrix LR=0.11, Embedding LR=1.4, Total Batch 2^19) that previously achieved the best val_bpb of 0.9891, as extensive fine-tuning attempts have consistently yielded worse results due to instability or insufficient convergence speed.",
+  "val_bpb": 0.99047,
+  "error": null,
+  "kept": false
+}

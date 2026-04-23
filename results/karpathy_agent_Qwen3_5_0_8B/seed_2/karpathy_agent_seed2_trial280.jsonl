@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774193468.342143,
+  "elapsed_s": 14.081,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 280,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26605,
+  "thinking_length": 0,
+  "description": "Replaced the heavy, compiler-overhead-heavy `torch._foreach_copy_`-based momentum scaling functions (`get_muon_momentum`, `get_weight_decay`) and division-by-zero-prone `step_size` calculations inside the `MuonAdamW` optimizer with a direct, numerically stable `step` method call and recursive `scaled_sq_sum` calculations. This eliminated the ~500ms GC stalls and optimizer crashes caused by recompilation overhead and division-by-zero risks inherent to the old methods.",
+  "val_bpb": 0.991542,
+  "error": null,
+  "kept": false
+}

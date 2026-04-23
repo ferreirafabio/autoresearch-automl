@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774313669.532809,
+  "elapsed_s": 393.343,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 201,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26664,
+  "thinking_length": 0,
+  "description": "Reduce device batch size from 128 to 64 to increase gradient accumulation steps (from 10 to 20), which often improves convergence stability for high learning rates in Muon-based training, while reverting to the proven 0% warmup and 0.06 Matrix LR configuration that yielded the current best score of 0.9880.",
+  "val_bpb": 0.995759,
+  "error": null,
+  "kept": false
+}

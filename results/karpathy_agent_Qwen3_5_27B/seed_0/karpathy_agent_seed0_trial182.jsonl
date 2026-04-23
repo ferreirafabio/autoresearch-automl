@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774140173.7467458,
+  "elapsed_s": 388.97,
+  "pid": 1570365,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 182,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26419,
+  "thinking_length": 0,
+  "description": "Revert to the proven aggressive Matrix LR (0.11) and Embedding LR (1.4) configuration with Depth 10 and Batch 128, as the previous run with LR 0.08 under-utilized the 5-minute budget by converging too slowly, while historical data confirms the aggressive setup achieves the best convergence speed (~0.983 bpb) within the time limit.",
+  "val_bpb": 0.983658,
+  "error": null,
+  "kept": false
+}

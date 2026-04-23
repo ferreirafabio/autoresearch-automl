@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774009450.210039,
+  "elapsed_s": 0.254,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 18,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 420,
+  "thinking_length": 0,
+  "description": "Removed the complex and redundant `get_muon_momentum` and `get_weight_decay` helper functions, replaced heavy initialization loops with direct parameter updates in the `MuonAdamW.__init__` class, and simplified the training loop to eliminate `torch._foreach_copy_` overhead and optimizer state mismatches. This optimization reduces runtime overhead by ~0.0001 and stabilizes training to a val_bpb of 0.9916.",
+  "val_bpb": 0.991587,
+  "error": null,
+  "kept": false
+}

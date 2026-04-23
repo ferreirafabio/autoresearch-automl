@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774197886.4928315,
+  "elapsed_s": 395.114,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 248,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26722,
+  "thinking_length": 0,
+  "description": "Revert to Depth 10 with Matrix LR 0.025 (stable regime) but reduce Weight Decay to 0.20 to allow the model to fit the data more aggressively within the short 5-minute budget, as the previous high-regularization runs (0.26-0.28) likely underfit the training set before the time limit.",
+  "val_bpb": 0.982005,
+  "error": null,
+  "kept": false
+}

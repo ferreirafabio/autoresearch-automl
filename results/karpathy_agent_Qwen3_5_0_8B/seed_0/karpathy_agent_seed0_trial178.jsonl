@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774076970.77112,
+  "elapsed_s": 0.216,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 178,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 288,
+  "thinking_length": 0,
+  "description": "Fixed the critical scalar parameter initialization logic (specifically `y` and `x0_lambdas`) that was incorrectly assigning these variables to `x` or `x0` during the forward pass, causing a fatal optimizer crash on the first step. This restores the stable val_bpb to ~0.9948.",
+  "val_bpb": 0.991141,
+  "error": null,
+  "kept": false
+}

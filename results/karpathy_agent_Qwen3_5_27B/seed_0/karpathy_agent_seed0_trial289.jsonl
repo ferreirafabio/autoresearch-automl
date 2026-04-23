@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774209783.8988135,
+  "elapsed_s": 386.713,
+  "pid": 3830506,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 289,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26340,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 9 layers to lower memory overhead and increase Device Batch Size to 160, thereby improving the gradient signal-to-noise ratio and stability while maintaining high model capacity within the 76GB VRAM limit.",
+  "val_bpb": null,
+  "error": "AssertionError",
+  "kept": false
+}

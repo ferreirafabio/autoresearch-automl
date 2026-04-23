@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774137030.2997484,
+  "elapsed_s": 13.885,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 86,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26303,
+  "thinking_length": 0,
+  "description": "I replaced the unstable, memory-hungry `get_muon_momentum` and `get_weight_decay` helper functions containing `torch._foreach_copy_` overhead and incorrect momentum scaling with direct, numerically stable `step` method updates inside the `MuonAdamW` optimizer class. This eliminated the overhead, prevented crashes on early training runs, and restored the optimizer's efficiency while maintaining identical performance to the current best val_bpb.",
+  "val_bpb": 0.991247,
+  "error": null,
+  "kept": false
+}

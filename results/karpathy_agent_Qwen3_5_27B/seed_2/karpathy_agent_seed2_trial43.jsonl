@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774144506.641948,
+  "elapsed_s": 391.817,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 43,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26659,
+  "thinking_length": 0,
+  "description": "Revert to the empirically proven stable configuration (Depth=8, Matrix LR=0.06, Weight Decay=0.1, Batch=128) which consistently achieves the lowest val_bpb (~0.9904-0.9905) and avoids the instability or under-convergence seen with more aggressive or conservative settings.",
+  "val_bpb": 0.990721,
+  "error": null,
+  "kept": false
+}

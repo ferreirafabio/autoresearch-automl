@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774139901.9589844,
+  "elapsed_s": 388.036,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 162,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26737,
+  "thinking_length": 0,
+  "description": "Revert to the proven 8-layer architecture with a larger global batch size (2^19) and a higher Muon learning rate (0.033) to maximize gradient steps and training stability within the 5-minute budget, as previous experiments consistently showed this configuration yields robust performance around 0.991 BPB, while the deeper 10-layer model failed to converge sufficiently.",
+  "val_bpb": 0.991526,
+  "error": null,
+  "kept": false
+}

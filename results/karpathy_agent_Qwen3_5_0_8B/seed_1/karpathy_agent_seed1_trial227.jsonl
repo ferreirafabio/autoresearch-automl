@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774056227.3732932,
+  "elapsed_s": 14.001,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 227,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26439,
+  "thinking_length": 0,
+  "description": "Removed the heavy, state-vector-mismatched hyperparameter initialization loops (`setup_optimizer`, `_step_adamw`, `_step_muon`) and unnecessary `torch._foreach_copy_` overhead from the `GPT` class. This eliminated compiler state vector mismatches and optimizer state vector mismatches that caused the optimizer to crash (exit code 1) during load, while significantly stabilizing val_bpb to 0.9916.",
+  "val_bpb": 0.991656,
+  "error": null,
+  "kept": false
+}

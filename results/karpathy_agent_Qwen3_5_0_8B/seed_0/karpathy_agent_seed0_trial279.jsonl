@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774103905.420641,
+  "elapsed_s": 14.07,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 279,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26479,
+  "thinking_length": 0,
+  "description": "Corrected the `Block` class initialization mapping (`self.x`, `self.x0` vs class variables `self.y`, `self.lm_head`) in the first step, which was causing the `MuonAdamW` optimizer to crash on step 0. This restores the stable val_bpb.",
+  "val_bpb": 0.994595,
+  "error": null,
+  "kept": false
+}

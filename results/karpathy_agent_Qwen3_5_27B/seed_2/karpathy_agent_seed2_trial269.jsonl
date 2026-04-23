@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774362655.3243268,
+  "elapsed_s": 393.039,
+  "pid": 2690863,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 269,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26654,
+  "thinking_length": 0,
+  "description": "Revert to the proven stable 8-layer depth and Matrix LR of 0.055, but reduce the Embedding Learning Rate to 0.52 and increase the Warmdown Ratio to 0.55 to allow the optimizer more time to settle into a deeper minimum, addressing the sensitivity observed in previous experiments while maintaining the optimal matrix learning dynamics.",
+  "val_bpb": 0.988694,
+  "error": null,
+  "kept": false
+}

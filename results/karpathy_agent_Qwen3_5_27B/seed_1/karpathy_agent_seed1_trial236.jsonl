@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774189481.542936,
+  "elapsed_s": 393.752,
+  "pid": 1363702,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 236,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26656,
+  "thinking_length": 0,
+  "description": "Revert to Depth 10 to restore model capacity (Depth 9 underfitted) and fine-tune Matrix LR to 0.033 to balance the fast convergence of the previous record with stability, while maintaining the high Weight Decay (0.24) and aggressive Embedding LR (0.6) that enabled the 0.9785 result.",
+  "val_bpb": 0.981911,
+  "error": null,
+  "kept": false
+}

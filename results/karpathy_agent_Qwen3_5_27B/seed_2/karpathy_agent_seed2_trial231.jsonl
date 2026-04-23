@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774334546.5961375,
+  "elapsed_s": 393.707,
+  "pid": 207980,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 231,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26643,
+  "thinking_length": 0,
+  "description": "Revert to the robust 8-layer baseline with softcap=13 and 0.06 Matrix LR, but increase the Embedding LR from 0.6 to 0.75 to accelerate the convergence of the token embeddings, which are often the bottleneck in early training when using a 0% warmup schedule and can help escape the local optimum at 0.9878.",
+  "val_bpb": 0.988743,
+  "error": null,
+  "kept": false
+}

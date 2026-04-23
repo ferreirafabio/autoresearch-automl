@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774034768.4891386,
+  "elapsed_s": 14.087,
+  "pid": 2686530,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 98,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26553,
+  "thinking_length": 0,
+  "description": "Replaced the high-overhead `torch._foreach_copy_` and `polar_express_coeffs` helper functions with direct inline parameter updates within `MuonAdamW.__init__` to eliminate the $O(N^2)$ parameter copying overhead and matrix operations, preventing crashes while preserving training logic.",
+  "val_bpb": 0.991506,
+  "error": null,
+  "kept": false
+}

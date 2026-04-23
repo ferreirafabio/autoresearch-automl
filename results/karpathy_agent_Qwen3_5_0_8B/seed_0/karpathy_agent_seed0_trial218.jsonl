@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774086578.4240777,
+  "elapsed_s": 14.01,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 218,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26424,
+  "thinking_length": 0,
+  "description": "Replaced the critical scalar parameter initialization bug in the GPT class (where `y` and `x0_lambdas` were incorrectly assigned to `x` or `x0` during forward passes), which caused the MuonAdamW optimizer to fail initialization on the first step, restoring the val_bpb from 0.9911 to ~0.9910.",
+  "val_bpb": 0.991248,
+  "error": null,
+  "kept": false
+}

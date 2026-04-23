@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774091740.6561117,
+  "elapsed_s": 383.09,
+  "pid": 199296,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 113,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26369,
+  "thinking_length": 0,
+  "description": "Revert to the stable Depth=8 configuration with Total Batch Size 2^19 to maximize gradient signal-to-noise ratio, as previous attempts to increase depth to 10 or 12 with reduced batch sizes consistently failed to converge to the sharp minimum due to optimization instability and gradient noise.",
+  "val_bpb": 0.990002,
+  "error": null,
+  "kept": false
+}

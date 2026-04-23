@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774014507.568,
+  "elapsed_s": 13.958,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 36,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26320,
+  "thinking_length": 0,
+  "description": "Simplified `MuonAdamW` initialization by removing the complex `get_muon_momentum`, `get_weight_decay`, and `setup_optimizer` wrappers, replacing them with a single, clean `_step_muon` and `step` method to eliminate `torch._foreach_copy_` overhead and optimizer state mismatches.",
+  "val_bpb": 0.991387,
+  "error": null,
+  "kept": false
+}

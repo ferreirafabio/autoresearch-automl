@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774126743.437581,
+  "elapsed_s": 389.747,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 17,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26654,
+  "thinking_length": 0,
+  "description": "Reduce model depth to 6 layers to lower activation memory overhead, enabling a significantly larger device batch size (256) to maximize throughput and convergence speed within the 5-minute budget, while slightly increasing the matrix learning rate to 0.07 to compensate for the reduced model capacity.",
+  "val_bpb": 1.020227,
+  "error": null,
+  "kept": false
+}

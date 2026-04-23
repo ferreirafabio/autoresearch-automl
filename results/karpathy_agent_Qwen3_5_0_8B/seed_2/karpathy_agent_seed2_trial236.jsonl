@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774181409.0836322,
+  "elapsed_s": 14.084,
+  "pid": 1702593,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 236,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26581,
+  "thinking_length": 0,
+  "description": "Removed the heavy, compiler-overhead-heavy and division-by-zero-prone `torch._foreach_copy_` momentum scaling functions (`get_muon_momentum`, `get_weight_decay`) that caused the optimizer to crash after ~10 steps and introduce ~500ms GC stalls, replacing them with a direct, numerically stable `step` method call.",
+  "val_bpb": 0.991519,
+  "error": null,
+  "kept": false
+}

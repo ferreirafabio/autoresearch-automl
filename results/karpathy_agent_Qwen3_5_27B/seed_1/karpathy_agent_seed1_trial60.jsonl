@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774067104.4962187,
+  "elapsed_s": 390.454,
+  "pid": 2755082,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 60,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26832,
+  "thinking_length": 0,
+  "description": "Revert to the 8-layer depth (from failed 12-layer attempts) but reduce head dimension to 64 to increase the number of heads (12 heads) for better attention resolution, while reducing device batch size to 64 to ensure VRAM safety for the deeper attention patterns and gradient accumulation, and slightly tuning the Muon learning rate and weight decay to match the increased head count and reduced dimensionality.",
+  "val_bpb": 1.016992,
+  "error": null,
+  "kept": false
+}

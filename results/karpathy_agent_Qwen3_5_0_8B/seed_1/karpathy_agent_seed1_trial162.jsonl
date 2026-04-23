@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774040493.570363,
+  "elapsed_s": 13.962,
+  "pid": 2686536,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 162,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26371,
+  "thinking_length": 0,
+  "description": "Replaced state-vector-mismatched hyperparameter initialization (MuonAdamW) with a lightweight `_step_muon` method and a standalone optimizer utility, eliminating the unnecessary `torch._foreach_copy_` overhead, optimizer state vector mismatches, and compiler state vector mismatches that caused the optimizer to crash under load.",
+  "val_bpb": 0.991388,
+  "error": null,
+  "kept": false
+}

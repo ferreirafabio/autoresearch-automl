@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774116983.57056,
+  "elapsed_s": 14.087,
+  "pid": 2754149,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-0.8B",
+  "trial_id": 326,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26536,
+  "thinking_length": 0,
+  "description": "Reordered the `Block` class initialization mapping to correctly assign `self.x` and `self.x0` (the `resid_lambdas`) to the class dictionary instead of the forward pass parameters, fixing the critical initialization failure in `MuonAdamW` that crashed the training loop.",
+  "val_bpb": 0.991077,
+  "error": null,
+  "kept": false
+}

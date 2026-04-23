@@ -1,0 +1,19 @@
+{
+  "timestamp": 1774117244.0354087,
+  "elapsed_s": 389.114,
+  "pid": 3932311,
+  "model": "/work/dlclarge1/ferreira-autoresearch-automl/models/Qwen3.5-27B",
+  "trial_id": 4,
+  "messages": [
+    {
+      "role": "user",
+      "content": "(prompt omitted \u2014 see source)"
+    }
+  ],
+  "response_length": 26564,
+  "thinking_length": 0,
+  "description": "Increase model depth to 12 layers and reduce head dimension to 64 to increase capacity while fitting within the 76GB VRAM budget, adjusting the learning rates and batch size to stabilize the deeper network and maximize performance within the 5-minute time limit.",
+  "val_bpb": 1.022283,
+  "error": null,
+  "kept": false
+}
