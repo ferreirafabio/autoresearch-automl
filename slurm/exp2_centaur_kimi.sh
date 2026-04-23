@@ -29,23 +29,6 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 export no_proxy="127.0.0.1,localhost,dlc2gpu18,dlc2gpu19,dlc2gpu20,dlc2gpu21,10.5.166.0/24,.dlc2gpu"
 export NO_PROXY="127.0.0.1,localhost,dlc2gpu18,dlc2gpu19,dlc2gpu20,dlc2gpu21,10.5.166.0/24,.dlc2gpu"
 
-# Wait for Kimi endpoint file (server may still be loading; poll up to 30 min)
-echo "Waiting for Kimi K2.6 endpoint file..."
-for i in $(seq 1 180); do
-    if [ -f "$ENDPOINT_FILE" ]; then
-        KIMI_ENDPOINT="$(cat "$ENDPOINT_FILE")"
-        echo "Found endpoint: $KIMI_ENDPOINT"
-        break
-    fi
-    sleep 10
-done
-if [ -z "${KIMI_ENDPOINT:-}" ]; then
-    echo "Error: Kimi endpoint file not found after 30 min"
-    exit 1
-fi
-
-export OPENAI_BASE_URL="http://${KIMI_ENDPOINT}/v1"
-export OPENAI_API_BASE="http://${KIMI_ENDPOINT}/v1"
 export OPENAI_API_KEY="dummy"  # vLLM doesn't check; OpenAI client needs it set
 
 # VRAM cap on training (OPTIMIZEE) GPU — 76 GB (same as all other method variants)
@@ -57,36 +40,63 @@ echo "Experiment: centaur [Kimi K2.6] seed ${SEED}"
 echo "=============================================="
 echo "Backend:         centaur"
 echo "LLM model:       moonshotai/Kimi-K2.6 (remote vLLM)"
-echo "API base:        $OPENAI_API_BASE"
 echo "Seed:            $SEED"
 echo "VRAM cap:        76 GB (CUDA_MEM_FRACTION=$CUDA_MEM_FRACTION)"
 echo "Node:            $(hostname)"
 echo "Results:         $RESULTS_DIR"
+echo "Endpoint file:   $ENDPOINT_FILE"
 echo "=============================================="
 
 mkdir -p "$RESULTS_DIR"
 
-# Block until Kimi server actually serves (not just endpoint file exists);
-# prevents fail-hard patch from killing us if server is still loading.
-echo "Probing Kimi server at http://${KIMI_ENDPOINT}/v1/models..."
-for _i in $(seq 1 360); do
-    if curl -sf --max-time 5 "http://${KIMI_ENDPOINT}/v1/models" > /dev/null 2>&1; then
-        echo "Kimi server healthy after $((_i*10))s"
+# Retry loop: bridges Kimi server chain handoffs. See exp2_karpathy_agent_kimi.sh
+# for details. Short version: wait for healthy endpoint, re-read the endpoint
+# file (IP may change across handoffs), restart HPO with --resume.
+KIMI_ENDPOINT=""
+for attempt in $(seq 1 200); do
+    echo "[$(date -u +%T)] Attempt $attempt: waiting for healthy Kimi endpoint..."
+    probe_ok=0
+    for _i in $(seq 1 360); do
+        if [ -f "$ENDPOINT_FILE" ]; then
+            NEW_EP="$(cat "$ENDPOINT_FILE" 2>/dev/null || true)"
+            if [ -n "$NEW_EP" ] && [ "$NEW_EP" != "$KIMI_ENDPOINT" ]; then
+                echo "  endpoint: ${KIMI_ENDPOINT:-<unset>} -> $NEW_EP"
+                KIMI_ENDPOINT="$NEW_EP"
+                export OPENAI_BASE_URL="http://${KIMI_ENDPOINT}/v1"
+                export OPENAI_API_BASE="http://${KIMI_ENDPOINT}/v1"
+            fi
+        fi
+        if [ -n "$KIMI_ENDPOINT" ] && curl -sf --max-time 5 "http://${KIMI_ENDPOINT}/v1/models" > /dev/null 2>&1; then
+            probe_ok=1
+            break
+        fi
+        sleep 10
+    done
+    if [ $probe_ok -ne 1 ]; then
+        echo "Kimi server never responded within 60 min at attempt $attempt — exiting"
+        exit 1
+    fi
+    echo "[$(date -u +%T)] Kimi healthy at $KIMI_ENDPOINT"
+
+    set +e
+    python -m autoresearch_automl.cli run \
+        --backend "centaur" \
+        --trials 9999 \
+        --budget-max 300 \
+        --seed "$SEED" \
+        --llm-model "moonshotai/Kimi-K2.6" \
+        --results-dir "$RESULTS_DIR" \
+        --resume \
+        --time-budget 86400
+    rc=$?
+    set -e
+    if [ $rc -eq 0 ]; then
+        echo "[$(date -u +%T)] HPO completed cleanly"
         break
     fi
-    sleep 10
+    echo "[$(date -u +%T)] HPO exited with code $rc — retrying after probe"
+    sleep 30
 done
-curl -sf --max-time 5 "http://${KIMI_ENDPOINT}/v1/models" > /dev/null 2>&1 || { echo "Kimi server never responded after 60 min"; exit 1; }
-
-python -m autoresearch_automl.cli run \
-    --backend "centaur" \
-    --trials 9999 \
-    --budget-max 300 \
-    --seed "$SEED" \
-    --llm-model "moonshotai/Kimi-K2.6" \
-    --results-dir "$RESULTS_DIR" \
-    --resume \
-    --time-budget 86400
 
 echo ""
 echo "=============================================="
