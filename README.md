@@ -1,7 +1,9 @@
 <h2 align="center"><code>autoresearch-automl</code></h2>
 <h3 align="center">Can LLMs Beat Classical Hyperparameter Optimization Algorithms?<br>A Study on <i>autoresearch</i></h3>
 
-> Under anonymous review at NeurIPS 2026.
+> **Paper:** [Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on *autoresearch*](https://arxiv.org/abs/2603.24647)
+>
+> **Interactive demo:** [ferreirafabio.github.io/autoresearch-automl](https://ferreirafabio.github.io/autoresearch-automl)
 
 ![Classical vs LLM-based HPO](assets/exp2_27b_walltime.png)
 
@@ -193,10 +195,13 @@ We implemented a [faithful adaptation](autoresearch_automl/backends/llambo_origi
 ## Citation
 
 ```bibtex
-@article{ANON2026autoresearchautoml,
+@article{ferreira2026autoresearchautoml,
     title={Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on autoresearch},
-    author={XXXX-1 and XXXX-2 and XXXX-3 and XXXX-4 and XXXX-5},
+    author={Fabio Ferreira and Lucca Wobbe and Arjun Krishnakumar and Frank Hutter and Arber Zela},
     year={2026},
-    note={Under anonymous review at NeurIPS 2026},
+    eprint={2603.24647},
+    archivePrefix={arXiv},
+    primaryClass={cs.LG},
+    url={https://arxiv.org/abs/2603.24647},
 }
 ```
