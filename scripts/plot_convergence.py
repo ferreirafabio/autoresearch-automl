@@ -74,6 +74,7 @@ def plot_convergence_walltime(
     ylim: tuple[float, float] = (0.973, 1.001),
     xlim_hours: tuple[float, float] | None = None,
     max_bands: int = 5,
+    show_linestyle_key: bool = False,
 ):
     """Plot convergence with x-axis = cumulative training wall-time (hours)."""
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -153,14 +154,29 @@ def plot_convergence_walltime(
                 ax.fill_between(hrs, mean - std, mean + std, color=color, alpha=0.08)
 
         max_name_len = max(len(r[2]) for r in ranking)
+        handles: list = []
+        labels: list = []
+        if show_linestyle_key:
+            from matplotlib.lines import Line2D
+            grey = "#555555"
+            handles.append(Line2D([0], [0], color=grey, linewidth=2, linestyle="-"))
+            labels.append("Optimizer LLM: 27B")
+            handles.append(Line2D([0], [0], color=grey, linewidth=2, linestyle=DASH_08B))
+            labels.append("Optimizer LLM: 0.8B")
+            sep_handle, = ax.plot([], [], color="none", marker="", linestyle="none")
+            handles.append(sep_handle)
+            labels.append("")
         header_handle, = ax.plot([], [], color="none", marker="", linestyle="none")
-        handles = [header_handle]
-        labels = [f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}"]
+        handles.append(header_handle)
+        labels.append(f"{'Method'.ljust(max_name_len + 2)}{'Best':>6}")
         for val, handle, name, *_ in ranking:
             labels.append(f"{name.ljust(max_name_len + 2)}{val:.4f}")
             handles.append(handle)
-        ax.legend(handles, labels, fontsize=8, loc="upper right",
-                  prop={"family": "monospace", "size": 8})
+        legend_kw = dict(fontsize=8, loc="upper right",
+                         prop={"family": "monospace", "size": 8})
+        if show_linestyle_key:
+            legend_kw["handlelength"] = 3.5
+        ax.legend(handles, labels, **legend_kw)
 
     fig.tight_layout()
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -293,16 +309,20 @@ BACKENDS_27B = {
     "llambo_Qwen3_5_27B": {"label": "LLAMBO (Optuna)", "color": "#9C27B0", "linestyle": "-", "marker": "*"},
 }
 
+# 0.8B variants use a tight (0,(4,2)) dash pattern instead of "--" so the dashes
+# visibly repeat inside legend handles (matplotlib's default dash for "--" is too
+# long for a single legend handle stroke and renders as solid).
+DASH_08B = (0, (4, 2))
 BACKENDS_ALL = {
     "optuna": {"label": "TPE (best classical)", "color": "#2196F3", "linestyle": "-", "marker": "o"},
     "centaur_Qwen3_5_27B": {"label": "Centaur [27B]", "color": "#E91E63", "linestyle": "-", "marker": "D"},
-    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": "--", "marker": "D"},
+    "centaur_Qwen3_5_0_8B": {"label": "Centaur [0.8B]", "color": "#E91E63", "linestyle": DASH_08B, "marker": "D"},
     "llambo_original_Qwen3_5_27B": {"label": "LLAMBO (Paper) [27B]", "color": "#00BCD4", "linestyle": "-", "marker": "*"},
-    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": "--", "marker": "*"},
+    "llambo_original": {"label": "LLAMBO (Paper) [0.8B]", "color": "#00BCD4", "linestyle": DASH_08B, "marker": "*"},
     "karpathy_agent_hps_Qwen3_5_27B": {"label": "Karpathy Agent (14 HPs) [27B]", "color": "#FFC107", "linestyle": "-", "marker": "*"},
-    "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": "--", "marker": "*"},
+    "karpathy_agent_hps": {"label": "Karpathy Agent (14 HPs) [0.8B]", "color": "#FFC107", "linestyle": DASH_08B, "marker": "*"},
     "karpathy_agent_Qwen3_5_27B": {"label": "Karpathy Agent (Code) [27B]", "color": "#4A148C", "linestyle": "-", "marker": "*"},
-    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4A148C", "linestyle": "--", "marker": "*"},
+    "karpathy_agent_Qwen3_5_0_8B": {"label": "Karpathy Agent (Code) [0.8B]", "color": "#4A148C", "linestyle": DASH_08B, "marker": "*"},
 }
 
 
@@ -359,6 +379,7 @@ def plot_exp2_all_walltime(results_dir: Path, output_path: Path):
         output_path,
         title="0.8B vs 27B LLM Optimizer",
         ylim=(0.971, 0.993),
+        show_linestyle_key=True,
     )
 
 
