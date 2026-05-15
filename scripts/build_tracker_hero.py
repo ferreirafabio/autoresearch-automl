@@ -299,13 +299,16 @@ def _plot_html(traces: list[dict]) -> str:
     Filter click-handling lives in index.html's initGroupFilters() so we get
     the proven Fig 1/2/3 behaviour for free."""
     div_id = "tracker-hero-plot"  # distinct from the h3 anchor id "tracker-hero"
+    # Legend below the plot so the chart keeps real estate on mobile.
     layout = {
-        "height": 700, "margin": {"l": 60, "r": 30, "t": 40, "b": 60},
+        "height": 620, "margin": {"l": 55, "r": 20, "t": 30, "b": 60},
         "xaxis": {"title": "Cumulative training time (hours)", "range": [0, 24]},
         "yaxis": {"title": "Best val_bpb (lower is better)"},
-        "legend": {"x": 0.99, "xanchor": "right", "y": 0.99, "yanchor": "top",
+        "legend": {"orientation": "h", "x": 0.5, "xanchor": "center",
+                   "y": -0.18, "yanchor": "top",
                    "bgcolor": "rgba(255,255,255,0.85)", "bordercolor": "#ddd",
-                   "borderwidth": 1, "font": {"size": 10}},
+                   "borderwidth": 1, "font": {"size": 10},
+                   "itemwidth": 50},
         "hovermode": "x unified",
     }
     config = {"responsive": True, "displayModeBar": False}
@@ -346,15 +349,18 @@ def _slopegraph_panel(method_key: str, gens: list[dict]) -> tuple[str, list[str]
         present = [(xl, y) for xl, y in zip(x_labels, ys) if y is not None]
         if not present:
             continue
+        # Hide individual seed legend entries — they're noise on mobile and
+        # the dots+lines themselves are still drawn. Mean line stays in the
+        # legend.
         traces.append({
             "x": [p[0] for p in present],
             "y": [p[1] for p in present],
             "mode": "lines+markers",
             "name": f"seed {s}",
-            "line": {"color": color_cmap[i], "width": 1.7},
-            "marker": {"size": 8, "color": color_cmap[i]},
+            "line": {"color": color_cmap[i], "width": 1.3, "dash": "dot"},
+            "marker": {"size": 7, "color": color_cmap[i]},
             "hovertemplate": f"<b>seed {s}</b><br>%{{x}}: %{{y:.4f}}<extra></extra>",
-            "type": "scatter",
+            "type": "scatter", "showlegend": False,
             "legendgroup": f"seed_{s}",
         })
     if not traces:
@@ -376,17 +382,21 @@ def _slopegraph_panel(method_key: str, gens: list[dict]) -> tuple[str, list[str]
 
     div_id = "tracker-slope-" + method_key + "-" + uuid.uuid4().hex[:6]
     title = METHOD_DISPLAY[method_key]
+    n_seeds_panel = len(traces) - 1  # mean trace + per-seed traces
     layout = {
-        "title": {"text": title, "font": {"size": 13}, "x": 0.5, "xanchor": "center"},
-        "height": 360, "margin": {"l": 55, "r": 20, "t": 40, "b": 40},
+        "title": {"text": f"{title}  ({n_seeds_panel} seeds, dotted = individual)",
+                  "font": {"size": 12}, "x": 0.5, "xanchor": "center"},
+        "height": 280, "margin": {"l": 55, "r": 20, "t": 40, "b": 35},
         "xaxis": {"title": "", "showgrid": False},
         "yaxis": {"title": "Final val_bpb", "showgrid": True, "gridcolor": "#eee"},
-        "legend": {"font": {"size": 9}, "bgcolor": "rgba(255,255,255,0.7)"},
+        "legend": {"font": {"size": 9}, "bgcolor": "rgba(255,255,255,0.7)",
+                   "orientation": "h", "x": 0.5, "xanchor": "center",
+                   "y": -0.05, "yanchor": "top"},
         "showlegend": True,
     }
     config = {"responsive": True, "displayModeBar": False}
     snippet = (f'<div id="{div_id}" class="plotly-graph-div" '
-               f'style="height:360px;width:100%;"></div>\n'
+               f'style="height:280px;width:100%;"></div>\n'
                f'<script>Plotly.newPlot("{div_id}", '
                f'{json.dumps(traces, separators=(",", ":"))}, '
                f'{json.dumps(layout, separators=(",", ":"))}, '
@@ -763,29 +773,41 @@ def build_forest_html() -> tuple[str, list[str]]:
         for r in rows
     ]
 
+    # Shorten labels for mobile: "Karpathy Agent (Code) [Opus 4.6]" → "KA Code · Opus 4.6"
+    short_labels = []
+    for r in rows:
+        s = (r["label"]
+             .replace("Karpathy Agent (Code)", "KA Code")
+             .replace("Karpathy Agent (14 HPs)", "KA HPs")
+             .replace(" [", " · ")
+             .replace("]", ""))
+        short_labels.append(s)
+
     bar = {
         "type": "bar", "orientation": "h",
-        "x": deltas, "y": labels,
+        "x": deltas, "y": short_labels,
         "marker": {"color": colors, "opacity": 0.85},
         "text": p_labels, "textposition": "outside",
+        "cliponaxis": False,
         "hovertemplate": "%{y}<br>Δ=%{x:+.4f}<br>%{text}<extra></extra>",
     }
-    xmax = max(abs(d) for d in deltas) * 1.6 if deltas else 0.005
+    xmax = max(abs(d) for d in deltas) * 1.9 if deltas else 0.005
     layout = {
-        "height": max(280, 70 * len(rows) + 100),
-        "margin": {"l": 240, "r": 80, "t": 30, "b": 40},
-        "xaxis": {"title": "Δ = mean(method) − mean(TPE), lower is better",
+        "height": max(260, 60 * len(rows) + 120),
+        "margin": {"l": 130, "r": 80, "t": 55, "b": 50},
+        "xaxis": {"title": {"text": "Δ = mean(method) − mean(TPE), lower is better",
+                            "font": {"size": 10}},
                   "zeroline": True, "zerolinecolor": "#666", "zerolinewidth": 1,
-                  "range": [-xmax, xmax]},
-        "yaxis": {"automargin": True, "tickfont": {"size": 11}},
+                  "range": [-xmax, xmax], "tickfont": {"size": 9}},
+        "yaxis": {"automargin": True, "tickfont": {"size": 10}},
         "showlegend": False,
         "annotations": [
-            {"x": -xmax * 0.95, "y": 1.06, "xref": "x", "yref": "paper",
+            {"x": -xmax * 0.95, "y": 1.10, "xref": "x", "yref": "paper",
              "text": "← method beats TPE", "showarrow": False,
-             "font": {"color": "#2E7D32", "size": 10}},
-            {"x":  xmax * 0.95, "y": 1.06, "xref": "x", "yref": "paper",
+             "font": {"color": "#2E7D32", "size": 9}},
+            {"x":  xmax * 0.95, "y": 1.10, "xref": "x", "yref": "paper",
              "text": "TPE beats method →", "showarrow": False,
-             "font": {"color": "#C62828", "size": 10}},
+             "font": {"color": "#C62828", "size": 9}},
         ],
     }
     config = {"responsive": True, "displayModeBar": False}
