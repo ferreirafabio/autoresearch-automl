@@ -1013,3 +1013,6 @@ if __name__ == "__main__":
     # Trial-number versions (appendix)
     plot_progress_classical_trials(results_dir, assets_dir / "exp2_incumbents_classical_trials.png")
     plot_progress_llm_trials(results_dir, assets_dir / "exp2_incumbents_llm_trials.png")
+
+    from wilcoxon_tests import run_all as run_wilcoxon_tests
+    run_wilcoxon_tests(results_dir, assets_dir)
