@@ -433,12 +433,110 @@ def build_slopegraph_html() -> tuple[str, list[str]]:
 
 
 _PLACEHOLDERS = {
+    "leader": ("tracker-leader-container", "tracker-hero"),
     "hero":   ("tracker-hero-container",   "tracker-slope"),
     "slope":  ("tracker-slope-container",  "tracker-forest"),
     "forest": ("tracker-forest-container", "tracker-cards"),
     # Cards is the last section; close on the wrapping </div><!-- /tab-panel tracker -->.
     "cards":  ("tracker-cards-container",  None),  # special-cased below
 }
+
+
+def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
+    """Current-leader banner: the (method × Claude generation) pair with the
+    lowest mean val_bpb, restricted to >= min_seeds completed seeds. Includes
+    paired Wilcoxon vs TPE if computable."""
+    from scipy import stats
+    info: list[str] = []
+    tpe_finals = _seed_finals(EXP2_BENCH / "optuna")
+
+    # Collect every (method, gen) with enough completed seeds.
+    candidates: list[dict] = []
+    for gen in GENERATIONS:
+        for method_key in ("centaur", "ka_code", "ka_hps"):
+            sub = gen.get(method_key)
+            if not sub:
+                continue
+            finals = _seed_finals(gen["base"] / sub)
+            if len(finals) < min_seeds:
+                continue
+            vals = np.array(list(finals.values()))
+            candidates.append({
+                "label": f"{METHOD_DISPLAY[method_key]} [{gen['tag']}]",
+                "method_key": method_key,
+                "gen_tag": gen["tag"],
+                "color": METHOD_COLOR[method_key],
+                "mean": float(vals.mean()),
+                "std":  float(vals.std()) if vals.size > 1 else 0.0,
+                "n":    int(vals.size),
+                "finals": finals,
+            })
+    # Always include TPE as a candidate so a strong classical can hold the crown
+    if len(tpe_finals) >= min_seeds:
+        vals = np.array(list(tpe_finals.values()))
+        candidates.append({
+            "label": "TPE (classical baseline)",
+            "method_key": "tpe",
+            "gen_tag": "classical",
+            "color": "#2196F3",
+            "mean": float(vals.mean()),
+            "std":  float(vals.std()),
+            "n":    int(vals.size),
+            "finals": tpe_finals,
+        })
+
+    if not candidates:
+        info.append(f"  no method has >= {min_seeds} completed seeds yet")
+        return ('<p class="tracker-leader" style="text-align:center;color:#888;font-style:italic">'
+                f'No method has &ge;{min_seeds} completed seeds yet.</p>'), info
+
+    candidates.sort(key=lambda c: c["mean"])
+    winner = candidates[0]
+    info.append(f"  winner: {winner['label']} @ {winner['mean']:.4f} (n={winner['n']})")
+
+    # Wilcoxon vs TPE
+    p_html = ""
+    if winner["method_key"] != "tpe":
+        common = sorted(set(winner["finals"]) & set(tpe_finals))
+        if len(common) >= 2:
+            a = np.array([winner["finals"][s] for s in common])
+            b = np.array([tpe_finals[s] for s in common])
+            try:
+                _, p_one = stats.wilcoxon(a, b, zero_method="wilcox", alternative="less")
+                p_one = float(p_one)
+                p_cls = "sig" if p_one < 0.05 else ("marginal" if p_one < 0.10 else "")
+                star = " *" if p_one < 0.10 else ""
+                if p_one < 0.05: star = " **"
+                p_html = (f'<div class="leader-metric">'
+                          f'<span class="label">Δ vs TPE (paired, n={len(common)})</span>'
+                          f'<span class="value {p_cls}">{(a.mean()-b.mean()):+.4f}'
+                          f', p={p_one:.3f}{star}</span></div>')
+                info.append(f"  vs TPE: Δ={(a.mean()-b.mean()):+.4f}, n={len(common)}, one-sided p={p_one:.4f}")
+            except Exception:
+                pass
+
+    eyebrow = "Current leader" if winner["method_key"] != "tpe" else "TPE still on top"
+    note = (f"Best across {len(candidates)} method × generation combinations with "
+            f"&ge;{min_seeds} completed seeds. Banner refreshes on every "
+            f"<code>make tracker</code> run.")
+    html = (
+        f'<div class="tracker-leader">\n'
+        f'  <div class="leader-eyebrow">{eyebrow}</div>\n'
+        f'  <div class="leader-title" style="border-left-color:{winner["color"]}">'
+        f'{winner["label"]}</div>\n'
+        f'  <div class="leader-metrics">\n'
+        f'    <div class="leader-metric">'
+        f'<span class="label">Mean &plusmn; std</span>'
+        f'<span class="value">{winner["mean"]:.4f} &plusmn; {winner["std"]:.4f}</span></div>\n'
+        f'    <div class="leader-metric">'
+        f'<span class="label">Seeds</span>'
+        f'<span class="value">{winner["n"]}</span></div>\n'
+        f'    {p_html}\n'
+        f'  </div>\n'
+        f'  <div class="leader-note">{note}</div>\n'
+        f'</div>'
+    )
+    return html, info
 
 
 def build_cards_html() -> tuple[str, list[str]]:
@@ -655,8 +753,10 @@ def inject_into_html(snippet_html: str, marker: str) -> None:
         close = r'(</div><!--\s*/tab-panel\s+tracker\s*-->)'
     else:
         close = rf'(</div>\s*<h3 id="{next_anchor}")'
+    # Match either <div class="plot-container" id="..."> or <div id="...">
+    # (leader banner has no plot-container class)
     pattern = re.compile(
-        rf'(<div class="plot-container" id="{container_id}">)'
+        rf'(<div(?:\s+class="plot-container")?\s+id="{container_id}">)'
         r'.*?'
         + close,
         flags=re.DOTALL,
@@ -671,11 +771,18 @@ def inject_into_html(snippet_html: str, marker: str) -> None:
 
 
 def main() -> None:
+    leader_html, leader_info = build_leader_html()
+    print("Current-leader banner:")
+    for line in leader_info:
+        print(line)
+    inject_into_html(leader_html, "leader")
+    print("  Injected leader banner.")
+
     traces, info = build_traces()
     if not traces:
         print("No traces built for hero (no completed seeds). Bailing.")
         return
-    print(f"Hero: built {len(traces)} traces ({len(traces)//3} method-generation curves).")
+    print(f"\nHero: built {len(traces)} traces ({len(traces)//3} method-generation curves).")
     for line in info:
         print(line)
     inject_into_html(_plot_html(traces), "hero")
