@@ -208,6 +208,7 @@
   /* Slopegraph stack (tracker tab section B): one panel per row */
   .slope-grid {
     display: grid; grid-template-columns: 1fr; gap: 1em;
+    max-width: 700px; margin: 0 auto;
   }
   .slope-panel { background: #fafafa; border-radius: 8px; padding: 0.5em; }
 
@@ -1538,9 +1539,15 @@ function switchToTab(target) {
   const panels  = document.querySelectorAll('.tab-panel');
   buttons.forEach(b => b.classList.toggle('active', b.dataset.tab === target));
   panels.forEach(p => { p.hidden = (p.dataset.tab !== target); });
-  if (target === 'tracker') {
-    const els = document.querySelectorAll('[data-tab="tracker"] .plotly-graph-div');
-    els.forEach(el => { if (window.Plotly) Plotly.Plots.resize(el); });
+  // Plotly figures created while their parent was `hidden` have no width
+  // and render as empty. Force resize on every plot inside the now-visible
+  // tab; the double timeout covers layout settling on different browsers.
+  if (window.Plotly) {
+    const els = document.querySelectorAll(`[data-tab="${target}"] .plotly-graph-div`);
+    const kick = () => els.forEach(el => { try { Plotly.Plots.resize(el); } catch(e){} });
+    kick();
+    setTimeout(kick, 50);
+    setTimeout(kick, 250);
   }
 }
 
