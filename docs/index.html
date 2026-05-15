@@ -212,6 +212,46 @@
   }
   .slope-panel { background: #fafafa; border-radius: 8px; padding: 0.5em; }
 
+  /* Summary cards (tracker tab section D) */
+  .tracker-cards-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1em;
+    max-width: 900px; margin: 0 auto;
+  }
+  .tracker-card {
+    border: 1px solid #e0e0e0; border-radius: 10px; padding: 1em 1.2em;
+    background: #fafafa;
+  }
+  .tracker-card-empty { opacity: 0.65; }
+  .tracker-card .card-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid #e5e5e5; padding-bottom: 0.5em; margin-bottom: 0.7em;
+  }
+  .tracker-card .card-title { font-weight: 600; font-size: 1.05em; }
+  .tracker-card .card-updated { font-size: 0.82em; color: #888; }
+  .tracker-card table.card-table {
+    width: 100%; border-collapse: collapse; font-size: 0.88em;
+  }
+  .tracker-card .card-table th, .tracker-card .card-table td {
+    text-align: left; padding: 0.35em 0.4em;
+  }
+  .tracker-card .card-table thead th {
+    font-weight: 600; color: #555; border-bottom: 1px solid #eee;
+  }
+  .tracker-card .card-row-empty td { color: #aaa; }
+  .tracker-card .dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    margin-right: 0.5em; vertical-align: middle;
+  }
+  .tracker-card .p-sig { color: #2E7D32; font-weight: 600; }
+  .tracker-card .p-marginal { color: #F57C00; font-weight: 500; }
+  .cards-tpe-note {
+    color: #666; font-style: italic; font-size: 0.9em;
+    margin-top: 1em; max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  @media (max-width: 800px) {
+    .tracker-cards-grid { grid-template-columns: 1fr; }
+  }
+
   /* Mobile responsive */
   @media (max-width: 800px) {
     body { padding: 1em 0.5em 3em; }
@@ -566,12 +606,12 @@
 </p>
 <div class="plot-container" id="tracker-slope-container">
 <div class="slope-grid">
-<div class="slope-panel"><div id="tracker-slope-centaur-47fee0" class="plotly-graph-div" style="height:360px;width:100%;"></div>
-<script>Plotly.newPlot("tracker-slope-centaur-47fee0", [{"x":["Opus 4.6","Opus 4.7"],"y":[0.973803625,0.976788],"mode":"lines+markers","name":"mean across seeds","line":{"color":"#C62828","width":3.5,"dash":"solid"},"marker":{"size":12,"symbol":"diamond","color":"#C62828"},"hovertemplate":"<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter"},{"x":["Opus 4.6","Opus 4.7"],"y":[0.972247,0.977262],"mode":"lines+markers","name":"seed 0","line":{"color":"#440154","width":1.7},"marker":{"size":8,"color":"#440154"},"hovertemplate":"<b>seed 0</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_0"},{"x":["Opus 4.6","Opus 4.7"],"y":[0.97443,0.976314],"mode":"lines+markers","name":"seed 1","line":{"color":"#3E2F73","width":1.7},"marker":{"size":8,"color":"#3E2F73"},"hovertemplate":"<b>seed 1</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_1"},{"x":["Opus 4.6"],"y":[0.974981],"mode":"lines+markers","name":"seed 2","line":{"color":"#375B8B","width":1.7},"marker":{"size":8,"color":"#375B8B"},"hovertemplate":"<b>seed 2</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_2"},{"x":["Opus 4.6"],"y":[0.972571],"mode":"lines+markers","name":"seed 3","line":{"color":"#287F8B","width":1.7},"marker":{"size":8,"color":"#287F8B"},"hovertemplate":"<b>seed 3</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_3"},{"x":["Opus 4.6"],"y":[0.971959],"mode":"lines+markers","name":"seed 4","line":{"color":"#32A180","width":1.7},"marker":{"size":8,"color":"#32A180"},"hovertemplate":"<b>seed 4</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_4"},{"x":["Opus 4.6"],"y":[0.974154],"mode":"lines+markers","name":"seed 5","line":{"color":"#55C168","width":1.7},"marker":{"size":8,"color":"#55C168"},"hovertemplate":"<b>seed 5</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_5"},{"x":["Opus 4.6"],"y":[0.974469],"mode":"lines+markers","name":"seed 6","line":{"color":"#A2D547","width":1.7},"marker":{"size":8,"color":"#A2D547"},"hovertemplate":"<b>seed 6</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_6"},{"x":["Opus 4.6"],"y":[0.975618],"mode":"lines+markers","name":"seed 7","line":{"color":"#FDE725","width":1.7},"marker":{"size":8,"color":"#FDE725"},"hovertemplate":"<b>seed 7</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_7"}], {"title":{"text":"Centaur","font":{"size":13},"x":0.5,"xanchor":"center"},"height":360,"margin":{"l":55,"r":20,"t":40,"b":40},"xaxis":{"title":"","showgrid":false},"yaxis":{"title":"Final val_bpb","showgrid":true,"gridcolor":"#eee"},"legend":{"font":{"size":9},"bgcolor":"rgba(255,255,255,0.7)"},"showlegend":true}, {"responsive":true,"displayModeBar":false});</script></div>
-<div class="slope-panel"><div id="tracker-slope-ka_code-9aadd5" class="plotly-graph-div" style="height:360px;width:100%;"></div>
-<script>Plotly.newPlot("tracker-slope-ka_code-9aadd5", [{"x":["Opus 4.6","Opus 4.7"],"y":[0.97538375,0.975058],"mode":"lines+markers","name":"mean across seeds","line":{"color":"#1565C0","width":3.5,"dash":"solid"},"marker":{"size":12,"symbol":"diamond","color":"#1565C0"},"hovertemplate":"<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter"},{"x":["Opus 4.6","Opus 4.7"],"y":[0.977346,0.975058],"mode":"lines+markers","name":"seed 0","line":{"color":"#440154","width":1.7},"marker":{"size":8,"color":"#440154"},"hovertemplate":"<b>seed 0</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_0"},{"x":["Opus 4.6"],"y":[0.973536],"mode":"lines+markers","name":"seed 1","line":{"color":"#32678B","width":1.7},"marker":{"size":8,"color":"#32678B"},"hovertemplate":"<b>seed 1</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_1"},{"x":["Opus 4.6"],"y":[0.980067],"mode":"lines+markers","name":"seed 2","line":{"color":"#49B670","width":1.7},"marker":{"size":8,"color":"#49B670"},"hovertemplate":"<b>seed 2</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_2"},{"x":["Opus 4.6"],"y":[0.970586],"mode":"lines+markers","name":"seed 3","line":{"color":"#FDE725","width":1.7},"marker":{"size":8,"color":"#FDE725"},"hovertemplate":"<b>seed 3</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_3"}], {"title":{"text":"Karpathy Agent (Code)","font":{"size":13},"x":0.5,"xanchor":"center"},"height":360,"margin":{"l":55,"r":20,"t":40,"b":40},"xaxis":{"title":"","showgrid":false},"yaxis":{"title":"Final val_bpb","showgrid":true,"gridcolor":"#eee"},"legend":{"font":{"size":9},"bgcolor":"rgba(255,255,255,0.7)"},"showlegend":true}, {"responsive":true,"displayModeBar":false});</script></div>
-<div class="slope-panel"><div id="tracker-slope-ka_hps-6a78c0" class="plotly-graph-div" style="height:360px;width:100%;"></div>
-<script>Plotly.newPlot("tracker-slope-ka_hps-6a78c0", [{"x":["Opus 4.7"],"y":[0.97737],"mode":"lines+markers","name":"mean across seeds","line":{"color":"#FFC107","width":3.5,"dash":"solid"},"marker":{"size":12,"symbol":"diamond","color":"#FFC107"},"hovertemplate":"<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter"},{"x":["Opus 4.7"],"y":[0.974829],"mode":"lines+markers","name":"seed 0","line":{"color":"#440154","width":1.7},"marker":{"size":8,"color":"#440154"},"hovertemplate":"<b>seed 0</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_0"},{"x":["Opus 4.7"],"y":[0.979911],"mode":"lines+markers","name":"seed 1","line":{"color":"#FDE725","width":1.7},"marker":{"size":8,"color":"#FDE725"},"hovertemplate":"<b>seed 1</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_1"}], {"title":{"text":"Karpathy Agent (14 HPs)","font":{"size":13},"x":0.5,"xanchor":"center"},"height":360,"margin":{"l":55,"r":20,"t":40,"b":40},"xaxis":{"title":"","showgrid":false},"yaxis":{"title":"Final val_bpb","showgrid":true,"gridcolor":"#eee"},"legend":{"font":{"size":9},"bgcolor":"rgba(255,255,255,0.7)"},"showlegend":true}, {"responsive":true,"displayModeBar":false});</script></div>
+<div class="slope-panel"><div id="tracker-slope-centaur-61245e" class="plotly-graph-div" style="height:360px;width:100%;"></div>
+<script>Plotly.newPlot("tracker-slope-centaur-61245e", [{"x":["Opus 4.6","Opus 4.7"],"y":[0.973803625,0.976788],"mode":"lines+markers","name":"mean across seeds","line":{"color":"#C62828","width":3.5,"dash":"solid"},"marker":{"size":12,"symbol":"diamond","color":"#C62828"},"hovertemplate":"<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter"},{"x":["Opus 4.6","Opus 4.7"],"y":[0.972247,0.977262],"mode":"lines+markers","name":"seed 0","line":{"color":"#440154","width":1.7},"marker":{"size":8,"color":"#440154"},"hovertemplate":"<b>seed 0</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_0"},{"x":["Opus 4.6","Opus 4.7"],"y":[0.97443,0.976314],"mode":"lines+markers","name":"seed 1","line":{"color":"#3E2F73","width":1.7},"marker":{"size":8,"color":"#3E2F73"},"hovertemplate":"<b>seed 1</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_1"},{"x":["Opus 4.6"],"y":[0.974981],"mode":"lines+markers","name":"seed 2","line":{"color":"#375B8B","width":1.7},"marker":{"size":8,"color":"#375B8B"},"hovertemplate":"<b>seed 2</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_2"},{"x":["Opus 4.6"],"y":[0.972571],"mode":"lines+markers","name":"seed 3","line":{"color":"#287F8B","width":1.7},"marker":{"size":8,"color":"#287F8B"},"hovertemplate":"<b>seed 3</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_3"},{"x":["Opus 4.6"],"y":[0.971959],"mode":"lines+markers","name":"seed 4","line":{"color":"#32A180","width":1.7},"marker":{"size":8,"color":"#32A180"},"hovertemplate":"<b>seed 4</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_4"},{"x":["Opus 4.6"],"y":[0.974154],"mode":"lines+markers","name":"seed 5","line":{"color":"#55C168","width":1.7},"marker":{"size":8,"color":"#55C168"},"hovertemplate":"<b>seed 5</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_5"},{"x":["Opus 4.6"],"y":[0.974469],"mode":"lines+markers","name":"seed 6","line":{"color":"#A2D547","width":1.7},"marker":{"size":8,"color":"#A2D547"},"hovertemplate":"<b>seed 6</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_6"},{"x":["Opus 4.6"],"y":[0.975618],"mode":"lines+markers","name":"seed 7","line":{"color":"#FDE725","width":1.7},"marker":{"size":8,"color":"#FDE725"},"hovertemplate":"<b>seed 7</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_7"}], {"title":{"text":"Centaur","font":{"size":13},"x":0.5,"xanchor":"center"},"height":360,"margin":{"l":55,"r":20,"t":40,"b":40},"xaxis":{"title":"","showgrid":false},"yaxis":{"title":"Final val_bpb","showgrid":true,"gridcolor":"#eee"},"legend":{"font":{"size":9},"bgcolor":"rgba(255,255,255,0.7)"},"showlegend":true}, {"responsive":true,"displayModeBar":false});</script></div>
+<div class="slope-panel"><div id="tracker-slope-ka_code-d129ac" class="plotly-graph-div" style="height:360px;width:100%;"></div>
+<script>Plotly.newPlot("tracker-slope-ka_code-d129ac", [{"x":["Opus 4.6","Opus 4.7"],"y":[0.97538375,0.975058],"mode":"lines+markers","name":"mean across seeds","line":{"color":"#1565C0","width":3.5,"dash":"solid"},"marker":{"size":12,"symbol":"diamond","color":"#1565C0"},"hovertemplate":"<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter"},{"x":["Opus 4.6","Opus 4.7"],"y":[0.977346,0.975058],"mode":"lines+markers","name":"seed 0","line":{"color":"#440154","width":1.7},"marker":{"size":8,"color":"#440154"},"hovertemplate":"<b>seed 0</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_0"},{"x":["Opus 4.6"],"y":[0.973536],"mode":"lines+markers","name":"seed 1","line":{"color":"#32678B","width":1.7},"marker":{"size":8,"color":"#32678B"},"hovertemplate":"<b>seed 1</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_1"},{"x":["Opus 4.6"],"y":[0.980067],"mode":"lines+markers","name":"seed 2","line":{"color":"#49B670","width":1.7},"marker":{"size":8,"color":"#49B670"},"hovertemplate":"<b>seed 2</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_2"},{"x":["Opus 4.6"],"y":[0.970586],"mode":"lines+markers","name":"seed 3","line":{"color":"#FDE725","width":1.7},"marker":{"size":8,"color":"#FDE725"},"hovertemplate":"<b>seed 3</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_3"}], {"title":{"text":"Karpathy Agent (Code)","font":{"size":13},"x":0.5,"xanchor":"center"},"height":360,"margin":{"l":55,"r":20,"t":40,"b":40},"xaxis":{"title":"","showgrid":false},"yaxis":{"title":"Final val_bpb","showgrid":true,"gridcolor":"#eee"},"legend":{"font":{"size":9},"bgcolor":"rgba(255,255,255,0.7)"},"showlegend":true}, {"responsive":true,"displayModeBar":false});</script></div>
+<div class="slope-panel"><div id="tracker-slope-ka_hps-34ff24" class="plotly-graph-div" style="height:360px;width:100%;"></div>
+<script>Plotly.newPlot("tracker-slope-ka_hps-34ff24", [{"x":["Opus 4.7"],"y":[0.97737],"mode":"lines+markers","name":"mean across seeds","line":{"color":"#FFC107","width":3.5,"dash":"solid"},"marker":{"size":12,"symbol":"diamond","color":"#FFC107"},"hovertemplate":"<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter"},{"x":["Opus 4.7"],"y":[0.974829],"mode":"lines+markers","name":"seed 0","line":{"color":"#440154","width":1.7},"marker":{"size":8,"color":"#440154"},"hovertemplate":"<b>seed 0</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_0"},{"x":["Opus 4.7"],"y":[0.979911],"mode":"lines+markers","name":"seed 1","line":{"color":"#FDE725","width":1.7},"marker":{"size":8,"color":"#FDE725"},"hovertemplate":"<b>seed 1</b><br>%{x}: %{y:.4f}<extra></extra>","type":"scatter","legendgroup":"seed_1"}], {"title":{"text":"Karpathy Agent (14 HPs)","font":{"size":13},"x":0.5,"xanchor":"center"},"height":360,"margin":{"l":55,"r":20,"t":40,"b":40},"xaxis":{"title":"","showgrid":false},"yaxis":{"title":"Final val_bpb","showgrid":true,"gridcolor":"#eee"},"legend":{"font":{"size":9},"bgcolor":"rgba(255,255,255,0.7)"},"showlegend":true}, {"responsive":true,"displayModeBar":false});</script></div>
 </div>
 </div>
 
@@ -580,8 +620,8 @@
   Paired Wilcoxon signed-rank test for each Claude generation &times; method versus TPE. Bars show &Delta; = mean(method) &minus; mean(TPE) across paired seeds; one-sided p-value annotated.
 </p>
 <div class="plot-container" id="tracker-forest-container">
-<div id="tracker-forest-bbf4e5" class="plotly-graph-div" style="height:380px;width:100%;"></div>
-<script>Plotly.newPlot("tracker-forest-bbf4e5", [{"type":"bar","orientation":"h","x":[-0.0027180000000000203,-0.0012430000000000496,-0.0011080000000000256,-0.0006610000000000782],"y":["Centaur [Opus 4.6]","Centaur [Opus 4.7]","Karpathy Agent (Code) [Opus 4.6]","Karpathy Agent (14 HPs) [Opus 4.7]"],"marker":{"color":["#C62828","#C62828","#1565C0","#FFC107"],"opacity":0.85},"text":["n=5  p=0.062 *","n=2  p=0.250","n=4  p=0.438","n=2  p=0.500"],"textposition":"outside","hovertemplate":"%{y}<br>\u0394=%{x:+.4f}<br>%{text}<extra></extra>"}], {"height":380,"margin":{"l":240,"r":80,"t":30,"b":40},"xaxis":{"title":"\u0394 = mean(method) \u2212 mean(TPE), lower is better","zeroline":true,"zerolinecolor":"#666","zerolinewidth":1,"range":[-0.004348800000000033,0.004348800000000033]},"yaxis":{"automargin":true,"tickfont":{"size":11}},"showlegend":false,"annotations":[{"x":-0.004131360000000031,"y":1.06,"xref":"x","yref":"paper","text":"\u2190 method beats TPE","showarrow":false,"font":{"color":"#2E7D32","size":10}},{"x":0.004131360000000031,"y":1.06,"xref":"x","yref":"paper","text":"TPE beats method \u2192","showarrow":false,"font":{"color":"#C62828","size":10}}]}, {"responsive":true,"displayModeBar":false});</script>
+<div id="tracker-forest-ecbe69" class="plotly-graph-div" style="height:380px;width:100%;"></div>
+<script>Plotly.newPlot("tracker-forest-ecbe69", [{"type":"bar","orientation":"h","x":[-0.0027180000000000203,-0.0012430000000000496,-0.0011080000000000256,-0.0006610000000000782],"y":["Centaur [Opus 4.6]","Centaur [Opus 4.7]","Karpathy Agent (Code) [Opus 4.6]","Karpathy Agent (14 HPs) [Opus 4.7]"],"marker":{"color":["#C62828","#C62828","#1565C0","#FFC107"],"opacity":0.85},"text":["n=5  p=0.062 *","n=2  p=0.250","n=4  p=0.438","n=2  p=0.500"],"textposition":"outside","hovertemplate":"%{y}<br>\u0394=%{x:+.4f}<br>%{text}<extra></extra>"}], {"height":380,"margin":{"l":240,"r":80,"t":30,"b":40},"xaxis":{"title":"\u0394 = mean(method) \u2212 mean(TPE), lower is better","zeroline":true,"zerolinecolor":"#666","zerolinewidth":1,"range":[-0.004348800000000033,0.004348800000000033]},"yaxis":{"automargin":true,"tickfont":{"size":11}},"showlegend":false,"annotations":[{"x":-0.004131360000000031,"y":1.06,"xref":"x","yref":"paper","text":"\u2190 method beats TPE","showarrow":false,"font":{"color":"#2E7D32","size":10}},{"x":0.004131360000000031,"y":1.06,"xref":"x","yref":"paper","text":"TPE beats method \u2192","showarrow":false,"font":{"color":"#C62828","size":10}}]}, {"responsive":true,"displayModeBar":false});</script>
 </div>
 
 <h3 id="tracker-cards" style="margin-top:2em;font-size:1.05em">D. Per-Claude-generation summary</h3>
@@ -589,11 +629,29 @@
   One card per Claude release: mean &plusmn; std across all completed seeds, paired Wilcoxon p-value vs TPE, number of seeds completed, and last-updated date.
 </p>
 <div class="plot-container" id="tracker-cards-container">
-  <p style="text-align:center;color:#888;font-style:italic;padding:3em 1em">
-    Cards generated by <code>scripts/build_tracker_hero.py</code>.
-  </p>
+<div class="tracker-cards-grid">
+<div class="tracker-card">
+  <div class="card-header">
+    <span class="card-title">Opus 4.6</span>
+    <span class="card-updated">Last updated 2026-05-11</span>
+  </div>
+  <table class="card-table">
+    <thead><tr><th>Method</th><th>Seeds</th><th>Mean &plusmn; std</th><th>p vs TPE</th></tr></thead>
+    <tbody><tr><td><span class="dot" style="background:#C62828"></span>Centaur</td><td>8</td><td>0.9738 &plusmn; 0.0013</td><td><span class="p-marginal">0.062</span></td></tr><tr><td><span class="dot" style="background:#1565C0"></span>Karpathy Agent (Code)</td><td>4</td><td>0.9754 &plusmn; 0.0036</td><td>0.438</td></tr><tr class="card-row-empty"><td><span class="dot" style="background:#FFC107"></span>Karpathy Agent (14 HPs)</td><td>-</td><td>-</td><td>-</td></tr></tbody>
+  </table>
 </div>
-
+<div class="tracker-card">
+  <div class="card-header">
+    <span class="card-title">Opus 4.7</span>
+    <span class="card-updated">Last updated 2026-05-15</span>
+  </div>
+  <table class="card-table">
+    <thead><tr><th>Method</th><th>Seeds</th><th>Mean &plusmn; std</th><th>p vs TPE</th></tr></thead>
+    <tbody><tr><td><span class="dot" style="background:#C62828"></span>Centaur</td><td>2</td><td>0.9768 &plusmn; 0.0005</td><td>0.250</td></tr><tr><td><span class="dot" style="background:#1565C0"></span>Karpathy Agent (Code)</td><td>1</td><td>0.9751 &plusmn; 0.0000</td><td>n=1</td></tr><tr><td><span class="dot" style="background:#FFC107"></span>Karpathy Agent (14 HPs)</td><td>2</td><td>0.9774 &plusmn; 0.0025</td><td>0.500</td></tr></tbody>
+  </table>
+</div>
+</div>
+<p class="cards-tpe-note">Classical reference (TPE): 0.9760 &plusmn; 0.0019 across 5 seeds.</p>
 </div><!-- /tab-panel tracker -->
 
 

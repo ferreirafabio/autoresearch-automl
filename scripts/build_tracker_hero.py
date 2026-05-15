@@ -411,7 +411,115 @@ _PLACEHOLDERS = {
     "hero":   ("tracker-hero-container",   "tracker-slope"),
     "slope":  ("tracker-slope-container",  "tracker-forest"),
     "forest": ("tracker-forest-container", "tracker-cards"),
+    # Cards is the last section; close on the wrapping </div><!-- /tab-panel tracker -->.
+    "cards":  ("tracker-cards-container",  None),  # special-cased below
 }
+
+
+def build_cards_html() -> tuple[str, list[str]]:
+    """Section D: one card per Claude generation, with a small per-method
+    table inside (n seeds, mean +/- std, paired Wilcoxon p vs TPE) and the
+    last-updated date for that generation."""
+    from datetime import datetime, timezone
+    from scipy import stats
+
+    info: list[str] = []
+    tpe_finals = _seed_finals(EXP2_BENCH / "optuna")
+
+    cards_html: list[str] = []
+    for gen in GENERATIONS:
+        rows_html: list[str] = []
+        last_mtime: float = 0.0
+        any_data = False
+        for method_key in ("centaur", "ka_code", "ka_hps"):
+            sub = gen.get(method_key)
+            if not sub:
+                rows_html.append(_card_row(METHOD_DISPLAY[method_key], None, None, None, None, METHOD_COLOR[method_key]))
+                continue
+            method_dir = gen["base"] / sub
+            m_finals = _seed_finals(method_dir)
+            if not m_finals:
+                rows_html.append(_card_row(METHOD_DISPLAY[method_key], 0, None, None, None, METHOD_COLOR[method_key]))
+                continue
+            any_data = True
+            vals = np.array(list(m_finals.values()))
+            mean = float(vals.mean())
+            std = float(vals.std()) if vals.size > 1 else 0.0
+            n = vals.size
+            # mtime tracker
+            for sdir in method_dir.glob("seed_*"):
+                p = sdir / "trials.jsonl"
+                if p.is_file():
+                    last_mtime = max(last_mtime, p.stat().st_mtime)
+            # paired Wilcoxon vs TPE
+            common = sorted(set(tpe_finals) & set(m_finals))
+            if len(common) >= 2:
+                a = np.array([m_finals[s] for s in common])
+                b = np.array([tpe_finals[s] for s in common])
+                try:
+                    _, p_one = stats.wilcoxon(a, b, zero_method="wilcox", alternative="less")
+                    p_str = f"{float(p_one):.3f}"
+                except Exception:
+                    p_str = "-"
+            else:
+                p_str = f"n={len(common)}"
+            rows_html.append(_card_row(METHOD_DISPLAY[method_key], n, mean, std, p_str, METHOD_COLOR[method_key]))
+
+        if last_mtime > 0:
+            updated = datetime.fromtimestamp(last_mtime, tz=timezone.utc).strftime("%Y-%m-%d")
+            updated_html = f'<span class="card-updated">Last updated {updated}</span>'
+        else:
+            updated_html = '<span class="card-updated">No data yet</span>'
+
+        body_class = "tracker-card" if any_data else "tracker-card tracker-card-empty"
+        cards_html.append(
+            f'<div class="{body_class}">\n'
+            f'  <div class="card-header">\n'
+            f'    <span class="card-title">{gen["tag"]}</span>\n'
+            f'    {updated_html}\n'
+            f'  </div>\n'
+            f'  <table class="card-table">\n'
+            f'    <thead><tr><th>Method</th><th>Seeds</th><th>Mean &plusmn; std</th><th>p vs TPE</th></tr></thead>\n'
+            f'    <tbody>{"".join(rows_html)}</tbody>\n'
+            f'  </table>\n'
+            f'</div>'
+        )
+        info.append(f"  card {gen['tag']}: any_data={any_data}, last_updated_mtime={last_mtime}")
+
+    tpe_note = ""
+    if tpe_finals:
+        tpe_mean = float(np.mean(list(tpe_finals.values())))
+        tpe_std = float(np.std(list(tpe_finals.values()))) if len(tpe_finals) > 1 else 0.0
+        tpe_note = (f'<p class="cards-tpe-note">Classical reference (TPE): '
+                    f'{tpe_mean:.4f} &plusmn; {tpe_std:.4f} '
+                    f'across {len(tpe_finals)} seeds.</p>')
+
+    return (f'<div class="tracker-cards-grid">\n' + "\n".join(cards_html) + f'\n</div>\n{tpe_note}', info)
+
+
+def _card_row(method: str, n: int | None, mean: float | None,
+              std: float | None, p: str | None, color: str) -> str:
+    if n is None:
+        return (f'<tr class="card-row-empty">'
+                f'<td><span class="dot" style="background:{color}"></span>{method}</td>'
+                f'<td>-</td><td>-</td><td>-</td></tr>')
+    if n == 0 or mean is None:
+        return (f'<tr class="card-row-empty">'
+                f'<td><span class="dot" style="background:{color}"></span>{method}</td>'
+                f'<td>0</td><td>-</td><td>-</td></tr>')
+    ms = f"{mean:.4f} &plusmn; {std:.4f}" if std is not None else f"{mean:.4f}"
+    p_disp = p or "-"
+    # Highlight significant beat (p<0.05)
+    try:
+        p_f = float(p_disp)
+        cls = "p-sig" if p_f < 0.05 else ("p-marginal" if p_f < 0.10 else "")
+        if cls:
+            p_disp = f'<span class="{cls}">{p_disp}</span>'
+    except (ValueError, TypeError):
+        pass
+    return (f'<tr>'
+            f'<td><span class="dot" style="background:{color}"></span>{method}</td>'
+            f'<td>{n}</td><td>{ms}</td><td>{p_disp}</td></tr>')
 
 
 def build_forest_html() -> tuple[str, list[str]]:
@@ -517,10 +625,15 @@ def inject_into_html(snippet_html: str, marker: str) -> None:
     interpreted as regex backrefs."""
     container_id, next_anchor = _PLACEHOLDERS[marker]
     html = HTML_PATH.read_text()
+    if next_anchor is None:
+        # cards section: ends at the tracker tab-panel close marker
+        close = r'(</div><!--\s*/tab-panel\s+tracker\s*-->)'
+    else:
+        close = rf'(</div>\s*<h3 id="{next_anchor}")'
     pattern = re.compile(
         rf'(<div class="plot-container" id="{container_id}">)'
         r'.*?'
-        rf'(</div>\s*<h3 id="{next_anchor}")',
+        + close,
         flags=re.DOTALL,
     )
     if not pattern.search(html):
@@ -556,6 +669,13 @@ def main() -> None:
         print(line)
     inject_into_html(forest_html, "forest")
     print(f"  Injected forest plot.")
+
+    cards_html, cards_info = build_cards_html()
+    print(f"\nSummary cards (section D):")
+    for line in cards_info:
+        print(line)
+    inject_into_html(cards_html, "cards")
+    print(f"  Injected summary cards.")
 
 
 if __name__ == "__main__":
