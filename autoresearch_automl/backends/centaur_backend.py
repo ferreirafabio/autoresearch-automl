@@ -129,15 +129,18 @@ class CentaurBackend(HPOBackend):
             self._trial_count += 1
             return config, self._max_budget
         except Exception as e:
-            # Fail HARD on connection/timeout errors — silently falling back
-            # to pure-CMA suggestions would pollute "Centaur" results with
-            # trials that are actually CMA-only, indistinguishable in the
-            # logged trials.jsonl.
-            from openai import APIConnectionError, APITimeoutError
-            if isinstance(e, (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError)):
+            # Fail HARD on any LLM transport/server failure (connect, timeout,
+            # or any 4xx/5xx response — including 400 API_KEY_INVALID from a
+            # revoked key, which previously fell through to the silent CMA
+            # fallback and corrupted ~580 trials in
+            # gemini31pro_benchmark/centaur_gemini_3_1_pro_preview/seed_3,4 on
+            # 2026-05-08). Silent fallback would log CMA-only trials as if
+            # they were Centaur, indistinguishable in trials.jsonl.
+            from openai import APIConnectionError, APITimeoutError, APIStatusError
+            if isinstance(e, (APIConnectionError, APITimeoutError, APIStatusError, ConnectionError, TimeoutError)):
                 logger.error(
-                    "LLM server unreachable (%s) - failing hard instead of "
-                    "falling back to pure CMA (would pollute results).", e
+                    "LLM call failed hard (%s) — refusing to fall back to "
+                    "pure CMA (would silently pollute results).", e
                 )
                 raise
             logger.warning("LLM suggestion failed (%s), falling back to CMA-ES config", e)

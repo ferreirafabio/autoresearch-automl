@@ -130,7 +130,12 @@ class KarpathyAgentBackend(HPOBackend):
                 model=self._model,
                 messages=messages,
                 temperature=0.7,
-                max_tokens=16384,
+                # 8192 (was 32768): max_tokens=ctx_len made vLLM 0.17 reject
+                # every request ("max input length 0 chars"), which fell through
+                # the silent-fallback path and produced 99% duplicate trials in
+                # karpathy_agent_Qwen3_5_27B seed_{3,4} on 2026-05-09 (those
+                # dirs renamed to *.INVALID_silent_fallback_*).
+                max_tokens=8192,
             )
             elapsed = time.time() - t0
 
@@ -138,7 +143,14 @@ class KarpathyAgentBackend(HPOBackend):
             extra = getattr(msg, "model_extra", {}) or {}
             thinking = extra.get("reasoning") or getattr(msg, "reasoning_content", None) or ""
             text = (msg.content or "").strip()
-            if not text and thinking:
+            # Kimi K2.6 reasoning parser can put the full ```python block into
+            # reasoning_content while emitting only a short tail (or nothing)
+            # into content. If content has no python code block but reasoning
+            # does, promote reasoning to text so the regex parser finds it.
+            if thinking and "```python" not in text and "```python" in thinking:
+                text = thinking.strip()
+                thinking = ""
+            elif not text and thinking:
                 text = thinking.strip()
                 thinking = ""
 
@@ -171,13 +183,16 @@ class KarpathyAgentBackend(HPOBackend):
             return config, self._max_budget
 
         except Exception as e:
-            # Fail HARD on connection/timeout errors — silently reusing the
-            # current-best source as "LLM output" would pollute results.
-            from openai import APIConnectionError, APITimeoutError
-            if isinstance(e, (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError)):
+            # Fail HARD on any LLM transport/server failure (connect, timeout,
+            # or any 4xx/5xx HTTP response — including 400 from a revoked
+            # API key). Silent fallback to last-best source would pollute
+            # results with trials logged as Karpathy-Agent-LLM that are
+            # actually just the previous best, indistinguishable downstream.
+            from openai import APIConnectionError, APITimeoutError, APIStatusError
+            if isinstance(e, (APIConnectionError, APITimeoutError, APIStatusError, ConnectionError, TimeoutError)):
                 logger.error(
-                    "LLM server unreachable (%s) - failing hard instead of "
-                    "reusing last-best source (would pollute results).", e
+                    "LLM call failed hard (%s) — refusing to reuse last-best "
+                    "source (would silently pollute results).", e
                 )
                 raise
             logger.warning("Karpathy agent LLM call failed: %s. Using current best source.", e)

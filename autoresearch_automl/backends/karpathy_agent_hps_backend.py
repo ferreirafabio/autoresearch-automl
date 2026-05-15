@@ -142,15 +142,17 @@ class KarpathyAgentHPSBackend(HPOBackend):
             return config, self._max_budget
 
         except Exception as e:
-            # Fail HARD on connection/timeout errors — a silent random fallback
-            # would pollute results with misleading random trials logged as if
-            # the LLM had produced them. Only tolerate content-level errors
-            # (bad JSON, schema mismatch) via random fallback.
-            from openai import APIConnectionError, APITimeoutError
-            if isinstance(e, (APIConnectionError, APITimeoutError, ConnectionError, TimeoutError)):
+            # Fail HARD on any LLM transport/server failure (connect, timeout,
+            # or any 4xx/5xx HTTP response — including 400 from a revoked
+            # API key). Only tolerate content-level errors (bad JSON, schema
+            # mismatch) via random fallback. Silent random-fallback would
+            # pollute results with misleading random trials logged as if the
+            # LLM had produced them.
+            from openai import APIConnectionError, APITimeoutError, APIStatusError
+            if isinstance(e, (APIConnectionError, APITimeoutError, APIStatusError, ConnectionError, TimeoutError)):
                 logger.error(
-                    "LLM server unreachable (%s) - failing hard instead of "
-                    "falling back to random (would pollute results).", e
+                    "LLM call failed hard (%s) — refusing to fall back to "
+                    "random (would silently pollute results).", e
                 )
                 raise
             logger.warning("LLM suggestion failed (%s), falling back to random", e)
