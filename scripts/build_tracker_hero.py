@@ -76,6 +76,26 @@ def _seed_dirs(method_dir: Path) -> list[Path]:
                   key=lambda p: int(p.name.split("_")[-1]))
 
 
+def _seed_finals(method_dir: Path) -> dict[int, float]:
+    """{seed_num: final val_bpb} for seeds at >= COMPLETION_THRESHOLD budget.
+    Used by the per-method slopegraph (section B)."""
+    out: dict[int, float] = {}
+    if not method_dir.is_dir():
+        return out
+    for sdir in _seed_dirs(method_dir):
+        res = _seed_curve(sdir / "trials.jsonl")
+        if not res:
+            continue
+        curve, budget = res
+        if budget < COMPLETION_THRESHOLD:
+            continue
+        valid = curve[~np.isnan(curve)]
+        if valid.size == 0:
+            continue
+        out[int(sdir.name.split("_")[-1])] = float(valid.min())
+    return out
+
+
 def _seed_curve(jsonl: Path) -> tuple[np.ndarray, float] | None:
     """Return (interpolated incumbent across INTERP_HOURS, budget_frac) or
     None if no usable trials."""
@@ -300,33 +320,168 @@ def _plot_html(traces: list[dict]) -> str:
             f'<script>{init_js}</script>')
 
 
-def inject_into_html(snippet_html: str) -> None:
+def _slopegraph_panel(method_key: str, gens: list[dict]) -> tuple[str, list[str]] | None:
+    """Returns (div_html_snippet, info_lines) for one method panel, or None
+    if the method has no data anywhere yet."""
+    # seed_finals per gen
+    per_gen: list[tuple[dict, dict[int, float]]] = []
+    for g in gens:
+        sub = g.get(method_key)
+        if not sub:
+            continue
+        finals = _seed_finals(g["base"] / sub)
+        if finals:
+            per_gen.append((g, finals))
+    if len(per_gen) < 1:
+        return None
+
+    # Sort seeds for stable color cycling
+    all_seeds = sorted({s for _, d in per_gen for s in d})
+    x_labels = [g["tag"] for g, _ in per_gen]
+    color_cmap = _viridis(len(all_seeds))
+
+    traces = []
+    info = []
+    for i, s in enumerate(all_seeds):
+        ys = [d.get(s) for _, d in per_gen]
+        present = [(xl, y) for xl, y in zip(x_labels, ys) if y is not None]
+        if not present:
+            continue
+        traces.append({
+            "x": [p[0] for p in present],
+            "y": [p[1] for p in present],
+            "mode": "lines+markers",
+            "name": f"seed {s}",
+            "line": {"color": color_cmap[i], "width": 1.7},
+            "marker": {"size": 8, "color": color_cmap[i]},
+            "hovertemplate": f"<b>seed {s}</b><br>%{{x}}: %{{y:.4f}}<extra></extra>",
+            "type": "scatter",
+            "legendgroup": f"seed_{s}",
+        })
+    if not traces:
+        return None
+
+    # Mean line per generation (only over present seeds)
+    mean_y = []
+    for _, d in per_gen:
+        vals = list(d.values())
+        mean_y.append(sum(vals) / len(vals) if vals else None)
+    traces.insert(0, {
+        "x": x_labels, "y": mean_y,
+        "mode": "lines+markers", "name": "mean across seeds",
+        "line": {"color": METHOD_COLOR[method_key], "width": 3.5, "dash": "solid"},
+        "marker": {"size": 12, "symbol": "diamond", "color": METHOD_COLOR[method_key]},
+        "hovertemplate": "<b>mean</b><br>%{x}: %{y:.4f}<extra></extra>",
+        "type": "scatter",
+    })
+
+    div_id = "tracker-slope-" + method_key + "-" + uuid.uuid4().hex[:6]
+    title = METHOD_DISPLAY[method_key]
+    layout = {
+        "title": {"text": title, "font": {"size": 13}, "x": 0.5, "xanchor": "center"},
+        "height": 360, "margin": {"l": 55, "r": 20, "t": 40, "b": 40},
+        "xaxis": {"title": "", "showgrid": False},
+        "yaxis": {"title": "Final val_bpb", "showgrid": True, "gridcolor": "#eee"},
+        "legend": {"font": {"size": 9}, "bgcolor": "rgba(255,255,255,0.7)"},
+        "showlegend": True,
+    }
+    config = {"responsive": True, "displayModeBar": False}
+    snippet = (f'<div id="{div_id}" class="plotly-graph-div" '
+               f'style="height:360px;width:100%;"></div>\n'
+               f'<script>Plotly.newPlot("{div_id}", '
+               f'{json.dumps(traces, separators=(",", ":"))}, '
+               f'{json.dumps(layout, separators=(",", ":"))}, '
+               f'{json.dumps(config, separators=(",", ":"))});</script>')
+    info.append(f"  slopegraph {method_key}: {len(traces)-1} seeds across {len(per_gen)} generations")
+    return snippet, info
+
+
+def _viridis(n: int) -> list[str]:
+    """N hex colors along a viridis-like ramp. Stable for small N."""
+    if n <= 1:
+        return ["#440154"]
+    stops = [(0.0,  0x44, 0x01, 0x54),
+             (0.25, 0x3B, 0x52, 0x8B),
+             (0.5,  0x21, 0x91, 0x8C),
+             (0.75, 0x5E, 0xC9, 0x62),
+             (1.0,  0xFD, 0xE7, 0x25)]
+    out = []
+    for i in range(n):
+        t = i / (n - 1)
+        for j in range(len(stops) - 1):
+            t0, r0, g0, b0 = stops[j]
+            t1, r1, g1, b1 = stops[j + 1]
+            if t0 <= t <= t1:
+                a = (t - t0) / (t1 - t0) if t1 > t0 else 0
+                r = int(r0 + (r1 - r0) * a)
+                g = int(g0 + (g1 - g0) * a)
+                b = int(b0 + (b1 - b0) * a)
+                out.append(f"#{r:02X}{g:02X}{b:02X}")
+                break
+    return out
+
+
+def build_slopegraph_html() -> tuple[str, list[str]]:
+    """3-panel grid: one per method. Each is its own Plotly div."""
+    info: list[str] = []
+    panels: list[str] = []
+    for method_key in ("centaur", "ka_code", "ka_hps"):
+        res = _slopegraph_panel(method_key, GENERATIONS)
+        if res is None:
+            info.append(f"  slopegraph {method_key}: no data yet, skipping panel")
+            continue
+        snippet, panel_info = res
+        info.extend(panel_info)
+        panels.append(f'<div class="slope-panel">{snippet}</div>')
+
+    if not panels:
+        return "<p>(no slopegraph data yet)</p>", info
+
+    html = ('<div class="slope-grid">\n' + "\n".join(panels) + "\n</div>")
+    return html, info
+
+
+_PLACEHOLDERS = {
+    "hero":  ("tracker-hero-container",  "tracker-slope"),
+    "slope": ("tracker-slope-container", "tracker-forest"),
+}
+
+
+def inject_into_html(snippet_html: str, marker: str) -> None:
+    """Replace the inner content of one placeholder plot-container in
+    docs/index.html, leaving its wrapping div intact."""
+    container_id, next_anchor = _PLACEHOLDERS[marker]
     html = HTML_PATH.read_text()
-    # Replace the placeholder inside #tracker-hero-container
     pattern = re.compile(
-        r'(<div class="plot-container" id="tracker-hero-container">)'
+        rf'(<div class="plot-container" id="{container_id}">)'
         r'.*?'
-        r'(</div>\s*<h3 id="tracker-slope")',
+        rf'(</div>\s*<h3 id="{next_anchor}")',
         flags=re.DOTALL,
     )
     new = pattern.sub(rf"\1\n{snippet_html}\n\2", html, count=1)
     if new == html:
-        raise RuntimeError("hero-container placeholder not found; index.html "
-                           "may have changed shape")
+        raise RuntimeError(f"{marker}-container placeholder not found; "
+                           "index.html may have changed shape")
     HTML_PATH.write_text(new)
 
 
 def main() -> None:
     traces, info = build_traces()
     if not traces:
-        print("No traces built (no completed seeds anywhere). Bailing.")
+        print("No traces built for hero (no completed seeds). Bailing.")
         return
-    print(f"Built {len(traces)} traces ({len(traces)//3} method-generation curves).")
+    print(f"Hero: built {len(traces)} traces ({len(traces)//3} method-generation curves).")
     for line in info:
         print(line)
-    snippet = _plot_html(traces)
-    inject_into_html(snippet)
-    print(f"\nInjected hero plot into {HTML_PATH}")
+    inject_into_html(_plot_html(traces), "hero")
+    print(f"  Injected hero plot.")
+
+    slope_html, slope_info = build_slopegraph_html()
+    print(f"\nSlopegraph (section B):")
+    for line in slope_info:
+        print(line)
+    inject_into_html(slope_html, "slope")
+    print(f"  Injected slopegraph panels.")
 
 
 if __name__ == "__main__":
