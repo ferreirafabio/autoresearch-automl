@@ -171,25 +171,38 @@
   @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Top-level tabs: 'Paper figures' / 'Live tracker' */
-  .tab-strip {
-    display: flex; gap: 0.5em; justify-content: center;
-    margin: 1.2em 0 1.5em; padding-bottom: 0.5em;
-    border-bottom: 1px solid #e5e5e5;
+  /* Top-level card tabs: 'Interactive Demo' / 'Live Benchmark' */
+  .tab-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1em;
+    max-width: 900px; margin: 1.5em auto 2em;
   }
-  .tab-strip button {
-    background: white; border: 1px solid #ddd; cursor: pointer;
-    border-radius: 8px 8px 0 0; padding: 0.6em 1.4em;
-    font-size: 0.95em; color: #444; border-bottom: none;
+  .tab-cards button {
+    text-align: left; background: white; cursor: pointer;
+    border: 1px solid #ddd; border-radius: 12px; padding: 1.1em 1.4em;
+    font-family: inherit; color: #333;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s, color 0.15s;
   }
-  .tab-strip button:hover { color: #E91E63; border-color: #E91E63; }
-  .tab-strip button.active {
-    background: #E91E63; color: white; border-color: #E91E63;
+  .tab-cards button:hover {
+    border-color: #E91E63; transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .tab-cards button.active {
+    background: #E91E63; border-color: #E91E63; color: white;
+    box-shadow: 0 4px 14px rgba(233,30,99,0.25);
+  }
+  .tab-cards .tc-title {
+    display: block; font-weight: 600; font-size: 1.08em; margin-bottom: 0.35em;
+  }
+  .tab-cards .tc-sub {
+    display: block; font-size: 0.88em; opacity: 0.88; line-height: 1.4;
   }
   .tab-panel[hidden] { display: none; }
   .tab-subtitle {
     text-align: center; color: #666; max-width: 800px;
     margin: 0 auto 1.5em; font-size: 0.95em;
+  }
+  @media (max-width: 700px) {
+    .tab-cards { grid-template-columns: 1fr; }
   }
 
   /* Mobile responsive */
@@ -324,11 +337,17 @@
   All in all, our results suggest that <strong>LLMs are most effective as a complement to classical optimizers, not as a replacement</strong>.
 </div>
 
-<div class="tab-strip" style="margin-top:2em">
-  <button data-tab="paper" class="active">Interactive Demo</button>
-  <button data-tab="tracker">Live Benchmark</button>
+<div class="tab-cards" style="margin-top:2em">
+  <button data-tab="paper" class="active">
+    <span class="tc-title">Interactive Demo</span>
+    <span class="tc-sub">Paper figures: 9 methods, 3-5 seeds, original study</span>
+  </button>
+  <button data-tab="tracker">
+    <span class="tc-title">Live Benchmark</span>
+    <span class="tc-sub">Is the latest Claude frontier LLM beating classical HPO yet?</span>
+  </button>
 </div>
-<p style="text-align:center;color:#666;margin-bottom:1.5em;max-width:800px;margin-left:auto;margin-right:auto">Explore the data interactively. Click legends to toggle methods, drag sliders, hover for details.</p>
+<p style="text-align:center;color:#666;margin-bottom:1.5em;max-width:800px;margin-left:auto;margin-right:auto;font-size:0.92em">Click legends to toggle methods, drag sliders, hover for details.</p>
 
 <div class="tab-panel" data-tab="paper">
 
@@ -1489,7 +1508,7 @@ window.addEventListener('resize', () => { clearTimeout(window._r); window._r = s
 // Top-level tabs: Paper figures / Live tracker
 // =================================================================
 function initTopTabs() {
-  const buttons = document.querySelectorAll('.tab-strip button');
+  const buttons = document.querySelectorAll('.tab-cards button');
   const panels  = document.querySelectorAll('.tab-panel');
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
