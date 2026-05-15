@@ -516,10 +516,9 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
                 pass
 
     eyebrow = "Current leader" if winner["method_key"] != "tpe" else "TPE still on top"
-    note = (f"Best across {len(candidates)} method × generation combinations with "
-            f"&ge;{min_seeds} completed seeds. Banner refreshes on every "
-            f"<code>make tracker</code> run.")
-    html = (
+    note = (f"Best across {len(candidates)} method &times; generation combinations with "
+            f"&ge;{min_seeds} completed seeds.")
+    banner = (
         f'<div class="tracker-leader">\n'
         f'  <div class="leader-eyebrow">{eyebrow}</div>\n'
         f'  <div class="leader-title" style="border-left-color:{winner["color"]}">'
@@ -536,7 +535,58 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         f'  <div class="leader-note">{note}</div>\n'
         f'</div>'
     )
-    return html, info
+
+    # Compact ranked overview table below the banner.
+    table_rows = []
+    for i, c in enumerate(candidates):
+        is_winner = (i == 0)
+        # paired-Wilcoxon vs TPE for the table cell (skip if it IS TPE)
+        p_str = "&mdash;"
+        if c["method_key"] != "tpe":
+            common = sorted(set(c["finals"]) & set(tpe_finals))
+            if len(common) >= 2:
+                a = np.array([c["finals"][s] for s in common])
+                b = np.array([tpe_finals[s] for s in common])
+                try:
+                    _, p_one = stats.wilcoxon(a, b, zero_method="wilcox", alternative="less")
+                    p_one = float(p_one)
+                    star = ""
+                    cls = ""
+                    if p_one < 0.05: star, cls = " **", "p-sig"
+                    elif p_one < 0.10: star, cls = " *", "p-marginal"
+                    p_str = f'<span class="{cls}">n={len(common)}, p={p_one:.3f}{star}</span>'
+                except Exception:
+                    p_str = f"n={len(common)}, (n.a.)"
+            else:
+                p_str = f"n={len(common)}, (too few)"
+        row_class = ' class="overview-winner"' if is_winner else ''
+        marker = " &#9733;" if is_winner else ""
+        table_rows.append(
+            f'<tr{row_class}>'
+            f'<td><span class="dot" style="background:{c["color"]}"></span>{c["label"]}{marker}</td>'
+            f'<td>{c["n"]}</td>'
+            f'<td><strong>{c["mean"]:.4f}</strong> &plusmn; {c["std"]:.4f}</td>'
+            f'<td>{p_str}</td>'
+            f'</tr>'
+        )
+
+    overview = (
+        '<div class="tracker-overview">\n'
+        '  <table class="overview-table">\n'
+        '    <thead><tr><th>Method &times; generation</th><th>Seeds</th>'
+        '<th>Mean &plusmn; std</th><th>One-sided p vs TPE</th></tr></thead>\n'
+        f'    <tbody>{"".join(table_rows)}</tbody>\n'
+        '  </table>\n'
+        '</div>'
+    )
+
+    combined = (
+        '<div class="tracker-headline">\n'
+        f'{banner}\n'
+        f'{overview}\n'
+        '</div>'
+    )
+    return combined, info
 
 
 def build_cards_html() -> tuple[str, list[str]]:
