@@ -249,13 +249,38 @@ def _present_generations(traces: list[dict]) -> list[dict]:
     return [g for g in GENERATIONS if g["tag_id"] in seen]
 
 
+_DASH_TO_SVG = {
+    "solid":       "",
+    "dot":         ' stroke-dasharray="1 4"',
+    "dash":        ' stroke-dasharray="5 3"',
+    "dashdot":     ' stroke-dasharray="6 2 1 2"',
+    "longdash":    ' stroke-dasharray="10 3"',
+    "longdashdot": ' stroke-dasharray="10 3 1 3"',
+}
+
+
+def _ls_svg(dash: str) -> str:
+    """Small dashed-line icon matching the linestyle used in the hero plot
+    for that Claude generation (mirrors the Fig 1 filter-button style)."""
+    da = _DASH_TO_SVG.get(dash, "")
+    return (f'<svg class="ls-svg" width="28" height="10" aria-hidden="true">'
+            f'<line x1="1" y1="5" x2="27" y2="5" stroke="currentColor" '
+            f'stroke-width="2"{da}/></svg>')
+
+
 def _filter_buttons(present_gens: list[dict]) -> str:
     """Buttons hook into the shared initGroupFilters / applyGroupFilter
-    machinery via data-target='tracker-hero' so behaviour matches Figs 1-3."""
-    btns = ['<button data-group="all" class="active">All</button>',
-            '<button data-group="classical">Classical (TPE)</button>']
-    for g in present_gens:
-        btns.append(f'<button data-group="{g["tag_id"]}">{g["tag"]}</button>')
+    machinery via data-target='tracker-hero' so behaviour matches Figs 1-3.
+    Each button carries a tiny SVG line icon whose dash pattern matches the
+    plot trace's line.dash for that generation (TPE = dotted, Opus 4.6 =
+    solid, Opus 4.7 = dashed, future = dashdot etc.)."""
+    btns = [
+        '<button data-group="all" class="active">All</button>',
+        f'<button data-group="classical">Classical (TPE) {_ls_svg("dot")}</button>',
+    ]
+    for gen_idx, g in enumerate(present_gens):
+        dash = DASH_BY_GEN_INDEX[gen_idx % len(DASH_BY_GEN_INDEX)]
+        btns.append(f'<button data-group="{g["tag_id"]}">{g["tag"]} {_ls_svg(dash)}</button>')
     return ('<div class="group-filter" data-target="tracker-hero">\n'
             '  <span class="gf-label">Show:</span>\n  '
             + "\n  ".join(btns) + "\n</div>")
