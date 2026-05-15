@@ -324,13 +324,11 @@
   All in all, our results suggest that <strong>LLMs are most effective as a complement to classical optimizers, not as a replacement</strong>.
 </div>
 
-<h2 style="text-align:center;margin-top:2em;margin-bottom:0.5em;padding-top:0;border-top:none">Interactive Demo</h2>
-<p style="text-align:center;color:#666;margin-bottom:1.5em;max-width:800px;margin-left:auto;margin-right:auto">Explore the data interactively. Click legends to toggle methods, drag sliders, hover for details.</p>
-
-<div class="tab-strip">
-  <button data-tab="paper" class="active">Paper figures</button>
-  <button data-tab="tracker">Live tracker</button>
+<div class="tab-strip" style="margin-top:2em">
+  <button data-tab="paper" class="active">Interactive Demo</button>
+  <button data-tab="tracker">Live Benchmark</button>
 </div>
+<p style="text-align:center;color:#666;margin-bottom:1.5em;max-width:800px;margin-left:auto;margin-right:auto">Explore the data interactively. Click legends to toggle methods, drag sliders, hover for details.</p>
 
 <div class="tab-panel" data-tab="paper">
 
@@ -515,7 +513,7 @@
 
 <div class="tab-panel" data-tab="tracker" hidden>
 
-<h2 style="margin-top:0;padding-top:0;border-top:none">Live tracker: is the latest Claude frontier LLM beating classical HPO yet?</h2>
+<h2 style="margin-top:0;padding-top:0;border-top:none">Live Benchmark: is the latest Claude frontier LLM beating classical HPO yet?</h2>
 <p class="tab-subtitle">
   Each new Claude release runs at 5 seeds on Climbmix-400B with a 24h training budget. We compare against TPE (the best classical baseline). Results refresh automatically as new jobs complete.
 </p>
