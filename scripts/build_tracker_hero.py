@@ -555,9 +555,18 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
     )
 
     # Compact ranked overview table below the banner.
+    def _short(label: str) -> str:
+        return (label
+                .replace("Karpathy Agent (Code)", "KA Code")
+                .replace("Karpathy Agent (14 HPs)", "KA HPs")
+                .replace(" [", " · ")
+                .replace("]", "")
+                .replace("(classical baseline)", "(classical)"))
+
     table_rows = []
     for i, c in enumerate(candidates):
         is_winner = (i == 0)
+        short_label = _short(c["label"])
         # paired-Wilcoxon vs TPE for the table cell (skip if it IS TPE)
         p_str = "&mdash;"
         if c["method_key"] != "tpe":
@@ -581,7 +590,7 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         marker = " &#9733;" if is_winner else ""
         table_rows.append(
             f'<tr{row_class}>'
-            f'<td><span class="dot" style="background:{c["color"]}"></span>{c["label"]}{marker}</td>'
+            f'<td><span class="dot" style="background:{c["color"]}"></span>{short_label}{marker}</td>'
             f'<td>{c["n"]}</td>'
             f'<td><strong>{c["mean"]:.4f}</strong> &plusmn; {c["std"]:.4f}</td>'
             f'<td>{p_str}</td>'
