@@ -284,12 +284,20 @@
   }
   .tracker-card .card-title { font-weight: 600; font-size: 1.05em; }
   .tracker-card .card-updated { font-size: 0.82em; color: #888; }
+  .tracker-card { overflow-x: auto; }
   .tracker-card table.card-table {
-    width: 100%; border-collapse: collapse; font-size: 0.88em;
+    width: 100%; border-collapse: collapse; font-size: 0.82em;
+    min-width: 360px;
   }
   .tracker-card .card-table th, .tracker-card .card-table td {
     text-align: left; padding: 0.35em 0.4em;
   }
+  /* Keep method name on one line; the right-hand numeric columns get
+     fixed widths so the Method column gets the rest. */
+  .tracker-card .card-table th:first-child,
+  .tracker-card .card-table td:first-child { white-space: nowrap; width: 100%; }
+  .tracker-card .card-table th:not(:first-child),
+  .tracker-card .card-table td:not(:first-child) { white-space: nowrap; }
   .tracker-card .card-table thead th {
     font-weight: 600; color: #555; border-bottom: 1px solid #eee;
   }
