@@ -573,7 +573,7 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
     overview = (
         '<div class="tracker-overview">\n'
         '  <table class="overview-table">\n'
-        '    <thead><tr><th>Method &times; generation</th><th>Seeds</th>'
+        '    <thead><tr><th>Method</th><th>Seeds</th>'
         '<th>Mean &plusmn; std</th><th>One-sided p vs TPE</th></tr></thead>\n'
         f'    <tbody>{"".join(table_rows)}</tbody>\n'
         '  </table>\n'
