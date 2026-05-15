@@ -265,7 +265,7 @@ def _plot_html(traces: list[dict]) -> str:
     """Self-contained Plotly snippet (filter buttons + plot div + Plotly init).
     Filter click-handling lives in index.html's initGroupFilters() so we get
     the proven Fig 1/2/3 behaviour for free."""
-    div_id = "tracker-hero"  # stable id so classifyTraceTags can dispatch
+    div_id = "tracker-hero-plot"  # distinct from the h3 anchor id "tracker-hero"
     layout = {
         "height": 700, "margin": {"l": 60, "r": 30, "t": 40, "b": 60},
         "xaxis": {"title": "Cumulative training time (hours)", "range": [0, 24]},
