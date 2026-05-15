@@ -28,32 +28,43 @@ HTML_PATH = REPO / "docs" / "index.html"
 RESULTS = Path("/work/dlclarge1/ferreira-autoresearch-automl/results")
 EXP2_BENCH = RESULTS / "exp2_benchmark"
 
-# Claude generations discoverable today. Listed oldest -> newest so the
-# default-visible cut (last 2) is automatic when new generations are added.
-GENERATIONS: list[dict] = [
-    {
-        "tag": "Opus 4.6",
-        "base": RESULTS / "opus46_benchmark",
-        "centaur":  "centaur_claude_opus_4_6",
-        "ka_code":  "karpathy_agent_claude_opus_4_6",
-        "ka_hps":   None,  # not run for 4.6
-        "colors":   {"centaur": "#C62828", "ka_code": "#1565C0", "ka_hps": "#6A1B9A"},
-    },
-    {
-        "tag": "Opus 4.7",
-        "base": RESULTS / "opus47_benchmark",
-        "centaur":  "centaur_claude_opus_4_7",
-        "ka_code":  "karpathy_agent_claude_opus_4_7",
-        "ka_hps":   "karpathy_agent_hps_claude_opus_4_7",
-        "colors":   {"centaur": "#E91E63", "ka_code": "#1976D2", "ka_hps": "#8E24AA"},
-    },
-]
-
+# Method-family colors match the canonical palette from plot_convergence.py
+# / Fig 1, so a trace looks identical across the two tabs.
+METHOD_COLOR = {
+    "centaur": "#C62828",  # red, matches Centaur [Opus 4.6] in Fig 1
+    "ka_code": "#1565C0",  # deep blue, matches KA Code [Opus 4.6] in Fig 1
+    "ka_hps":  "#FFC107",  # amber, matches KA HPs in Fig 1
+}
 METHOD_DISPLAY = {
     "centaur": "Centaur",
     "ka_code": "Karpathy Agent (Code)",
     "ka_hps":  "Karpathy Agent (14 HPs)",
 }
+# Dash style per Claude generation index (oldest = 0). Cycles back to dot if
+# more than five generations land.
+DASH_BY_GEN_INDEX = ["solid", "dash", "dashdot", "longdash", "longdashdot", "dot"]
+
+
+# Claude generations discoverable today. Listed oldest -> newest so the
+# default-visible cut (last 2) is automatic when new generations are added.
+GENERATIONS: list[dict] = [
+    {
+        "tag":     "Opus 4.6",
+        "tag_id":  "opus_4_6",
+        "base":    RESULTS / "opus46_benchmark",
+        "centaur": "centaur_claude_opus_4_6",
+        "ka_code": "karpathy_agent_claude_opus_4_6",
+        "ka_hps":  None,  # not run for 4.6
+    },
+    {
+        "tag":     "Opus 4.7",
+        "tag_id":  "opus_4_7",
+        "base":    RESULTS / "opus47_benchmark",
+        "centaur": "centaur_claude_opus_4_7",
+        "ka_code": "karpathy_agent_claude_opus_4_7",
+        "ka_hps":  "karpathy_agent_hps_claude_opus_4_7",
+    },
+]
 
 INTERP_HOURS = np.linspace(0, 24, 1000)
 CAP_BUDGET_S = 86400.0
@@ -137,8 +148,10 @@ def _safe(arr) -> list:
 
 
 def _traces_for(legend: str, color: str, agg: dict, visible: bool,
-                dash: str = "solid") -> list[dict]:
-    """Three traces (lower band, upper band, mean line) for one method+version."""
+                dash: str = "solid", model_tag: str = "") -> list[dict]:
+    """Three traces (lower band, upper band, mean line) for one method+version.
+    The mean-line trace carries a `meta.model` field that the filter buttons
+    read to decide visibility."""
     x = _safe(agg["x"])
     mean_arr = np.array(agg["mean"], dtype=float)
     std_arr = np.array(agg["std"], dtype=float)
@@ -151,37 +164,42 @@ def _traces_for(legend: str, color: str, agg: dict, visible: bool,
     return [
         {"hoverinfo": "skip", "legendgroup": legend, "showlegend": False,
          "mode": "lines", "line": {"width": 0, "color": color},
-         "x": x, "y": lower, "type": "scatter", "visible": vis},
+         "x": x, "y": lower, "type": "scatter", "visible": vis,
+         "meta": {"model": model_tag}},
         {"hoverinfo": "skip", "legendgroup": legend, "showlegend": False,
          "fill": "tonexty", "fillcolor": fill_rgba,
          "mode": "lines", "line": {"width": 0, "color": color},
-         "x": x, "y": upper, "type": "scatter", "visible": vis},
+         "x": x, "y": upper, "type": "scatter", "visible": vis,
+         "meta": {"model": model_tag}},
         {"legendgroup": legend, "name": label,
          "mode": "lines", "line": {"color": color, "dash": dash, "width": 2.5},
          "hovertemplate": "<b>" + legend + "</b><br>hour: %{x:.2f}<br>val_bpb: %{y:.4f}<extra></extra>",
-         "x": x, "y": mean, "type": "scatter", "visible": vis},
+         "x": x, "y": mean, "type": "scatter", "visible": vis,
+         "meta": {"model": model_tag}},
     ]
 
 
 def build_traces() -> tuple[list[dict], list[str]]:
-    """Returns (traces, info_lines).  Default-visible state: TPE + the two
-    most-recent generations across all method families."""
-    traces: list[dict] = []
+    """Returns (traces_in_best_first_order, info_lines).  Default-visible state:
+    every trace (filter buttons let user narrow to a single model). Color per
+    method family matches Fig 1; dash per Claude generation lets you tell
+    generations apart at a glance."""
     info: list[str] = []
+    # Collect (best, trace_group, label) tuples, then sort by best ascending.
+    groups: list[tuple[float, list[dict], str]] = []
 
-    # TPE always visible
     tpe = _aggregate(EXP2_BENCH / "optuna")
     if tpe is None:
         info.append("WARNING: TPE has no completed seeds; skipping reference.")
     else:
-        traces.extend(_traces_for("TPE (classical ref)", "#2196F3", tpe,
-                                  visible=True, dash="dot"))
+        legend = "TPE (classical ref)"
+        triplet = _traces_for(legend, "#2196F3", tpe, visible=True,
+                              dash="dot", model_tag="classical")
+        groups.append((tpe["final"], triplet, legend))
         info.append(f"TPE (optuna): n={tpe['n_seeds']} seeds, best mean={tpe['final']:.4f}")
 
-    # Last 2 generations visible-by-default; older ones legendonly.
-    visible_cutoff = max(0, len(GENERATIONS) - 2)
-    for idx, gen in enumerate(GENERATIONS):
-        is_visible = idx >= visible_cutoff
+    for gen_idx, gen in enumerate(GENERATIONS):
+        dash = DASH_BY_GEN_INDEX[gen_idx % len(DASH_BY_GEN_INDEX)]
         for method_key in ("centaur", "ka_code", "ka_hps"):
             sub = gen.get(method_key)
             if not sub:
@@ -191,16 +209,38 @@ def build_traces() -> tuple[list[dict], list[str]]:
                 info.append(f"  {METHOD_DISPLAY[method_key]} [{gen['tag']}]: no completed seeds")
                 continue
             legend = f"{METHOD_DISPLAY[method_key]} [{gen['tag']}]"
-            color = gen["colors"][method_key]
-            # Different dash per method family for at-a-glance shape recognition
-            dash = {"centaur": "solid", "ka_code": "dash", "ka_hps": "dashdot"}[method_key]
-            traces.extend(_traces_for(legend, color, agg, visible=is_visible, dash=dash))
-            info.append(f"  {legend}: n={agg['n_seeds']} seeds {agg['seeds']}, best mean={agg['final']:.4f}, visible={is_visible}")
+            color = METHOD_COLOR[method_key]
+            triplet = _traces_for(legend, color, agg, visible=True,
+                                  dash=dash, model_tag=gen["tag_id"])
+            groups.append((agg["final"], triplet, legend))
+            info.append(f"  {legend}: n={agg['n_seeds']} seeds {agg['seeds']}, "
+                        f"best mean={agg['final']:.4f}, color={color}, dash={dash}")
+
+    groups.sort(key=lambda g: g[0])  # best (lowest val_bpb) first in legend
+    traces: list[dict] = []
+    for _, triplet, _ in groups:
+        traces.extend(triplet)
     return traces, info
 
 
+def _present_generations(traces: list[dict]) -> list[dict]:
+    """Generations that ended up with at least one trace in the figure."""
+    seen = {t.get("meta", {}).get("model") for t in traces}
+    return [g for g in GENERATIONS if g["tag_id"] in seen]
+
+
+def _filter_buttons(present_gens: list[dict]) -> str:
+    btns = ['<button data-model="all" class="active">All</button>',
+            '<button data-model="classical">Classical (TPE)</button>']
+    for g in present_gens:
+        btns.append(f'<button data-model="{g["tag_id"]}">{g["tag"]}</button>')
+    return ("<div class=\"group-filter tracker-hero-filter\">\n"
+            "  <span class=\"gf-label\">Show:</span>\n  "
+            + "\n  ".join(btns) + "\n</div>")
+
+
 def _plot_html(traces: list[dict]) -> str:
-    """Self-contained Plotly snippet for injection into index.html."""
+    """Self-contained Plotly snippet (filter buttons + plot div + init JS)."""
     div_id = "tracker-hero-plot-" + uuid.uuid4().hex[:8]
     layout = {
         "height": 700, "margin": {"l": 60, "r": 30, "t": 40, "b": 60},
@@ -212,12 +252,52 @@ def _plot_html(traces: list[dict]) -> str:
         "hovermode": "x unified",
     }
     config = {"responsive": True, "displayModeBar": False}
-    return (f'<div id="{div_id}" class="plotly-graph-div" '
+    filter_html = _filter_buttons(_present_generations(traces))
+    init_js = (
+        f"(function(){{\n"
+        f"  const plotEl = document.getElementById('{div_id}');\n"
+        f"  Plotly.newPlot('{div_id}', "
+        f"{json.dumps(traces, separators=(',', ':'))}, "
+        f"{json.dumps(layout, separators=(',', ':'))}, "
+        f"{json.dumps(config, separators=(',', ':'))});\n"
+        "  const root = plotEl.closest('.plot-container') || document;\n"
+        "  const allBtns = root.querySelectorAll('.tracker-hero-filter button');\n"
+        "  const allBtn = root.querySelector('.tracker-hero-filter button[data-model=\"all\"]');\n"
+        "  const specBtns = Array.from(allBtns).filter(b => b.dataset.model !== 'all');\n"
+        "  function applyVisibility(activeSet){\n"
+        "    const data = plotEl.data || [];\n"
+        "    const vis = data.map(t => activeSet === 'all' || activeSet.has((t.meta||{}).model) ? true : 'legendonly');\n"
+        "    Plotly.restyle(plotEl, {visible: vis});\n"
+        "  }\n"
+        "  allBtns.forEach(btn => btn.addEventListener('click', () => {\n"
+        "    const m = btn.dataset.model;\n"
+        "    if (m === 'all'){\n"
+        "      allBtns.forEach(b => b.classList.add('active'));\n"
+        "      applyVisibility('all');\n"
+        "      return;\n"
+        "    }\n"
+        "    if (allBtn.classList.contains('active')){\n"
+        "      allBtn.classList.remove('active');\n"
+        "      specBtns.forEach(b => b.classList.toggle('active', b === btn));\n"
+        "    } else {\n"
+        "      btn.classList.toggle('active');\n"
+        "    }\n"
+        "    const active = new Set();\n"
+        "    specBtns.forEach(b => { if (b.classList.contains('active')) active.add(b.dataset.model); });\n"
+        "    if (active.size === 0 || active.size === specBtns.length){\n"
+        "      allBtns.forEach(b => b.classList.add('active'));\n"
+        "      applyVisibility('all');\n"
+        "    } else {\n"
+        "      allBtn.classList.remove('active');\n"
+        "      applyVisibility(active);\n"
+        "    }\n"
+        "  }));\n"
+        "})();"
+    )
+    return (f'{filter_html}\n'
+            f'<div id="{div_id}" class="plotly-graph-div" '
             f'style="height:700px;width:100%;"></div>\n'
-            f'<script>Plotly.newPlot("{div_id}", '
-            f'{json.dumps(traces, separators=(",", ":"))}, '
-            f'{json.dumps(layout, separators=(",", ":"))}, '
-            f'{json.dumps(config, separators=(",", ":"))});</script>')
+            f'<script>{init_js}</script>')
 
 
 def inject_into_html(snippet_html: str) -> None:
