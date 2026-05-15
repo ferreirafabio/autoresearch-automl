@@ -79,7 +79,7 @@ VLLM_PID=$!
 
 # Wait for vLLM to be ready
 echo "Waiting for vLLM server to start..."
-for i in $(seq 1 600); do
+for i in $(seq 1 1800); do
     STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
     if [ "$STATUS" = "200" ]; then
         echo "vLLM server ready after ${i}s"
@@ -94,7 +94,7 @@ done
 
 STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
 if [ "$STATUS" != "200" ]; then
-    echo "vLLM server failed to start within 600s (status: $STATUS)"
+    echo "vLLM server failed to start within 1800s (status: $STATUS)"
     kill $VLLM_PID 2>/dev/null
     exit 1
 fi

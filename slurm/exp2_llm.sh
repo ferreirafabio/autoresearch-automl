@@ -3,7 +3,7 @@
 #SBATCH --partition=alldlc2_gpu-h200
 #SBATCH --gpus=1
 #SBATCH --time=24:00:00
-#SBATCH --output=/home/zelaa/autoresearch-automl-private/logs/exp2_%x_%j.log
+#SBATCH --output=/work/dlclarge1/ferreira-autoresearch-automl/logs/exp2_%x_%j.log
 #SBATCH --requeue
 
 set -euo pipefail
@@ -117,7 +117,7 @@ if [ "$USE_GEMINI_API" = "false" ]; then
 
     # Wait for vLLM to be ready
     echo "Waiting for vLLM server to start..."
-    for i in $(seq 1 600); do
+    for i in $(seq 1 1800); do
         STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
         if [ "$STATUS" = "200" ]; then
             echo "vLLM server ready after ${i}s"
@@ -132,7 +132,7 @@ if [ "$USE_GEMINI_API" = "false" ]; then
 
     STATUS=$(curl --noproxy '*' -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${VLLM_PORT}/health" 2>/dev/null || echo "000")
     if [ "$STATUS" != "200" ]; then
-        echo "vLLM server failed to start within 600s (status: $STATUS)"
+        echo "vLLM server failed to start within 1800s (status: $STATUS)"
         kill $VLLM_PID 2>/dev/null
         exit 1
     fi
