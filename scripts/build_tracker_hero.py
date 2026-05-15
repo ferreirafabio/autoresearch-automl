@@ -250,18 +250,22 @@ def _present_generations(traces: list[dict]) -> list[dict]:
 
 
 def _filter_buttons(present_gens: list[dict]) -> str:
-    btns = ['<button data-model="all" class="active">All</button>',
-            '<button data-model="classical">Classical (TPE)</button>']
+    """Buttons hook into the shared initGroupFilters / applyGroupFilter
+    machinery via data-target='tracker-hero' so behaviour matches Figs 1-3."""
+    btns = ['<button data-group="all" class="active">All</button>',
+            '<button data-group="classical">Classical (TPE)</button>']
     for g in present_gens:
-        btns.append(f'<button data-model="{g["tag_id"]}">{g["tag"]}</button>')
-    return ("<div class=\"group-filter tracker-hero-filter\">\n"
-            "  <span class=\"gf-label\">Show:</span>\n  "
+        btns.append(f'<button data-group="{g["tag_id"]}">{g["tag"]}</button>')
+    return ('<div class="group-filter" data-target="tracker-hero">\n'
+            '  <span class="gf-label">Show:</span>\n  '
             + "\n  ".join(btns) + "\n</div>")
 
 
 def _plot_html(traces: list[dict]) -> str:
-    """Self-contained Plotly snippet (filter buttons + plot div + init JS)."""
-    div_id = "tracker-hero-plot-" + uuid.uuid4().hex[:8]
+    """Self-contained Plotly snippet (filter buttons + plot div + Plotly init).
+    Filter click-handling lives in index.html's initGroupFilters() so we get
+    the proven Fig 1/2/3 behaviour for free."""
+    div_id = "tracker-hero"  # stable id so classifyTraceTags can dispatch
     layout = {
         "height": 700, "margin": {"l": 60, "r": 30, "t": 40, "b": 60},
         "xaxis": {"title": "Cumulative training time (hours)", "range": [0, 24]},
@@ -273,51 +277,13 @@ def _plot_html(traces: list[dict]) -> str:
     }
     config = {"responsive": True, "displayModeBar": False}
     filter_html = _filter_buttons(_present_generations(traces))
-    init_js = (
-        f"(function(){{\n"
-        f"  const plotEl = document.getElementById('{div_id}');\n"
-        f"  Plotly.newPlot('{div_id}', "
-        f"{json.dumps(traces, separators=(',', ':'))}, "
-        f"{json.dumps(layout, separators=(',', ':'))}, "
-        f"{json.dumps(config, separators=(',', ':'))});\n"
-        "  const root = plotEl.closest('.plot-container') || document;\n"
-        "  const allBtns = root.querySelectorAll('.tracker-hero-filter button');\n"
-        "  const allBtn = root.querySelector('.tracker-hero-filter button[data-model=\"all\"]');\n"
-        "  const specBtns = Array.from(allBtns).filter(b => b.dataset.model !== 'all');\n"
-        "  function applyVisibility(activeSet){\n"
-        "    const data = plotEl.data || [];\n"
-        "    const vis = data.map(t => activeSet === 'all' || activeSet.has((t.meta||{}).model) ? true : 'legendonly');\n"
-        "    Plotly.restyle(plotEl, {visible: vis});\n"
-        "  }\n"
-        "  allBtns.forEach(btn => btn.addEventListener('click', () => {\n"
-        "    const m = btn.dataset.model;\n"
-        "    if (m === 'all'){\n"
-        "      allBtns.forEach(b => b.classList.add('active'));\n"
-        "      applyVisibility('all');\n"
-        "      return;\n"
-        "    }\n"
-        "    if (allBtn.classList.contains('active')){\n"
-        "      allBtn.classList.remove('active');\n"
-        "      specBtns.forEach(b => b.classList.toggle('active', b === btn));\n"
-        "    } else {\n"
-        "      btn.classList.toggle('active');\n"
-        "    }\n"
-        "    const active = new Set();\n"
-        "    specBtns.forEach(b => { if (b.classList.contains('active')) active.add(b.dataset.model); });\n"
-        "    if (active.size === 0 || active.size === specBtns.length){\n"
-        "      allBtns.forEach(b => b.classList.add('active'));\n"
-        "      applyVisibility('all');\n"
-        "    } else {\n"
-        "      allBtn.classList.remove('active');\n"
-        "      applyVisibility(active);\n"
-        "    }\n"
-        "  }));\n"
-        "})();"
-    )
     return (f'{filter_html}\n'
             f'<div id="{div_id}" class="plotly-graph-div" '
             f'style="height:700px;width:100%;"></div>\n'
-            f'<script>{init_js}</script>')
+            f'<script>Plotly.newPlot("{div_id}", '
+            f'{json.dumps(traces, separators=(",", ":"))}, '
+            f'{json.dumps(layout, separators=(",", ":"))}, '
+            f'{json.dumps(config, separators=(",", ":"))});</script>')
 
 
 def _slopegraph_panel(method_key: str, gens: list[dict]) -> tuple[str, list[str]] | None:
@@ -442,14 +408,113 @@ def build_slopegraph_html() -> tuple[str, list[str]]:
 
 
 _PLACEHOLDERS = {
-    "hero":  ("tracker-hero-container",  "tracker-slope"),
-    "slope": ("tracker-slope-container", "tracker-forest"),
+    "hero":   ("tracker-hero-container",   "tracker-slope"),
+    "slope":  ("tracker-slope-container",  "tracker-forest"),
+    "forest": ("tracker-forest-container", "tracker-cards"),
 }
+
+
+def build_forest_html() -> tuple[str, list[str]]:
+    """Section C: paired Wilcoxon Δ vs TPE, one bar per Claude-gen × method."""
+    from scipy import stats
+
+    info: list[str] = []
+    tpe_finals = _seed_finals(EXP2_BENCH / "optuna")
+    if not tpe_finals:
+        return "<p>(TPE has no completed seeds yet)</p>", ["forest: no TPE data"]
+
+    rows: list[dict] = []
+    for gen in GENERATIONS:
+        for method_key in ("centaur", "ka_code", "ka_hps"):
+            sub = gen.get(method_key)
+            if not sub:
+                continue
+            m_finals = _seed_finals(gen["base"] / sub)
+            if not m_finals:
+                continue
+            common = sorted(set(tpe_finals) & set(m_finals))
+            if len(common) < 2:
+                info.append(f"  {METHOD_DISPLAY[method_key]} [{gen['tag']}] vs TPE: "
+                            f"only {len(common)} paired seed(s), skipping")
+                continue
+            a = np.array([m_finals[s] for s in common])
+            b = np.array([tpe_finals[s] for s in common])
+            diffs = a - b
+            delta = float(diffs.mean())
+            signs_neg = int((diffs < 0).sum())
+            try:
+                _, p_one = stats.wilcoxon(a, b, zero_method="wilcox", alternative="less")
+            except Exception:
+                p_one = float("nan")
+            rows.append({
+                "label": f"{METHOD_DISPLAY[method_key]} [{gen['tag']}]",
+                "color": METHOD_COLOR[method_key],
+                "delta": delta,
+                "n": len(common),
+                "signs": f"{signs_neg}/{len(common)}",
+                "p_one": float(p_one),
+                "gen": gen["tag_id"],
+            })
+            info.append(f"  {METHOD_DISPLAY[method_key]} [{gen['tag']}] vs TPE: "
+                        f"n={len(common)}, Δ={delta:+.4f}, signs={signs_neg}/{len(common)}, "
+                        f"one-sided p={p_one:.4f}")
+
+    if not rows:
+        return "<p>(no paired seeds yet for any method × generation)</p>", info
+
+    # Sort by Δ ascending so the biggest improvement (most negative) is at top
+    rows.sort(key=lambda r: r["delta"])
+
+    labels = [r["label"] for r in rows]
+    deltas = [r["delta"] for r in rows]
+    colors = [r["color"] if r["delta"] < 0 else "#9E9E9E" for r in rows]
+    p_labels = [
+        f"n={r['n']}  p={r['p_one']:.3f}"
+        + (" **" if r["p_one"] < 0.05 else (" *" if r["p_one"] < 0.10 else ""))
+        for r in rows
+    ]
+
+    bar = {
+        "type": "bar", "orientation": "h",
+        "x": deltas, "y": labels,
+        "marker": {"color": colors, "opacity": 0.85},
+        "text": p_labels, "textposition": "outside",
+        "hovertemplate": "%{y}<br>Δ=%{x:+.4f}<br>%{text}<extra></extra>",
+    }
+    xmax = max(abs(d) for d in deltas) * 1.6 if deltas else 0.005
+    layout = {
+        "height": max(280, 70 * len(rows) + 100),
+        "margin": {"l": 240, "r": 80, "t": 30, "b": 40},
+        "xaxis": {"title": "Δ = mean(method) − mean(TPE), lower is better",
+                  "zeroline": True, "zerolinecolor": "#666", "zerolinewidth": 1,
+                  "range": [-xmax, xmax]},
+        "yaxis": {"automargin": True, "tickfont": {"size": 11}},
+        "showlegend": False,
+        "annotations": [
+            {"x": -xmax * 0.95, "y": 1.06, "xref": "x", "yref": "paper",
+             "text": "← method beats TPE", "showarrow": False,
+             "font": {"color": "#2E7D32", "size": 10}},
+            {"x":  xmax * 0.95, "y": 1.06, "xref": "x", "yref": "paper",
+             "text": "TPE beats method →", "showarrow": False,
+             "font": {"color": "#C62828", "size": 10}},
+        ],
+    }
+    config = {"responsive": True, "displayModeBar": False}
+    div_id = "tracker-forest-" + uuid.uuid4().hex[:6]
+    snippet = (f'<div id="{div_id}" class="plotly-graph-div" '
+               f'style="height:{layout["height"]}px;width:100%;"></div>\n'
+               f'<script>Plotly.newPlot("{div_id}", '
+               f'{json.dumps([bar], separators=(",", ":"))}, '
+               f'{json.dumps(layout, separators=(",", ":"))}, '
+               f'{json.dumps(config, separators=(",", ":"))});</script>')
+    return snippet, info
 
 
 def inject_into_html(snippet_html: str, marker: str) -> None:
     """Replace the inner content of one placeholder plot-container in
-    docs/index.html, leaving its wrapping div intact."""
+    docs/index.html, leaving its wrapping div intact. Uses a function-based
+    sub so JSON backslash escapes (e.g. \\u003c) in the snippet aren't
+    interpreted as regex backrefs."""
     container_id, next_anchor = _PLACEHOLDERS[marker]
     html = HTML_PATH.read_text()
     pattern = re.compile(
@@ -458,10 +523,12 @@ def inject_into_html(snippet_html: str, marker: str) -> None:
         rf'(</div>\s*<h3 id="{next_anchor}")',
         flags=re.DOTALL,
     )
-    new = pattern.sub(rf"\1\n{snippet_html}\n\2", html, count=1)
-    if new == html:
+    if not pattern.search(html):
         raise RuntimeError(f"{marker}-container placeholder not found; "
                            "index.html may have changed shape")
+    def repl(m: re.Match) -> str:
+        return f"{m.group(1)}\n{snippet_html}\n{m.group(2)}"
+    new = pattern.sub(repl, html, count=1)
     HTML_PATH.write_text(new)
 
 
@@ -482,6 +549,13 @@ def main() -> None:
         print(line)
     inject_into_html(slope_html, "slope")
     print(f"  Injected slopegraph panels.")
+
+    forest_html, forest_info = build_forest_html()
+    print(f"\nForest plot (section C):")
+    for line in forest_info:
+        print(line)
+    inject_into_html(forest_html, "forest")
+    print(f"  Injected forest plot.")
 
 
 if __name__ == "__main__":
