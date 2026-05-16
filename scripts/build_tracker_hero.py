@@ -37,8 +37,8 @@ METHOD_COLOR = {
 }
 METHOD_DISPLAY = {
     "centaur": "Centaur",
-    "ka_code": "Karpathy Code Editing",
-    "ka_hps":  "Karpathy 14 HPs",
+    "ka_code": "Karpathy Agent (Code)",
+    "ka_hps":  "Karpathy Agent (14 HPs)",
 }
 # Dash style per Claude generation index (oldest = 0). Cycles back to dot if
 # more than five generations land.
