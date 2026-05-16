@@ -451,7 +451,9 @@ def build_slopegraph_html() -> tuple[str, list[str]]:
 
 
 _PLACEHOLDERS = {
-    "leader": ("tracker-leader-container", "tracker-hero"),
+    # Leader sits at the very top of the tracker tab; closes when the next
+    # element starts (the TOC nav as of 5e18b96, the hero h3 before that).
+    "leader": ("tracker-leader-container", "__leader_next__"),
     "hero":   ("tracker-hero-container",   "tracker-slope"),
     "slope":  ("tracker-slope-container",  "tracker-forest"),
     "forest": ("tracker-forest-container", "tracker-cards"),
@@ -840,6 +842,10 @@ def inject_into_html(snippet_html: str, marker: str) -> None:
     if next_anchor is None:
         # cards section: ends at the tracker tab-panel close marker
         close = r'(</div><!--\s*/tab-panel\s+tracker\s*-->)'
+    elif next_anchor == "__leader_next__":
+        # leader section: matches the next element (either <nav class="toc">
+        # or directly <h3 id="tracker-hero">) after the closing </div>
+        close = r'(</div>\s*<(?:nav|h3))'
     else:
         close = rf'(</div>\s*<h3 id="{next_anchor}")'
     # Match either <div class="plot-container" id="..."> or <div id="...">
