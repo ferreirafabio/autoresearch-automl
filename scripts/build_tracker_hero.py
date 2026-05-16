@@ -299,14 +299,21 @@ def _plot_html(traces: list[dict]) -> str:
     Filter click-handling lives in index.html's initGroupFilters() so we get
     the proven Fig 1/2/3 behaviour for free."""
     div_id = "tracker-hero-plot"  # distinct from the h3 anchor id "tracker-hero"
-    # Legend top-right inside the plot, matching the Interactive Demo Fig 1.
+    # Legend matches the Interactive Demo Fig 1 exactly: vertical, anchored
+    # just outside the plot on the right (x=1.02), no border, font size 9,
+    # click toggles, double-click isolates.
     layout = {
-        "height": 620, "margin": {"l": 55, "r": 20, "t": 30, "b": 50},
+        "height": 620, "margin": {"l": 55, "r": 220, "t": 30, "b": 50},
         "xaxis": {"title": "Cumulative training time (hours)", "range": [0, 24]},
         "yaxis": {"title": "Best val_bpb (lower is better)"},
-        "legend": {"x": 0.99, "xanchor": "right", "y": 0.99, "yanchor": "top",
-                   "bgcolor": "rgba(255,255,255,0.85)", "bordercolor": "#ddd",
-                   "borderwidth": 1, "font": {"size": 10}},
+        "legend": {
+            "x": 1.02, "y": 1,
+            "orientation": "v",
+            "bgcolor": "rgba(255,255,255,0.9)",
+            "font": {"size": 9},
+            "itemclick": "toggle",
+            "itemdoubleclick": "toggleothers",
+        },
         "hovermode": "x unified",
     }
     config = {"responsive": True, "displayModeBar": False}
@@ -605,15 +612,45 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         '</div>'
     )
 
-    sig_line = (
-        '<p class="tracker-sig-key">'
-        '<span class="sig-key">Significance:</span> '
-        '<span class="p-marginal">* p&lt;0.10</span>, '
-        '<span class="p-sig">** p&lt;0.05</span>, '
-        '<span class="p-sig">*** p&lt;0.01</span> '
-        '(one-sided Wilcoxon vs TPE).'
-        '</p>'
-    )
+    # Significance legend: only show the asterisk levels actually present in
+    # the current data, so we don't promise ** / *** badges that aren't on
+    # the page.
+    levels_used: set[str] = set()
+    for c in candidates:
+        if c["method_key"] == "tpe":
+            continue
+        common = sorted(set(c["finals"]) & set(tpe_finals))
+        if len(common) < 2:
+            continue
+        a_arr = np.array([c["finals"][s] for s in common])
+        b_arr = np.array([tpe_finals[s] for s in common])
+        try:
+            _, p_one = stats.wilcoxon(a_arr, b_arr, zero_method="wilcox",
+                                      alternative="less")
+        except Exception:
+            continue
+        p_f = float(p_one)
+        if p_f < 0.01:   levels_used.add("***")
+        elif p_f < 0.05: levels_used.add("**")
+        elif p_f < 0.10: levels_used.add("*")
+
+    sig_pieces = []
+    if "*" in levels_used:
+        sig_pieces.append('<span class="p-marginal">* p&lt;0.10</span>')
+    if "**" in levels_used:
+        sig_pieces.append('<span class="p-sig">** p&lt;0.05</span>')
+    if "***" in levels_used:
+        sig_pieces.append('<span class="p-sig">*** p&lt;0.01</span>')
+    if sig_pieces:
+        sig_line = (
+            '<p class="tracker-sig-key">'
+            '<span class="sig-key">Significance:</span> '
+            + ', '.join(sig_pieces)
+            + ' (one-sided Wilcoxon vs TPE).</p>'
+        )
+    else:
+        # No row crosses any threshold yet, so don't show a stars legend.
+        sig_line = ''
     combined = (
         '<div class="tracker-headline">\n'
         f'{banner}\n'
