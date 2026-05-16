@@ -54,7 +54,7 @@ GENERATIONS: list[dict] = [
         "base":    RESULTS / "opus46_benchmark",
         "centaur": "centaur_claude_opus_4_6",
         "ka_code": "karpathy_agent_claude_opus_4_6",
-        "ka_hps":  None,  # not run for 4.6
+        "ka_hps":  "karpathy_agent_hps_claude_opus_4_6",
     },
     {
         "tag":     "Opus 4.7",
