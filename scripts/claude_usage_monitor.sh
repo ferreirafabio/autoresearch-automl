@@ -96,65 +96,67 @@ else
     log "TRIGGER 5h=${usage_5h}% >= ${THRESHOLD_5H}% (7d=${usage_7d}%): pausing, resume at ${begin_local}"
 fi
 
-# --- Find tracked jobids using *claude_code* slurm scripts ---
-if [ ! -f "$TRACKER" ]; then
-    log "ERROR: tracker $TRACKER not found"; exit 1
-fi
-mapfile -t opus_jids < <(awk -F'\t' 'NR>1 && $5 ~ /claude_code/ {print $1}' "$TRACKER" | sort -u)
-
-if [ ${#opus_jids[@]} -eq 0 ]; then
-    log "no claude_code jobs in tracker"; exit 0
-fi
-
-# --- Filter to RUNNING or PENDING-not-already-deferred ---
-# A job counts as "already deferred" if reason=(BeginTime) OR StartTime is
-# more than 1h in the future (covers `scontrol update StartTime=...` which
-# clears the BeginTime reason but still defers the job).
-ids_csv=$(IFS=,; echo "${opus_jids[*]}")
+# --- Discover claude_code jobs directly from squeue (no tracker file) ---
+# A job qualifies if its `scontrol show job` Command path contains
+# `_claude_code` (covers _claude_code.sh, _claude_code_opus47.sh,
+# _claude_code_sonnet46.sh, future variants). RUNNING qualifies; PENDING
+# qualifies only if not already deferred (reason != BeginTime AND
+# StartTime not >1h in the future).
 now_epoch=$(date +%s)
-mapfile -t to_pause < <(squeue -h -j "$ids_csv" -o '%i %T %r %S' 2>/dev/null \
-    | awk -v now="$now_epoch" '
-        {
-            jid=$1; state=$2; reason=$3; start=$4
-            if (state=="RUNNING") { print jid; next }
-            if (state=="PENDING") {
-                if (reason=="(BeginTime)") next
-                if (start ~ /^[0-9]{4}-/) {
-                    cmd = "date -d \"" start "\" +%s 2>/dev/null"
-                    cmd | getline ts; close(cmd)
-                    if (ts != "" && ts+0 > now+3600) next
-                }
-                print jid
-            }
-        }')
+to_pause=()
+while read -r jid state reason start; do
+    [ -z "$jid" ] && continue
+    if [ "$state" = "PENDING" ]; then
+        [ "$reason" = "(BeginTime)" ] && continue
+        if [[ "$start" =~ ^[0-9]{4}- ]]; then
+            ts=$(date -d "$start" +%s 2>/dev/null || echo "")
+            if [ -n "$ts" ] && [ "$ts" -gt "$((now_epoch + 3600))" ]; then
+                continue
+            fi
+        fi
+    elif [ "$state" != "RUNNING" ]; then
+        continue
+    fi
+    cmd=$(scontrol show job "$jid" 2>/dev/null | awk -F= '/Command=/ {print $2; exit}')
+    case "$cmd" in
+        *_claude_code*.sh) to_pause+=("$jid|$cmd") ;;
+    esac
+done < <(squeue -h -u "$USER" -o '%i %T %r %S' 2>/dev/null)
 
 if [ ${#to_pause[@]} -eq 0 ]; then
     log "above threshold but no active claude_code jobs to pause"; exit 0
 fi
 
+# --- Pause each job: extract seed from its log, scancel, resubmit with --begin ---
+LOG_DIR="/work/dlclarge1/ferreira-autoresearch-automl/logs"
 declare -A SEEN
-for jid in "${to_pause[@]}"; do
-    row=$(awk -F'\t' -v j="$jid" '$1==j {print; exit}' "$TRACKER")
-    if [ -z "$row" ]; then
-        log "  $jid: not in tracker; skipping"; continue
+for entry in "${to_pause[@]}"; do
+    jid="${entry%%|*}"
+    script="${entry#*|}"
+    # Try to recover the seed from the latest log line "Seed:" or "(seed N"
+    # find won't error under set -e when no file matches; ls would
+    log_glob=$(find "$LOG_DIR" -maxdepth 1 -name "exp2_*_${jid}.log" 2>/dev/null | head -1)
+    seed=""
+    if [ -n "$log_glob" ] && [ -f "$log_glob" ]; then
+        seed=$(grep -oE "Seed:\s+[0-9]+" "$log_glob" 2>/dev/null | head -1 | grep -oE "[0-9]+" || true)
+        if [ -z "$seed" ]; then
+            seed=$(grep -oE "\(seed\s+[0-9]+" "$log_glob" 2>/dev/null | head -1 | grep -oE "[0-9]+" || true)
+        fi
     fi
-    IFS=$'\t' read -r _ batch method seed script args _ <<< "$row"
-    # Strip any --begin=... tokens from prior deferrals so we don't pass them
-    # as positional args to the slurm wrapper (it would treat them as <smoke>
-    # or similar and either ignore or fail).
-    clean_args=$(echo "$args" | sed -E 's/--begin=[^ ]+//g; s/  +/ /g; s/^ +//; s/ +$//')
-    key="$method:$seed"
+    if [ -z "$seed" ]; then
+        log "  $jid: could not extract seed from log; skipping"
+        continue
+    fi
+    key="$script:$seed"
     if [ -n "${SEEN[$key]:-}" ]; then continue; fi
     SEEN[$key]=1
 
     if [ "$DRY_RUN" = "1" ]; then
-        log "  DRY would scancel $jid ($method seed=$seed) and: sbatch --begin=$begin_local $script $clean_args"
+        log "  DRY would scancel $jid and: sbatch --begin=$begin_local $script $seed"
     else
         scancel "$jid" 2>&1 | sed "s|^|  scancel $jid: |" | tee -a "$LOG_FILE" >&2 || true
-        newjid=$(cd "$PROJECT_DIR" && sbatch --parsable --begin="$begin_local" $script $clean_args 2>&1 || echo "ERROR")
-        log "  paused $method seed=$seed (was $jid) -> $newjid (begin $begin_local)"
-        printf '%s\t%s\t%s_PAUSED_BY_USAGE\t%s\t%s\t%s\t%s\n' \
-            "$newjid" "$batch" "$method" "$seed" "$script" "$clean_args" "$(date -Iseconds)" >> "$TRACKER"
+        newjid=$(cd "$PROJECT_DIR" && sbatch --parsable --begin="$begin_local" "$script" "$seed" 2>&1 || echo "ERROR")
+        log "  paused $(basename "$script") seed=$seed (was $jid) -> $newjid (begin $begin_local)"
     fi
 done
 
