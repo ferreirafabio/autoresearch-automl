@@ -299,16 +299,14 @@ def _plot_html(traces: list[dict]) -> str:
     Filter click-handling lives in index.html's initGroupFilters() so we get
     the proven Fig 1/2/3 behaviour for free."""
     div_id = "tracker-hero-plot"  # distinct from the h3 anchor id "tracker-hero"
-    # Legend below the plot so the chart keeps real estate on mobile.
+    # Legend top-right inside the plot, matching the Interactive Demo Fig 1.
     layout = {
-        "height": 620, "margin": {"l": 55, "r": 20, "t": 30, "b": 60},
+        "height": 620, "margin": {"l": 55, "r": 20, "t": 30, "b": 50},
         "xaxis": {"title": "Cumulative training time (hours)", "range": [0, 24]},
         "yaxis": {"title": "Best val_bpb (lower is better)"},
-        "legend": {"orientation": "h", "x": 0.5, "xanchor": "center",
-                   "y": -0.18, "yanchor": "top",
+        "legend": {"x": 0.99, "xanchor": "right", "y": 0.99, "yanchor": "top",
                    "bgcolor": "rgba(255,255,255,0.85)", "bordercolor": "#ddd",
-                   "borderwidth": 1, "font": {"size": 10},
-                   "itemwidth": 50},
+                   "borderwidth": 1, "font": {"size": 10}},
         "hovermode": "x unified",
     }
     config = {"responsive": True, "displayModeBar": False}
@@ -349,7 +347,7 @@ def _slopegraph_panel(method_key: str, gens: list[dict]) -> tuple[str, list[str]
         present = [(xl, y) for xl, y in zip(x_labels, ys) if y is not None]
         if not present:
             continue
-        # Hide individual seed legend entries — they're noise on mobile and
+        # Hide individual seed legend entries : they're noise on mobile and
         # the dots+lines themselves are still drawn. Mean line stays in the
         # legend.
         traces.append({
@@ -537,13 +535,7 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
 
     eyebrow = "Current leader" if winner["method_key"] != "tpe" else "TPE still on top"
     note = (f"Best across {len(candidates)} method &times; generation combinations with "
-            f"&ge;{min_seeds} completed seeds. "
-            f"&nbsp;&middot;&nbsp; "
-            f'<span class="sig-key">Significance:</span> '
-            f'<span class="p-marginal">* p&lt;0.10</span>, '
-            f'<span class="p-sig">** p&lt;0.05</span>, '
-            f'<span class="p-sig">*** p&lt;0.01</span> '
-            f"(one-sided Wilcoxon vs TPE).")
+            f"&ge;{min_seeds} completed seeds.")
     banner = (
         f'<div class="tracker-leader">\n'
         f'  <div class="leader-eyebrow">{eyebrow}</div>\n'
@@ -613,11 +605,21 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         '</div>'
     )
 
+    sig_line = (
+        '<p class="tracker-sig-key">'
+        '<span class="sig-key">Significance:</span> '
+        '<span class="p-marginal">* p&lt;0.10</span>, '
+        '<span class="p-sig">** p&lt;0.05</span>, '
+        '<span class="p-sig">*** p&lt;0.01</span> '
+        '(one-sided Wilcoxon vs TPE).'
+        '</p>'
+    )
     combined = (
         '<div class="tracker-headline">\n'
         f'{banner}\n'
         f'{overview}\n'
-        '</div>'
+        '</div>\n'
+        f'{sig_line}'
     )
     return combined, info
 
