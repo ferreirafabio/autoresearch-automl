@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
-# Claude Max 7-day usage monitor — pause Opus SLURM jobs when over threshold.
+# Claude Max usage monitor: pause *claude_code* SLURM jobs when over threshold.
 #
 # Polls https://api.anthropic.com/api/oauth/usage with the OAuth token from
-# ~/.claude/.credentials.json (same endpoint Claude Code's statusline uses).
-# When 7d utilization >= THRESHOLD, scancel any RUNNING/PENDING `*claude_code*`
-# jobs and resubmit them with --begin=<seven_day.resets_at>+30min so they
-# automatically pick up after the weekly reset.
+# ~/.claude/.credentials.json. Triggers on EITHER:
+#   - 7d utilization >= CLAUDE_USAGE_THRESHOLD       (default 80)
+#   - 5h utilization >= CLAUDE_USAGE_THRESHOLD_5H    (default 90)
+#
+# When the 7d cap triggers, scancel and resubmit with
+#   --begin=<seven_day.resets_at>+30min   (next weekly reset)
+# When only the 5h cap triggers, resubmit with
+#   --begin=<five_hour.resets_at>+5min    (next 5h rolling boundary)
+# When both trigger, the more conservative 7d-resume time wins.
 #
 # Idempotent: jobs already deferred (StartTime in the future / reason
 # (BeginTime)) are skipped.
@@ -18,7 +23,8 @@
 
 set -euo pipefail
 
-THRESHOLD="${CLAUDE_USAGE_THRESHOLD:-80}"
+THRESHOLD="${CLAUDE_USAGE_THRESHOLD:-80}"            # 7d cap threshold
+THRESHOLD_5H="${CLAUDE_USAGE_THRESHOLD_5H:-90}"       # 5h cap threshold
 PROJECT_DIR="/work/dlclarge1/ferreira-autoresearch-automl/autoresearch-automl"
 TRACKER="${CLAUDE_USAGE_TRACKER:-/tmp/seed_runs_jobs.tsv}"
 LOG_FILE="/work/dlclarge1/ferreira-autoresearch-automl/logs/claude_usage_monitor.log"
@@ -61,19 +67,34 @@ if $need_refresh; then
     fi
 fi
 
-usage=$(jq -r '.seven_day.utilization' "$CACHE_FILE")
-resets_at_utc=$(jq -r '.seven_day.resets_at' "$CACHE_FILE")
-# Convert UTC ISO timestamp to local "YYYY-MM-DDTHH:MM:SS" + 30 min buffer
-begin_local=$(date -d "$resets_at_utc + 30 min" '+%Y-%m-%dT%H:%M:%S')
+usage_7d=$(jq -r '.seven_day.utilization' "$CACHE_FILE")
+resets_7d=$(jq -r '.seven_day.resets_at' "$CACHE_FILE")
+usage_5h=$(jq -r '.five_hour.utilization' "$CACHE_FILE")
+resets_5h=$(jq -r '.five_hour.resets_at' "$CACHE_FILE")
+begin_7d=$(date -d "$resets_7d + 30 min" '+%Y-%m-%dT%H:%M:%S')
+begin_5h=$(date -d "$resets_5h + 5 min"  '+%Y-%m-%dT%H:%M:%S')
 
-usage_int=$(printf '%.0f' "$usage")
+usage_7d_int=$(printf '%.0f' "$usage_7d")
+usage_5h_int=$(printf '%.0f' "$usage_5h")
 
-if [ "$usage_int" -lt "$THRESHOLD" ]; then
-    log "OK  7d=${usage}% < ${THRESHOLD}% (resets ${resets_at_utc})"
+trigger_7d=0; trigger_5h=0
+[ "$usage_7d_int" -ge "$THRESHOLD" ]    && trigger_7d=1
+[ "$usage_5h_int" -ge "$THRESHOLD_5H" ] && trigger_5h=1
+
+if [ "$trigger_7d" = 0 ] && [ "$trigger_5h" = 0 ]; then
+    log "OK  7d=${usage_7d}% < ${THRESHOLD}%, 5h=${usage_5h}% < ${THRESHOLD_5H}% (7d resets ${resets_7d})"
     exit 0
 fi
 
-log "TRIGGER 7d=${usage}% >= ${THRESHOLD}% — pausing claude_code jobs, resume at ${begin_local}"
+# If 7d triggered, must wait for the 7d window: the 5h reset alone won't help.
+# If only 5h triggered, the next 5h boundary is enough.
+if [ "$trigger_7d" = 1 ]; then
+    begin_local="$begin_7d"
+    log "TRIGGER 7d=${usage_7d}% >= ${THRESHOLD}% (5h=${usage_5h}%): pausing, resume at ${begin_local}"
+else
+    begin_local="$begin_5h"
+    log "TRIGGER 5h=${usage_5h}% >= ${THRESHOLD_5H}% (7d=${usage_7d}%): pausing, resume at ${begin_local}"
+fi
 
 # --- Find tracked jobids using *claude_code* slurm scripts ---
 if [ ! -f "$TRACKER" ]; then

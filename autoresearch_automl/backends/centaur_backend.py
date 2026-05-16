@@ -129,24 +129,24 @@ class CentaurBackend(HPOBackend):
             self._trial_count += 1
             return config, self._max_budget
         except Exception as e:
-            # Fail HARD on any LLM transport/server failure (connect, timeout,
-            # or any 4xx/5xx response — including 400 API_KEY_INVALID from a
-            # revoked key, which previously fell through to the silent CMA
-            # fallback and corrupted ~580 trials in
-            # gemini31pro_benchmark/centaur_gemini_3_1_pro_preview/seed_3,4 on
-            # 2026-05-08). Silent fallback would log CMA-only trials as if
-            # they were Centaur, indistinguishable in trials.jsonl.
-            from openai import APIConnectionError, APITimeoutError, APIStatusError
-            if isinstance(e, (APIConnectionError, APITimeoutError, APIStatusError, ConnectionError, TimeoutError)):
-                logger.error(
-                    "LLM call failed hard (%s) — refusing to fall back to "
-                    "pure CMA (would silently pollute results).", e
-                )
-                raise
-            logger.warning("LLM suggestion failed (%s), falling back to CMA-ES config", e)
-            self._active_source = "cma"
-            self._trial_count += 1
-            return cma_config, self._max_budget
+            # Fail HARD on EVERY exception. Any silent fallback to pure-CMA
+            # would log CMA-only trials as if they were Centaur,
+            # indistinguishable in trials.jsonl downstream. Previous policy
+            # tolerated non-transport exceptions (bad JSON, schema mismatch,
+            # value errors) via a CMA fallback path; that tolerated path
+            # corrupted ~580 trials in
+            # gemini31pro_benchmark/centaur_gemini_3_1_pro_preview/seed_3,4
+            # on 2026-05-08 when a 400 API_KEY_INVALID slipped through as a
+            # non-standard exception, and we don't want a repeat from
+            # Claude-Code 5h/7d rate-limit errors either. The rule is now:
+            # no fallback, ever; let the orchestrator log the trial as
+            # failed and move on.
+            logger.error(
+                "LLM call failed hard (%s: %s): refusing to fall back to "
+                "pure CMA (would silently pollute results).",
+                type(e).__name__, e,
+            )
+            raise
 
     def tell(self, config: dict[str, Any], budget: float, results: dict[str, float]) -> None:
         if self._pending_trial is None:
