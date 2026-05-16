@@ -37,8 +37,8 @@ METHOD_COLOR = {
 }
 METHOD_DISPLAY = {
     "centaur": "Centaur",
-    "ka_code": "Karpathy Agent (Code)",
-    "ka_hps":  "Karpathy Agent (14 HPs)",
+    "ka_code": "Karpathy Code Editing",
+    "ka_hps":  "Karpathy 14 HPs",
 }
 # Dash style per Claude generation index (oldest = 0). Cycles back to dot if
 # more than five generations land.
@@ -559,8 +559,6 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
     # Compact ranked overview table below the banner.
     def _short(label: str) -> str:
         return (label
-                .replace("Karpathy Agent (Code)", "KA Code")
-                .replace("Karpathy Agent (14 HPs)", "KA HPs")
                 .replace(" [", " · ")
                 .replace("]", "")
                 .replace("(classical baseline)", "(classical)"))
@@ -784,15 +782,8 @@ def build_forest_html() -> tuple[str, list[str]]:
         for r in rows
     ]
 
-    # Shorten labels for mobile: "Karpathy Agent (Code) [Opus 4.6]" → "KA Code · Opus 4.6"
-    short_labels = []
-    for r in rows:
-        s = (r["label"]
-             .replace("Karpathy Agent (Code)", "KA Code")
-             .replace("Karpathy Agent (14 HPs)", "KA HPs")
-             .replace(" [", " · ")
-             .replace("]", ""))
-        short_labels.append(s)
+    # Shorten the bracketed Opus tag so labels fit on mobile.
+    short_labels = [r["label"].replace(" [", " · ").replace("]", "") for r in rows]
 
     bar = {
         "type": "bar", "orientation": "h",
