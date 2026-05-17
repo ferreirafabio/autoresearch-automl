@@ -310,7 +310,7 @@ def _plot_html(traces: list[dict]) -> str:
             "x": 1.02, "y": 1,
             "orientation": "v",
             "bgcolor": "rgba(255,255,255,0.9)",
-            "font": {"size": 9},
+            "font": {"size": 12},
             "itemclick": "toggle",
             "itemdoubleclick": "toggleothers",
         },
