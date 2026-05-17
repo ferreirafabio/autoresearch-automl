@@ -561,12 +561,11 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         f'</div>'
     )
 
-    # Compact ranked overview table below the banner.
+    # Compact ranked overview table below the banner. Keep the bracketed
+    # [Opus 4.6] / [Opus 4.7] / [Sonnet 4.6] tag so the table matches the
+    # leader banner's "Centaur [Opus 4.6]" style exactly.
     def _short(label: str) -> str:
-        return (label
-                .replace(" [", " · ")
-                .replace("]", "")
-                .replace("(classical baseline)", "(classical)"))
+        return label.replace("(classical baseline)", "(classical)")
 
     table_rows = []
     for i, c in enumerate(candidates):
@@ -827,8 +826,9 @@ def build_forest_html() -> tuple[str, list[str]]:
         for r in rows
     ]
 
-    # Shorten the bracketed Opus tag so labels fit on mobile.
-    short_labels = [r["label"].replace(" [", " · ").replace("]", "") for r in rows]
+    # Keep the canonical "[Opus 4.6]" / "[Opus 4.7]" / "[Sonnet 4.6]" tags
+    # so forest plot labels match the leader banner and overview table.
+    short_labels = [r["label"] for r in rows]
 
     bar = {
         "type": "bar", "orientation": "h",

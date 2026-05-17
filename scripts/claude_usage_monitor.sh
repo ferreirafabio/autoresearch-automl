@@ -71,29 +71,37 @@ usage_7d=$(jq -r '.seven_day.utilization' "$CACHE_FILE")
 resets_7d=$(jq -r '.seven_day.resets_at' "$CACHE_FILE")
 usage_5h=$(jq -r '.five_hour.utilization' "$CACHE_FILE")
 resets_5h=$(jq -r '.five_hour.resets_at' "$CACHE_FILE")
+usage_son=$(jq -r '.seven_day_sonnet.utilization // 0' "$CACHE_FILE")
+resets_son=$(jq -r '.seven_day_sonnet.resets_at  // empty' "$CACHE_FILE")
+[ -z "$resets_son" ] && resets_son="$resets_7d"
+
 begin_7d=$(date -d "$resets_7d + 30 min" '+%Y-%m-%dT%H:%M:%S')
 begin_5h=$(date -d "$resets_5h + 5 min"  '+%Y-%m-%dT%H:%M:%S')
+begin_son=$(date -d "$resets_son + 30 min" '+%Y-%m-%dT%H:%M:%S')
 
-usage_7d_int=$(printf '%.0f' "$usage_7d")
-usage_5h_int=$(printf '%.0f' "$usage_5h")
+usage_7d_int=$(printf '%.0f'  "$usage_7d")
+usage_5h_int=$(printf '%.0f'  "$usage_5h")
+usage_son_int=$(printf '%.0f' "$usage_son")
 
-trigger_7d=0; trigger_5h=0
-[ "$usage_7d_int" -ge "$THRESHOLD" ]    && trigger_7d=1
-[ "$usage_5h_int" -ge "$THRESHOLD_5H" ] && trigger_5h=1
+trigger_5h=0; trigger_opus=0; trigger_son=0
+[ "$usage_5h_int"  -ge "$THRESHOLD_5H" ] && trigger_5h=1
+# seven_day in the API is the Opus-equivalent rolling 7d cap; sonnet has
+# its own seven_day_sonnet bucket. We pause Opus-scoped jobs on either
+# 5h or 7d-Opus; we pause Sonnet-scoped jobs on either 5h or 7d-Sonnet.
+[ "$usage_7d_int"  -ge "$THRESHOLD" ]    && trigger_opus=1
+[ "$usage_son_int" -ge "$THRESHOLD" ]    && trigger_son=1
 
-if [ "$trigger_7d" = 0 ] && [ "$trigger_5h" = 0 ]; then
-    log "OK  7d=${usage_7d}% < ${THRESHOLD}%, 5h=${usage_5h}% < ${THRESHOLD_5H}% (7d resets ${resets_7d})"
+if [ "$trigger_5h" = 0 ] && [ "$trigger_opus" = 0 ] && [ "$trigger_son" = 0 ]; then
+    log "OK  7d=${usage_7d}% < ${THRESHOLD}%, 7d-sonnet=${usage_son}% < ${THRESHOLD}%, 5h=${usage_5h}% < ${THRESHOLD_5H}%"
     exit 0
 fi
 
-# If 7d triggered, must wait for the 7d window: the 5h reset alone won't help.
-# If only 5h triggered, the next 5h boundary is enough.
-if [ "$trigger_7d" = 1 ]; then
-    begin_local="$begin_7d"
-    log "TRIGGER 7d=${usage_7d}% >= ${THRESHOLD}% (5h=${usage_5h}%): pausing, resume at ${begin_local}"
+# Decide a resume time per script-kind in the pause loop below.
+# Default for logging:
+if [ "$trigger_opus" = 1 ] || [ "$trigger_son" = 1 ]; then
+    log "TRIGGER 5h=${usage_5h}% / 7d-opus=${usage_7d}% / 7d-sonnet=${usage_son}% (thresholds ${THRESHOLD_5H}/${THRESHOLD}/${THRESHOLD})"
 else
-    begin_local="$begin_5h"
-    log "TRIGGER 5h=${usage_5h}% >= ${THRESHOLD_5H}% (7d=${usage_7d}%): pausing, resume at ${begin_local}"
+    log "TRIGGER 5h=${usage_5h}% >= ${THRESHOLD_5H}% (7d caps OK)"
 fi
 
 # --- Discover claude_code jobs directly from squeue (no tracker file) ---
@@ -150,6 +158,23 @@ for entry in "${to_pause[@]}"; do
     key="$script:$seed"
     if [ -n "${SEEN[$key]:-}" ]; then continue; fi
     SEEN[$key]=1
+
+    # Choose the model-specific begin time. Sonnet scripts pause only on
+    # 5h or 7d-Sonnet; Opus scripts pause only on 5h or 7d-Opus.
+    case "$(basename "$script")" in
+        *sonnet*)
+            if [ "$trigger_son" = 1 ]; then begin_local="$begin_son"
+            elif [ "$trigger_5h" = 1 ]; then begin_local="$begin_5h"
+            else continue
+            fi
+            ;;
+        *)
+            if [ "$trigger_opus" = 1 ]; then begin_local="$begin_7d"
+            elif [ "$trigger_5h" = 1 ]; then begin_local="$begin_5h"
+            else continue
+            fi
+            ;;
+    esac
 
     if [ "$DRY_RUN" = "1" ]; then
         log "  DRY would scancel $jid and: sbatch --begin=$begin_local $script $seed"
