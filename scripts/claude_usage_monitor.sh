@@ -121,7 +121,7 @@ while read -r jid state reason start; do
     case "$cmd" in
         *_claude_code*.sh) to_pause+=("$jid|$cmd") ;;
     esac
-done < <(squeue -h -u "$USER" -o '%i %T %r %S' 2>/dev/null)
+done < <(squeue -h -u "$(id -un)" -o '%i %T %r %S' 2>/dev/null)
 
 if [ ${#to_pause[@]} -eq 0 ]; then
     log "above threshold but no active claude_code jobs to pause"; exit 0
