@@ -572,7 +572,7 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         is_winner = (i == 0)
         short_label = _short(c["label"])
         # paired-Wilcoxon vs TPE for the table cell (skip if it IS TPE)
-        p_str = "&mdash;"
+        p_str = "(baseline)"
         if c["method_key"] != "tpe":
             common = sorted(set(c["finals"]) & set(tpe_finals))
             if len(common) >= 2:
