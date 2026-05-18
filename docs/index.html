@@ -950,9 +950,14 @@ function displayName(methodKey) {
     return methodKey;
 }
 
+// Path assembled at runtime so the full URL is not a single string literal
+// (defeats naive regex URL extraction). robots.txt remains the primary
+// crawler defense; this is belt-and-suspenders.
+function _dpath(name) { return ['d', 'ata', '/', name, '.', 'json'].join(''); }
+
 async function loadData() {
     if (DATA) return DATA;
-    const r = await fetch('data/trials.json');
+    const r = await fetch(_dpath('trials'));
     DATA = await r.json();
     return DATA;
 }
@@ -1186,7 +1191,7 @@ let CENTAUR_LLM_TIDS = null;
 async function loadCentaurSources() {
     if (CENTAUR_LLM_TIDS) return CENTAUR_LLM_TIDS;
     try {
-        const r = await fetch('data/llm_logs.json');
+        const r = await fetch(_dpath('llm_logs'));
         const d = await r.json();
         CENTAUR_LLM_TIDS = { 0: new Set(), 1: new Set(), 2: new Set() };
         for (let s = 0; s < 3; s++) {
