@@ -86,6 +86,11 @@ table. Use:
 
 - Two top-level tabs: "Interactive Demo" (paper figures, stays canonical)
   and "Live Benchmark" (rolling tracker for each new Claude release).
+  The Live Benchmark tab card carries a pulsing red "NEW" badge so
+  returning visitors notice the new content. Leave it on until the
+  tracker is no longer the latest thing on the page; remove the
+  `<span class="tc-new-badge">NEW</span>` from the tab title when it
+  stops being new.
 - Live Benchmark sections use **1/2/3/4** numbering to match the
   Interactive Demo's 1-8 scheme. No A/B/C/D.
 - Live Benchmark filter buttons mirror the Fig 1 SVG-line-icon style.

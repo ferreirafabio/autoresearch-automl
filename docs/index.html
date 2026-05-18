@@ -217,6 +217,23 @@
   .tab-cards .tc-sub {
     display: block; font-size: 1em; opacity: 0.88; line-height: 1.4;
   }
+  /* Pulsing 'NEW' badge on the Live Benchmark tab card */
+  .tc-new-badge {
+    display: inline-block; vertical-align: middle;
+    background: #C62828; color: #fff;
+    font-size: 0.62em; font-weight: 800;
+    padding: 0.18em 0.55em; border-radius: 8px;
+    margin-left: 0.5em; letter-spacing: 0.08em; text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(198,40,40,0.35);
+    animation: newBadgePulse 2.2s ease-in-out infinite;
+  }
+  .tab-cards button.active .tc-new-badge {
+    background: #fff; color: #C62828; box-shadow: none;
+  }
+  @keyframes newBadgePulse {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: 0.78; transform: scale(1.06); }
+  }
   .tab-panel[hidden] { display: none; }
   .tab-subtitle {
     text-align: center; color: #666; max-width: 800px;
@@ -491,7 +508,7 @@
     <span class="tc-sub">All methods &times; all seeds from the 2026 paper</span>
   </button>
   <button data-tab="tracker">
-    <span class="tc-title">Live Benchmark</span>
+    <span class="tc-title">Live Benchmark <span class="tc-new-badge">NEW</span></span>
     <span class="tc-sub">Is the latest Claude frontier LLM beating classical HPO yet?</span>
   </button>
 </div>

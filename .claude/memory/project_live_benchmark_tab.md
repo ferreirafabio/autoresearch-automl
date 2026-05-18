@@ -4,6 +4,15 @@ description: Architecture of docs/index.html's second tab — what scripts popul
 type: project
 originSessionId: aabedbd7-00d1-4a75-a99c-cb2d93f6ce73
 ---
+## "NEW" badge on the tab card
+
+The Live Benchmark tab card carries a small pulsing red `NEW` badge
+(class `tc-new-badge`) so returning visitors notice the addition.
+Keep it on while the tab is still novel; strip the `<span class="tc-new-badge">NEW</span>`
+from the title when the live tracker is no longer the freshest piece
+of the page. CSS uses a 2.2s opacity+scale pulse so it draws the eye
+without being annoying.
+
 ## Two-tab layout
 
 `docs/index.html` has top-level card tabs: "Interactive Demo" (default, the paper figures) and "Live Benchmark". The tab state persists across reloads via the URL hash (`#tab=tracker`). Switch handler is `initTopTabs` near the bottom of index.html — calls `Plotly.Plots.resize` three times (0/50/250ms) when the tracker tab becomes visible, because Plotly figures created in a `hidden` panel start at width 0.
