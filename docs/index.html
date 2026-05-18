@@ -217,6 +217,16 @@
   .tab-cards .tc-sub {
     display: block; font-size: 1em; opacity: 0.88; line-height: 1.4;
   }
+  /* Data leakage disclaimer near the top of the page */
+  aside.data-leakage-note {
+    max-width: 900px; margin: 1em auto 1em;
+    background: #fff8e1; border: 1px solid #ffe082; border-left: 4px solid #F57C00;
+    border-radius: 8px; padding: 0.8em 1.1em;
+    font-size: 0.88em; color: #555; line-height: 1.5;
+  }
+  aside.data-leakage-note strong { color: #E65100; }
+  aside.data-leakage-note code { background: #fff3e0; padding: 0 0.25em; border-radius: 3px; }
+
   /* Pulsing 'NEW' badge on the Live Benchmark tab card */
   .tc-new-badge {
     display: inline-block; vertical-align: middle;
@@ -501,6 +511,17 @@
     All in all, our results suggest that <strong>LLMs are most effective as a complement to classical optimizers, not as a replacement</strong>.
   </div>
 </details>
+
+<aside class="data-leakage-note">
+  <strong>Data release note.</strong>
+  This page publishes the full hyperparameter configurations of every trial
+  (see <a href="./data/trials.json"><code>data/trials.json</code></a>: 3.8 MB, ~10k trials).
+  Any LLM whose pre-training corpus includes this URL may have seen these configs
+  and could exhibit upward-biased HPO scores on Climbmix-400B as a consequence.
+  When you re-benchmark a frontier model released after May 2026, consider a
+  held-out variant of the search space (rename HP keys, perturb defaults) or a
+  different downstream task to mitigate the leakage.
+</aside>
 
 <div class="tab-cards" style="margin-top:2em">
   <button data-tab="paper" class="active">
