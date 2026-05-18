@@ -901,6 +901,22 @@ def inject_into_html(snippet_html: str, marker: str) -> None:
     HTML_PATH.write_text(new)
 
 
+def update_last_updated_stamp() -> None:
+    """Replace the inner text of <p id='tracker-last-updated'> with the
+    current UTC timestamp, so visitors can see when the tracker last ran."""
+    from datetime import datetime, timezone
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    html = HTML_PATH.read_text()
+    pat = re.compile(
+        r'(<p id="tracker-last-updated"[^>]*>)[^<]*(</p>)',
+        flags=re.DOTALL,
+    )
+    if not pat.search(html):
+        return
+    new = pat.sub(lambda m: f"{m.group(1)}Last updated: {stamp}{m.group(2)}", html)
+    HTML_PATH.write_text(new)
+
+
 def main() -> None:
     leader_html, leader_info = build_leader_html()
     print("Current-leader banner:")
@@ -939,6 +955,9 @@ def main() -> None:
         print(line)
     inject_into_html(cards_html, "cards")
     print(f"  Injected summary cards.")
+
+    update_last_updated_stamp()
+    print(f"\nUpdated 'Last updated' timestamp.")
 
 
 if __name__ == "__main__":
