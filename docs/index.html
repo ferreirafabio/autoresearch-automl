@@ -253,16 +253,33 @@
   table.changelog-table td:first-child { white-space: nowrap; color: #888; font-weight: 500; }
   table.changelog-table tbody tr:first-child td:first-child { color: #558b2f; font-weight: 600; }
 
-  /* Data leakage disclaimer near the top of the page */
-  aside.data-leakage-note {
-    max-width: 900px; margin: 1em auto 1em;
+  /* Data leakage disclaimer (collapsible, matches Abstract / What's new style) */
+  details.data-leakage-collapsible {
+    max-width: 900px; margin: 0.5em auto 1em;
+  }
+  details.data-leakage-collapsible > summary {
+    cursor: pointer; padding: 0.45em 0.9em; font-size: 0.88em;
+    background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px;
+    list-style: none; text-align: center; color: #555;
+  }
+  details.data-leakage-collapsible > summary::-webkit-details-marker { display: none; }
+  details.data-leakage-collapsible > summary::before {
+    content: "\25B8 "; color: #F57C00; font-weight: 700;
+  }
+  details.data-leakage-collapsible[open] > summary::before { content: "\25BE "; }
+  details.data-leakage-collapsible > summary strong { color: #E65100; }
+  details.data-leakage-collapsible .data-leakage-hint {
+    color: #888; font-size: 0.86em; margin-left: 0.4em; font-weight: 400;
+  }
+  details.data-leakage-collapsible[open] .data-leakage-hint { display: none; }
+  details.data-leakage-collapsible .data-leakage-body {
+    margin-top: 0.5em; padding: 0.8em 1.1em;
     background: #fff8e1; border: 1px solid #ffe082; border-left: 4px solid #F57C00;
-    border-radius: 8px; padding: 0.8em 1.1em;
+    border-radius: 8px;
     font-size: 0.88em; color: #555; line-height: 1.5;
     text-align: center;
   }
-  aside.data-leakage-note strong { color: #E65100; }
-  aside.data-leakage-note code { background: #fff3e0; padding: 0 0.25em; border-radius: 3px; }
+  details.data-leakage-collapsible .data-leakage-body strong { color: #E65100; }
 
   /* 'UPDATED' badge on the Interactive Demo tab card (less attention-grabbing
      than NEW since the content is incremental, not net-new). */
@@ -577,19 +594,21 @@
   </table>
 </details>
 
-<aside class="data-leakage-note">
-  <strong>Data access policy.</strong>
-  Publishing per-trial HP configs and val_bpb values carries a risk of
-  training-data leakage: future LLMs that we benchmark, trained on this page,
-  could later score
-  artificially well on Climbmix-400B HPO. To reduce that risk, the
-  <em>raw per-trial LLM call logs</em> (full prompts, responses,
-  chain-of-thought, error traces; ~12 GB across ~7k files) have been
-  removed from this repository and are available <strong>on request</strong>
-  for academic reproducibility: open an issue on the
-  <a href="https://github.com/ferreirafabio/autoresearch-automl/issues">GitHub repo</a>
-  or email the authors.
-</aside>
+<details class="data-leakage-collapsible">
+  <summary><strong>Data access policy</strong> <span class="data-leakage-hint">(click to expand)</span></summary>
+  <div class="data-leakage-body">
+    Publishing per-trial HP configs and val_bpb values carries a risk of
+    training-data leakage: future LLMs that we benchmark, trained on this page,
+    could later score
+    artificially well on Climbmix-400B HPO. To reduce that risk, the
+    <em>raw per-trial LLM call logs</em> (full prompts, responses,
+    chain-of-thought, error traces; ~12 GB across ~7k files) have been
+    removed from this repository and are available <strong>on request</strong>
+    for academic reproducibility: open an issue on the
+    <a href="https://github.com/ferreirafabio/autoresearch-automl/issues">GitHub repo</a>
+    or email the authors.
+  </div>
+</details>
 
 <div class="tab-cards" style="margin-top:2em">
   <button data-tab="paper" class="active">
