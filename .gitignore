@@ -216,3 +216,4 @@ results/exp2_benchmark*/
 autoresearch/
 # Experiment outputs (lived in git briefly; now backed up to Dropbox)
 results/
+private/

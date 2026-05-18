@@ -1,0 +1,104 @@
+# Block known LLM training / AI crawler bots from ingesting this site.
+# The demo publishes ~10k labeled HPO trials on Climbmix-400B; we don't want
+# future frontier models to memorize these configs and bias HPO benchmarks.
+# Human visitors and search engines (Google, Bing) continue to access the site
+# normally. Honor of these directives depends on each crawler's policy.
+
+# OpenAI
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+# Anthropic
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+# Google AI training (separate from Googlebot which is allowed for search indexing)
+User-agent: Google-Extended
+Disallow: /
+
+# Common Crawl (feeds many open LLM training sets)
+User-agent: CCBot
+Disallow: /
+
+# Meta
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Meta-ExternalFetcher
+Disallow: /
+
+# ByteDance / TikTok / Doubao
+User-agent: Bytespider
+Disallow: /
+
+# Amazon
+User-agent: Amazonbot
+Disallow: /
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Disallow: /
+
+# Cohere
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Perplexity-User
+Disallow: /
+
+# DuckAssist (DuckDuckGo's AI summarizer)
+User-agent: DuckAssistBot
+Disallow: /
+
+# Mistral
+User-agent: MistralAI-User
+Disallow: /
+
+# AI2 (Allen Institute)
+User-agent: AI2Bot
+Disallow: /
+
+# Diffbot
+User-agent: Diffbot
+Disallow: /
+
+# Omgili / Webz.io (sells crawl feeds to AI shops)
+User-agent: omgili
+Disallow: /
+
+User-agent: omgilibot
+Disallow: /
+
+# Catch-all: anything self-identifying as AI training
+User-agent: AI-Bot
+Disallow: /
+
+User-agent: TrainingBot
+Disallow: /
+
+# Default: allow regular search crawlers (Googlebot, Bingbot, DuckDuckBot)
+# to keep the demo discoverable for humans.
+User-agent: *
+Allow: /

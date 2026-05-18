@@ -567,21 +567,29 @@
 
 <aside class="data-leakage-note">
   <strong>Data access policy.</strong>
-  Aggregated trial summaries (HP configs + outcomes used by the interactive figures
-  below) remain public at <a href="./data/trials.json"><code>data/trials.json</code></a>.
-  The <em>raw per-trial LLM call logs</em> (full prompts, responses, chain-of-thought,
-  error traces; ~12 GB across ~7k files) have been removed from this repository to
-  mitigate training-data bleed-in for future LLMs that crawl GitHub Pages. The full
-  per-trial dataset is available <strong>on request</strong> for academic reproducibility:
-  open an issue on the
+  The <em>raw per-trial LLM call logs</em> (full prompts, responses,
+  chain-of-thought, error traces; ~12 GB across ~7k files) have been
+  removed from this repository and are available <strong>on request</strong>
+  for academic reproducibility: open an issue on the
   <a href="https://github.com/ferreirafabio/autoresearch-automl/issues">GitHub repo</a>
-  or email the authors.
+  or email the authors. The interactive figures below are driven by an
+  aggregated trial summary loaded at page load.
+  <br><br>
+  <strong>Note on LLM training-data leakage.</strong>
+  The per-trial HP configs and val_bpb values shown here are a benchmark
+  artifact. To reduce the chance that future LLMs are trained on this page
+  and later score artificially well on Climbmix-400B HPO, we ask known AI
+  training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot, Bytespider,
+  and others) to skip this site via a robots policy. This is a polite barrier,
+  not a hard one. When you re-benchmark a frontier model released after May
+  2026, please use a held-out variant of the 14-HP search space (rename keys,
+  perturb defaults) or a different downstream task to control for leakage.
 </aside>
 
 <div class="tab-cards" style="margin-top:2em">
   <button data-tab="paper" class="active">
     <span class="tc-title">Interactive Demo <span class="tc-updated-badge">UPDATED</span></span>
-    <span class="tc-sub">All methods &times; all seeds from the 2026 paper</span>
+    <span class="tc-sub">All methods &times; all seeds from the paper</span>
   </button>
   <button data-tab="tracker">
     <span class="tc-title">Live Benchmark <span class="tc-new-badge">NEW</span></span>
