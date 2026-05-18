@@ -217,6 +217,32 @@
   .tab-cards .tc-sub {
     display: block; font-size: 1em; opacity: 0.88; line-height: 1.4;
   }
+  /* Collapsible 'What's new' changelog above the data-leakage note */
+  details.changelog-collapsible {
+    max-width: 900px; margin: 0.5em auto 0.5em;
+  }
+  details.changelog-collapsible > summary {
+    cursor: pointer; padding: 0.45em 0.9em; font-size: 0.88em;
+    background: #f1f8e9; border: 1px solid #c5e1a5; border-radius: 8px;
+    list-style: none;
+  }
+  details.changelog-collapsible > summary::-webkit-details-marker { display: none; }
+  details.changelog-collapsible > summary::before {
+    content: "\25B8 "; color: #558b2f; font-weight: 700;
+  }
+  details.changelog-collapsible[open] > summary::before { content: "\25BE "; }
+  details.changelog-collapsible .changelog-hint { color: #888; font-size: 0.86em; margin-left: 0.4em; }
+  details.changelog-collapsible[open] .changelog-hint { display: none; }
+  table.changelog-table {
+    width: 100%; border-collapse: collapse; margin-top: 0.5em; font-size: 0.88em;
+  }
+  table.changelog-table th, table.changelog-table td {
+    text-align: left; padding: 0.4em 0.6em; border-bottom: 1px solid #eee;
+  }
+  table.changelog-table thead th { color: #555; font-weight: 600; font-size: 0.82em; }
+  table.changelog-table tbody tr:last-child td { border-bottom: none; }
+  table.changelog-table td:first-child { white-space: nowrap; color: #558b2f; font-weight: 500; }
+
   /* Data leakage disclaimer near the top of the page */
   aside.data-leakage-note {
     max-width: 900px; margin: 1em auto 1em;
@@ -226,6 +252,20 @@
   }
   aside.data-leakage-note strong { color: #E65100; }
   aside.data-leakage-note code { background: #fff3e0; padding: 0 0.25em; border-radius: 3px; }
+
+  /* 'UPDATED' badge on the Interactive Demo tab card (less attention-grabbing
+     than NEW since the content is incremental, not net-new). */
+  .tc-updated-badge {
+    display: inline-block; vertical-align: middle;
+    background: #2E7D32; color: #fff;
+    font-size: 0.6em; font-weight: 800;
+    padding: 0.18em 0.55em; border-radius: 8px;
+    margin-left: 0.5em; letter-spacing: 0.08em; text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(46,125,50,0.30);
+  }
+  .tab-cards button.active .tc-updated-badge {
+    background: #fff; color: #2E7D32; box-shadow: none;
+  }
 
   /* Pulsing 'NEW' badge on the Live Benchmark tab card */
   .tc-new-badge {
@@ -512,6 +552,19 @@
   </div>
 </details>
 
+<details class="changelog-collapsible">
+  <summary><strong>What's new</strong> <span class="changelog-hint">(recent updates)</span></summary>
+  <table class="changelog-table">
+    <thead><tr><th>Date</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td>2026-05-18</td><td>Opus 4.6 KA Code + KA HPs extra seeds (5 &rarr; 8 in progress); Sonnet 4.6 KA Code + KA HPs at 5/5</td></tr>
+      <tr><td>2026-05-17</td><td>Opus 4.7 KA Code closes at 5/5</td></tr>
+      <tr><td>2026-05-16</td><td>Live Benchmark tab launched (rolling Centaur / KA Code / KA HPs across Claude generations)</td></tr>
+      <tr><td>2026-05-15</td><td>5-seed extension across all Qwen 27B methods; result dirs de-aliased</td></tr>
+    </tbody>
+  </table>
+</details>
+
 <aside class="data-leakage-note">
   <strong>Data release note.</strong>
   This page publishes the full hyperparameter configurations of every trial
@@ -525,7 +578,7 @@
 
 <div class="tab-cards" style="margin-top:2em">
   <button data-tab="paper" class="active">
-    <span class="tc-title">Interactive Demo</span>
+    <span class="tc-title">Interactive Demo <span class="tc-updated-badge">UPDATED</span></span>
     <span class="tc-sub">All methods &times; all seeds from the 2026 paper</span>
   </button>
   <button data-tab="tracker">
