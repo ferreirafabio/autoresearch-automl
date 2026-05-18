@@ -175,8 +175,23 @@ class Runner:
             if cfg.hybrid_mode == "B" and trial_id > 0 and trial_id % cfg.structural_interval == 0:
                 self._structural_mutation()
 
-            # Suggest
-            hp_config, budget = cfg.backend.suggest()
+            # Suggest. Backends may now hard-fail (raise) on any LLM-transport
+            # error rather than silently falling back. Catch here so one bad
+            # Claude SDK call (rate limit / transient / etc.) kills only this
+            # trial, not the whole job.
+            try:
+                hp_config, budget = cfg.backend.suggest()
+            except Exception as e:
+                logger.warning(
+                    "Trial %d: backend.suggest() raised (%s: %s). Marking trial "
+                    "FAILED and continuing.", trial_id + 1, type(e).__name__, e,
+                )
+                try:
+                    cfg.backend.tell({}, 0.0, {"_error": f"{type(e).__name__}: {e}"})
+                except Exception:
+                    pass
+                trial_id += 1
+                continue
             hp_config = self._to_native_types(hp_config)
 
             # Check for source override (Karpathy agent produces full source code)

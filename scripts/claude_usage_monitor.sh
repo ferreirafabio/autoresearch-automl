@@ -75,9 +75,18 @@ usage_son=$(jq -r '.seven_day_sonnet.utilization // 0' "$CACHE_FILE")
 resets_son=$(jq -r '.seven_day_sonnet.resets_at  // empty' "$CACHE_FILE")
 [ -z "$resets_son" ] && resets_son="$resets_7d"
 
-begin_7d=$(date -d "$resets_7d + 30 min" '+%Y-%m-%dT%H:%M:%S')
-begin_5h=$(date -d "$resets_5h + 5 min"  '+%Y-%m-%dT%H:%M:%S')
-begin_son=$(date -d "$resets_son + 30 min" '+%Y-%m-%dT%H:%M:%S')
+# resets_at may come back as 'null' / empty when utilization is 0 (no active
+# rolling window). Guard the date calls so the script doesn't die.
+_safe_begin() {
+    local resets="$1" offset="$2"
+    [ -z "$resets" ] || [ "$resets" = "null" ] && { echo ""; return; }
+    date -d "$resets $offset" '+%Y-%m-%dT%H:%M:%S' 2>/dev/null || echo ""
+}
+begin_7d=$(_safe_begin "$resets_7d"  "+ 30 min")
+begin_5h=$(_safe_begin "$resets_5h"  "+ 5 min")
+begin_son=$(_safe_begin "$resets_son" "+ 30 min")
+# If a cap is currently at zero, its reset_at is null. That cap can't be
+# triggered anyway (usage < threshold), so an empty begin string is fine.
 
 usage_7d_int=$(printf '%.0f'  "$usage_7d")
 usage_5h_int=$(printf '%.0f'  "$usage_5h")
