@@ -36,7 +36,7 @@ METHOD_COLOR = {
     "ka_hps":  "#FFC107",  # amber, matches KA HPs in Fig 1
 }
 METHOD_DISPLAY = {
-    "centaur": "Centaur (hybrid)",
+    "centaur": "Centaur (CMA-ES + LLM)",
     "ka_code": "Karpathy Agent (Code)",
     "ka_hps":  "Karpathy Agent (14 HPs)",
 }
