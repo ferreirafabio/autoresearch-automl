@@ -201,7 +201,7 @@ def _traces_for(legend: str, color: str, agg: dict, visible: bool,
          "meta": {"model": model_tag}},
         {"legendgroup": legend, "name": label,
          "mode": "lines", "line": {"color": color, "dash": dash, "width": 2.5},
-         "hovertemplate": "<b>" + legend + "</b><br>hour: %{x:.2f}<br>val_bpb: %{y:.4f}<extra></extra>",
+         "hovertemplate": "<b>" + legend + "</b><br>time: %{x:.1f}h<br>val_bpb: %{y:.4f}<extra></extra>",
          "x": x, "y": mean, "type": "scatter", "visible": vis,
          "meta": {"model": model_tag}},
     ]
@@ -225,6 +225,16 @@ def build_traces() -> tuple[list[dict], list[str]]:
                               dash="dot", model_tag="classical")
         groups.append((tpe["final"], triplet, legend))
         info.append(f"TPE (optuna): n={tpe['n_seeds']} seeds, best mean={tpe['final']:.4f}")
+
+    cmaes = _aggregate(EXP2_BENCH / "cma_es")
+    if cmaes is None:
+        info.append("WARNING: CMA-ES has no completed seeds; skipping reference.")
+    else:
+        legend = "CMA-ES (classical ref)"
+        triplet = _traces_for(legend, "#2E7D32", cmaes, visible=True,
+                              dash="dot", model_tag="classical")
+        groups.append((cmaes["final"], triplet, legend))
+        info.append(f"CMA-ES: n={cmaes['n_seeds']} seeds, best mean={cmaes['final']:.4f}")
 
     for gen_idx, gen in enumerate(GENERATIONS):
         dash = DASH_BY_GEN_INDEX[gen_idx % len(DASH_BY_GEN_INDEX)]
@@ -302,19 +312,37 @@ def _plot_html(traces: list[dict]) -> str:
     # Legend matches the Interactive Demo Fig 1 exactly: vertical, anchored
     # just outside the plot on the right (x=1.02), no border, font size 9,
     # click toggles, double-click isolates.
+    # Layout mirrors the Interactive Demo Fig 1 exactly so the look + interactions
+    # are identical across both tabs (font, axes, hover, legend, margins, bg).
     layout = {
-        "height": 620, "margin": {"l": 55, "r": 220, "t": 30, "b": 50},
-        "xaxis": {"title": "Cumulative training time (hours)", "range": [0, 24]},
-        "yaxis": {"title": "Best val_bpb (lower is better)"},
+        "height": 850,
+        "margin": {"l": 70, "r": 40, "t": 60, "b": 60},
+        "paper_bgcolor": "white",
+        "plot_bgcolor": "white",
+        "font": {"family": "Inter, -apple-system, sans-serif"},
+        "hovermode": "closest",
+        "xaxis": {
+            "title": {"text": "Cumulative training time (hours)"},
+            "range": [0, 24], "dtick": 2,
+            "gridcolor": "#e5e5e5",
+            "linecolor": "#333", "linewidth": 1,
+            "mirror": True, "showline": True,
+        },
+        "yaxis": {
+            "title": {"text": "val_bpb (lower is better)"},
+            "range": [0.971, 0.993], "autorange": False,
+            "gridcolor": "#e5e5e5",
+            "linecolor": "#333", "linewidth": 1,
+            "mirror": True, "showline": True,
+        },
         "legend": {
             "x": 1.02, "y": 1,
             "orientation": "v",
             "bgcolor": "rgba(255,255,255,0.9)",
-            "font": {"size": 12},
+            "font": {"size": 9},
             "itemclick": "toggle",
             "itemdoubleclick": "toggleothers",
         },
-        "hovermode": "x unified",
     }
     config = {"responsive": True, "displayModeBar": False}
     filter_html = _filter_buttons(_present_generations(traces))
