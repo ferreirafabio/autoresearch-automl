@@ -35,10 +35,19 @@ log "Backup-dir:    ${BACKUP_DIR}"
 log "Retention:     ${RETENTION_DAYS} days"
 
 # Mirror with retention. --backup-dir captures changes so deletions are reversible.
+# --dropbox-chunk-size=4Ki forces every file through the chunked-upload-session
+# path. We've observed the simple /2/files/upload endpoint returning HTTP 500
+# (empty body) under this proxy / app combination while the session-based
+# path works reliably. 4Ki is small enough that every file (jsonl ≈ 16 KiB)
+# crosses the threshold and uses the session path.
 rclone sync "${SOURCE}" "${DEST}" \
     --backup-dir "${BACKUP_DIR}" \
-    --transfers=8 --checkers=8 \
+    --transfers=8 --checkers=16 \
     --fast-list \
+    --exclude '_legacy*/**' \
+    --dropbox-chunk-size=4Ki \
+    --dropbox-batch-mode=async \
+    --retries=3 --low-level-retries=10 \
     --log-level INFO
 
 # Prune backup dirs older than $RETENTION_DAYS.
