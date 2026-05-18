@@ -35,6 +35,15 @@
     min-height: 100vh;
   }
   header { text-align: center; padding: 2em 0 1em; animation: fadeInDown 0.8s ease-out; }
+  header .back-link {
+    text-align: left; max-width: 900px; margin: -1.2em auto 1em;
+    font-size: 0.88em;
+  }
+  header .back-link a {
+    color: #888; text-decoration: none;
+    transition: color 0.15s;
+  }
+  header .back-link a:hover { color: #E91E63; }
   h1 { font-size: 2.2em; font-weight: 700; margin: 0 0 0.3em; color: #0f0f0f; letter-spacing: -0.02em; }
   .subtitle { color: #666; font-size: 1.1em; font-style: italic; margin-bottom: 1em; font-weight: 400; }
   .authors { color: #444; font-size: 0.95em; margin-bottom: 1.5em; }
@@ -511,6 +520,7 @@
 <body>
 
 <header>
+  <p class="back-link"><a href="https://ferreirafabio.github.io/">&larr; All Projects</a></p>
   <h1>Can LLMs Beat Classical Hyperparameter Optimization Algorithms?</h1>
   <p class="subtitle">A Study on <a href="https://github.com/karpathy/autoresearch" style="color:inherit;text-decoration:underline"><em>autoresearch</em></a></p>
   <p class="authors">Fabio Ferreira · Lucca Wobbe · Arjun Krishnakumar · Frank Hutter · Arber Zela</p>
