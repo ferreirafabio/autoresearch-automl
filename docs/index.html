@@ -566,14 +566,16 @@
 </details>
 
 <aside class="data-leakage-note">
-  <strong>Data release note.</strong>
-  This page publishes the full hyperparameter configurations of every trial
-  (see <a href="./data/trials.json"><code>data/trials.json</code></a>: 3.8 MB, ~10k trials).
-  Any LLM whose pre-training corpus includes this URL may have seen these configs
-  and could exhibit upward-biased HPO scores on Climbmix-400B as a consequence.
-  When you re-benchmark a frontier model released after May 2026, consider a
-  held-out variant of the search space (rename HP keys, perturb defaults) or a
-  different downstream task to mitigate the leakage.
+  <strong>Data access policy.</strong>
+  Aggregated trial summaries (HP configs + outcomes used by the interactive figures
+  below) remain public at <a href="./data/trials.json"><code>data/trials.json</code></a>.
+  The <em>raw per-trial LLM call logs</em> (full prompts, responses, chain-of-thought,
+  error traces; ~12 GB across ~7k files) have been removed from this repository to
+  mitigate training-data bleed-in for future LLMs that crawl GitHub Pages. The full
+  per-trial dataset is available <strong>on request</strong> for academic reproducibility:
+  open an issue on the
+  <a href="https://github.com/ferreirafabio/autoresearch-automl/issues">GitHub repo</a>
+  or email the authors.
 </aside>
 
 <div class="tab-cards" style="margin-top:2em">
