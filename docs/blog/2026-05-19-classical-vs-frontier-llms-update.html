@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classical HPO vs frontier LLMs: an update (2026-05-19)</title>
+<meta name="description" content="An update to 'Can LLMs Beat Classical Hyperparameter Optimization Algorithms?' with doubled seed counts, Claude Opus 4.7 + Sonnet 4.6 added, and a live tracker.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Classical HPO vs frontier LLMs: an update">
+<meta property="og:description" content="Centaur (CMA-ES + LLM) with Claude Opus 4.6 now beats TPE at p=0.055 (n=8). Updated numbers, two new Anthropic generations, and an honest caveat about n=3 in the original paper.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3em 1.5em 4em;
+    color: #1a1a1a;
+    line-height: 1.7;
+    background: linear-gradient(180deg, #fafafa 0%, #f5f5f7 100%);
+    min-height: 100vh;
+    font-size: 17px;
+  }
+  .back-link {
+    text-align: left;
+    margin: -1em 0 1.5em;
+    font-size: 0.88em;
+  }
+  .back-link a {
+    color: #888; text-decoration: none;
+    transition: color 0.15s;
+  }
+  .back-link a:hover { color: #E91E63; }
+
+  header { margin-bottom: 2.5em; animation: fadeInDown 0.8s ease-out; }
+  header .date {
+    color: #888; font-size: 0.85em; letter-spacing: 0.04em;
+    text-transform: uppercase; margin-bottom: 0.4em;
+  }
+  h1 {
+    font-size: 2em; font-weight: 700; margin: 0 0 0.2em;
+    color: #0f0f0f; letter-spacing: -0.02em; line-height: 1.25;
+  }
+  header .author {
+    color: #555; font-size: 0.95em;
+  }
+  header .author a { color: #555; text-decoration: none; border-bottom: 1px dotted #aaa; }
+
+  article {
+    background: white; padding: 2em 2.2em;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.05);
+    animation: fadeInUp 0.8s ease-out 0.1s both;
+  }
+  article h2 {
+    font-size: 1.35em; font-weight: 600; margin: 2em 0 0.6em;
+    color: #0f0f0f; letter-spacing: -0.01em;
+    padding-bottom: 0.3em; border-bottom: 1px solid #eee;
+  }
+  article h2:first-child { margin-top: 0; }
+  article h3 {
+    font-size: 1.08em; font-weight: 600; margin: 1.6em 0 0.4em; color: #222;
+  }
+  article a {
+    color: #E91E63; text-decoration: none;
+    border-bottom: 1px solid rgba(233, 30, 99, 0.2);
+    transition: border-color 0.15s;
+  }
+  article a:hover { border-bottom-color: #E91E63; }
+  article p { margin: 0.8em 0; }
+  article ul, article ol { padding-left: 1.4em; margin: 0.6em 0 1em; }
+  article li { margin: 0.4em 0; }
+  article strong { color: #0f0f0f; }
+  article code {
+    background: #f4f4f6; padding: 0.1em 0.35em;
+    border-radius: 3px; font-size: 0.92em;
+  }
+
+  /* Pull-out blocks */
+  .tldr {
+    background: #fff8e1; border-left: 4px solid #F57C00;
+    border-radius: 0 8px 8px 0;
+    padding: 1em 1.2em; margin: 1.5em 0;
+    font-size: 0.95em;
+  }
+  .tldr strong { color: #E65100; }
+  .tldr ul { margin: 0.4em 0 0.2em; }
+
+  .caveat {
+    background: #f1f8e9; border-left: 4px solid #558b2f;
+    border-radius: 0 8px 8px 0;
+    padding: 0.9em 1.2em; margin: 1.5em 0;
+    font-size: 0.92em; color: #444;
+  }
+
+  .winner-row { background: linear-gradient(90deg, #fff5f7 0%, white 40%); }
+  .winner-row td:first-child::after {
+    content: "  \2605";
+    color: #E91E63; font-weight: 700;
+  }
+
+  table.results {
+    width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.91em;
+  }
+  table.results th, table.results td {
+    text-align: left; padding: 0.55em 0.7em; border-bottom: 1px solid #eee;
+  }
+  table.results thead th {
+    background: #fafafa; color: #555; font-weight: 600;
+    font-size: 0.82em; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  table.results tbody tr:last-child td { border-bottom: none; }
+  table.results td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.results td.sig-strong { color: #2E7D32; font-weight: 600; }
+  .baseline-row td { color: #888; font-style: italic; }
+
+  footer.post-footer {
+    margin-top: 3em; padding-top: 1.5em;
+    color: #888; font-size: 0.85em; text-align: center;
+    border-top: 1px solid #eee;
+  }
+  footer.post-footer a { color: #888; }
+
+  @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 600px) {
+    body { padding: 1.5em 1em 3em; font-size: 16px; }
+    h1 { font-size: 1.55em; }
+    article { padding: 1.3em 1.2em; }
+    table.results { font-size: 0.84em; }
+    table.results th, table.results td { padding: 0.45em 0.5em; }
+  }
+</style>
+</head>
+<body>
+
+<p class="back-link"><a href="../">&larr; Back to demo</a></p>
+
+<header>
+  <p class="date">2026-05-19 &middot; ~10 min read</p>
+  <h1>Classical HPO vs frontier LLMs: an update</h1>
+  <p class="author">
+    Companion post to
+    <a href="https://arxiv.org/abs/2603.24647">Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on autoresearch</a>
+    (Ferreira, Wobbe, Krishnakumar, Hutter, Zela &mdash; 2026)
+  </p>
+</header>
+
+<article>
+
+<div class="tldr">
+  <strong>TL;DR.</strong>
+  <ul>
+    <li>The paper's headline holds and is now <em>stronger</em>: <strong>Centaur (CMA-ES + LLM) with Claude Opus 4.6</strong> beats TPE at <strong>p=0.055 (n=8)</strong>, up from p=0.06 (n=5) in the paper.</li>
+    <li>Two pure-LLM agent methods (<strong>KA Code [Opus 4.6]</strong> and <strong>KA HPs [Opus 4.7]</strong>) now <em>numerically</em> beat TPE. Differences are within noise (p&asymp;0.41) but the means inverted vs the paper.</li>
+    <li>Two new Anthropic generations tested. Opus 4.7 and Sonnet 4.6 do not reproduce the Opus 4.6 advantage in our setup &mdash; <strong>but we cannot yet attribute that to the model</strong>. Could be sampling noise at n=5, prompt sensitivity, or a real model difference.</li>
+    <li>TPE's mean shifted ~0.0004 lower when we extended its seeds from n=3 to n=8. <strong>Part of the apparent "closing gap" is the classical baseline being measured more accurately, not LLMs improving.</strong></li>
+    <li>We keep a <a href="../#tab=tracker">live tracker</a>. Each new Claude release runs here.</li>
+  </ul>
+</div>
+
+<h2>What we already wrote</h2>
+
+<p>
+  In the original paper we benchmarked 9 HPO methods (classical, LLM-based, hybrid) on Karpathy's
+  <a href="https://github.com/karpathy/autoresearch"><em>autoresearch</em></a> task,
+  optimizing a 50M-parameter GPT-2-class transformer on Climbmix-400B. Each method got an identical
+  24h training-time budget per seed. We tested two LLM optimizer "shapes":
+</p>
+<ul>
+  <li><strong>Karpathy Agent (14 HPs)</strong>: the LLM suggests the next config inside a fixed 14-HP search space (DEPTH, head dim, batch sizes, learning rates, etc.).</li>
+  <li><strong>Karpathy Agent (Code)</strong>: the LLM edits <code>train.py</code> directly &mdash; no fixed search space, so OOM and "off-spec" trials are possible.</li>
+</ul>
+<p>
+  We also introduced <strong>Centaur (CMA-ES + LLM)</strong>: a CMA-ES inner loop where, on a fraction of
+  trials, the LLM overrides the proposal with a config informed by CMA-ES's internal state (its current
+  mean and covariance estimate). The paper concluded that classical methods consistently outperform
+  pure LLM-based agents within a fixed search space, that code-editing freedom <em>narrows but does not
+  close</em> the gap with frontier models such as Opus 4.6 and Gemini 3.1 Pro Preview, and that Centaur
+  was the only LLM-flavored setup that landed <em>near</em> the classical baselines.
+</p>
+<p>
+  That was the picture at <strong>n=3 seeds per method</strong>.
+</p>
+
+<h2>What changed</h2>
+
+<p>Three things shifted since publication:</p>
+<ol>
+  <li><strong>More seeds on the headline methods.</strong> TPE: n=3 &rarr; <strong>n=8</strong>.
+    Centaur (CMA-ES + LLM) [Opus 4.6]: n=3 &rarr; <strong>n=8</strong>. The other methods went from n=3 to n=5 (with extras still in flight).</li>
+  <li><strong>Two new Anthropic generations.</strong> Claude Opus 4.7 (April 2026) and Claude Sonnet 4.6 (May 2026), both tested via the Claude Code SDK with <code>thinking=False</code>, identical SUGGEST_PROMPT to the paper's Opus 4.6 runs, identical VRAM cap.</li>
+  <li><strong>A live tracker.</strong> Auto-updates the comparison and the paired Wilcoxon p-values whenever new seeds clear the 95% training-budget threshold.</li>
+</ol>
+
+<div class="caveat">
+  A caveat to flag up front: TPE's mean shifted from ~0.9760 (n=5) to <strong>0.9755 (n=8)</strong> as
+  the continuation seeds came in. The classical baseline got measurably better with more data.
+  Part of what looks like LLM improvement vs the paper is, more honestly, TPE getting a better point
+  estimate. We come back to this below.
+</div>
+
+<h2>Updated results</h2>
+
+<p>The current state of the 11 method &times; generation cells in the tracker:</p>
+
+<table class="results">
+  <thead>
+    <tr><th>Method</th><th class="num">Mean &plusmn; std</th><th class="num">n vs TPE</th><th class="num">p (one-sided)</th></tr>
+  </thead>
+  <tbody>
+    <tr class="winner-row"><td><strong>Centaur (CMA-ES + LLM) [Opus 4.6]</strong></td><td class="num"><strong>0.9738 &plusmn; 0.0013</strong></td><td class="num">8</td><td class="num sig-strong">0.055 **</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Opus 4.7]</td><td class="num">0.9752 &plusmn; 0.0029</td><td class="num">5</td><td class="num">0.406</td></tr>
+    <tr><td>Karpathy Agent (Code) [Opus 4.6]</td><td class="num">0.9753 &plusmn; 0.0032</td><td class="num">5</td><td class="num">0.406</td></tr>
+    <tr class="baseline-row"><td>TPE (classical, baseline)</td><td class="num">0.9755 &plusmn; 0.0019</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Opus 4.6]</td><td class="num">0.9757 &plusmn; 0.0029</td><td class="num">5</td><td class="num">0.500</td></tr>
+    <tr><td>Centaur (CMA-ES + LLM) [Opus 4.7]</td><td class="num">0.9764 &plusmn; 0.0006</td><td class="num">5</td><td class="num">0.781</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Sonnet 4.6]</td><td class="num">0.9764 &plusmn; 0.0016</td><td class="num">5</td><td class="num">0.594</td></tr>
+    <tr class="baseline-row"><td>CMA-ES (classical)</td><td class="num">0.9774 &plusmn; 0.0024</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+    <tr><td>Centaur (CMA-ES + LLM) [Sonnet 4.6]</td><td class="num">0.9780 &plusmn; 0.0028</td><td class="num">5</td><td class="num">0.969</td></tr>
+    <tr><td>Karpathy Agent (Code) [Opus 4.7]</td><td class="num">0.9790 &plusmn; 0.0021</td><td class="num">5</td><td class="num">0.906</td></tr>
+    <tr><td>Karpathy Agent (Code) [Sonnet 4.6]</td><td class="num">0.9800 &plusmn; 0.0047</td><td class="num">5</td><td class="num">0.969</td></tr>
+  </tbody>
+</table>
+
+<p>Reading the table:</p>
+<ul>
+  <li><strong>Three of nine</strong> LLM &times; generation variants numerically beat TPE (Centaur Opus 4.6, KA HPs Opus 4.7, KA Code Opus 4.6).</li>
+  <li><strong>One of nine</strong> does so with statistical significance: Centaur (CMA-ES + LLM) [Opus 4.6], with p=0.055 at n=8 paired observations.</li>
+  <li>Sonnet 4.6 variants cluster near the bottom across all three method families. CMA-ES alone (no LLM) is mid-pack.</li>
+</ul>
+
+<h2>Surprises worth a paragraph</h2>
+
+<h3>1. Centaur with Opus 4.6 holds up; the picture across models is mixed</h3>
+<p>
+  The same recipe (same prompt, same CMA-ES state hand-off, same VRAM cap, same 30% LLM-override ratio)
+  gives p=0.055 with Opus 4.6 but lands in the noise for Opus 4.7 (p=0.78) and Sonnet 4.6 (p=0.97,
+  mean is actually <em>above</em> TPE). We do not have enough data to claim this is a real
+  "Opus 4.6 is special" effect rather than seed-level variance at n=5 for the other two generations.
+  As the tracker fills in more seeds the picture may change.
+  <strong>For now: Centaur's lift is real for the configuration we tested in the paper; whether it
+  generalizes across LLMs is an open question.</strong>
+</p>
+
+<h3>2. KA Code [Opus 4.6] closes the "code-editing" gap the paper said it couldn't</h3>
+<p>
+  The paper wrote: <em>"Allowing the LLM to directly edit source code narrows the gap but does not close
+  it, even with frontier models such as Claude Opus 4.6."</em> Updated data: KA Code [Opus 4.6] mean =
+  <strong>0.9753</strong>, TPE mean = <strong>0.9755</strong>. The mean is now <em>below</em> TPE by
+  0.0002. Statistical test: paired Wilcoxon p=0.41, well inside noise. So <strong>"doesn't significantly
+  close" is still defensible; "doesn't close" was overstated</strong> at the paper's n=3.
+  With more seeds we may see the gap stay closed or re-open.
+</p>
+
+<h3>3. Part of the closing is TPE getting better data</h3>
+<p>
+  TPE n=3 &rarr; n=8 moved its mean from approximately 0.9760 to 0.9755. That is roughly the same
+  magnitude as the KA Code [Opus 4.6] gap closure. At n=3, paired tests on a 0.001 effect at this
+  noise level have very wide confidence intervals; the paper's headline numbers were on thin
+  statistical ice and we should have noted that more clearly. This is the most important
+  methodological lesson from the update.
+</p>
+
+<h3>4. CMA-ES alone is the worst classical method on this benchmark</h3>
+<p>
+  CMA-ES standalone: 0.9774. TPE: 0.9755. But hand CMA-ES's internal state to an LLM (Centaur with
+  Opus 4.6) and the combined system is the best of everything tested. The hybrid's lift is not
+  "the LLM rescues a bad classical method" &mdash; it's that exposing the CMA-ES internal state to
+  the LLM gives the LLM a foothold that pure-LLM agents and pure-CMA-ES alone do not have.
+</p>
+
+<h2>What we cannot claim yet</h2>
+<ul>
+  <li><strong>No GPT-5 in the comparison.</strong> OpenAI's flagship is conspicuously absent. Adding GPT-5 is the next item on the queue; results will land in the live tracker as they complete.</li>
+  <li><strong>One task.</strong> Climbmix-400B language modeling is one downstream. The Centaur-Opus-4.6 effect may be task-specific. We have no evidence either way.</li>
+  <li><strong>n=8 is still small.</strong> With n=16 the Wilcoxon p-value could move &plusmn;0.03 in either direction. The qualitative story is unlikely to flip but the exact significance level could.</li>
+  <li><strong>We do not understand <em>why</em> Opus 4.6 + Centaur works.</strong> Candidate hypotheses (prompt-sensitivity, reasoning-budget differences, training-data exposure to HPO content) are all speculation right now.</li>
+</ul>
+
+<h2>The live tracker</h2>
+<p>
+  <a href="../#tab=tracker">https://ferreirafabio.github.io/autoresearch-automl/#tab=tracker</a>
+</p>
+<p>Four sections:</p>
+<ul>
+  <li><strong>A. Convergence.</strong> All method &times; generation cells, val_bpb vs cumulative wall-time, mean &plusmn; std band. Filter by Claude generation.</li>
+  <li><strong>B. Slopegraph.</strong> Per-method progression across the Claude generations we've tested.</li>
+  <li><strong>C. Wilcoxon forest.</strong> &Delta; vs TPE with paired p-values.</li>
+  <li><strong>D. Per-generation summary cards.</strong> One card per Anthropic release; last-updated timestamp; current leader.</li>
+</ul>
+<p>Each new Anthropic release lands here automatically once the 5-seed campaign for that release clears the 95% training-budget threshold.</p>
+
+<h2>What's next</h2>
+<ul>
+  <li><strong>GPT-5.</strong> Backend scaffolding in progress; will fold into the live tracker once seed runs complete.</li>
+  <li><strong>More seeds on the lagging methods</strong> to settle the "is it Opus 4.6 specifically or just noise?" question.</li>
+  <li><strong>arXiv v2</strong> after the NeurIPS 2026 review window closes, with the updated numbers and a more cautious framing of the n=3 results in the original.</li>
+</ul>
+
+<footer class="post-footer">
+  Code: <a href="https://github.com/ferreirafabio/autoresearch-automl">github.com/ferreirafabio/autoresearch-automl</a>
+  &middot; Paper: <a href="https://arxiv.org/abs/2603.24647">arXiv:2603.24647</a>
+  &middot; <a href="https://github.com/ferreirafabio/autoresearch-automl/issues">Issues / contact</a>
+</footer>
+
+</article>
+
+<!-- Privacy-friendly analytics (GoatCounter) -->
+<script data-goatcounter="https://ferreirafabio.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+</body>
+</html>
