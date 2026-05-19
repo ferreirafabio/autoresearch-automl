@@ -156,7 +156,7 @@
   <ul>
     <li>The paper's headline holds and is now <em>stronger</em>: <strong>Centaur (CMA-ES + LLM) with Claude Opus 4.6</strong> beats TPE at <strong>p=0.055 (n=8)</strong>, up from p=0.06 (n=5) in the paper.</li>
     <li>Two pure-LLM agent methods (<strong>KA Code [Opus 4.6]</strong> and <strong>KA HPs [Opus 4.7]</strong>) now <em>numerically</em> beat TPE. Differences are within noise (p&asymp;0.41) but the means inverted vs the paper.</li>
-    <li>Two new Anthropic generations tested. Opus 4.7 and Sonnet 4.6 do not reproduce the Opus 4.6 advantage in our setup &mdash; <strong>but we cannot yet attribute that to the model</strong>. Could be sampling noise at n=5, prompt sensitivity, or a real model difference.</li>
+    <li>Two new Anthropic generations tested. Opus 4.7 and Sonnet 4.6 do not reproduce the Opus 4.6 advantage in our setup at n=5. We do not have enough seeds to conclude whether this is a model difference or sampling variance.</li>
     <li>TPE's mean shifted ~0.0004 lower when we extended its seeds from n=3 to n=8. <strong>Part of the apparent "closing gap" is the classical baseline being measured more accurately, not LLMs improving.</strong></li>
     <li>We keep a <a href="../#tab=tracker">live tracker</a>. Each new Claude release runs here.</li>
   </ul>
@@ -239,11 +239,10 @@
 <p>
   The same recipe (same prompt, same CMA-ES state hand-off, same VRAM cap, same 30% LLM-override ratio)
   gives p=0.055 with Opus 4.6 but lands in the noise for Opus 4.7 (p=0.78) and Sonnet 4.6 (p=0.97,
-  mean is actually <em>above</em> TPE). We do not have enough data to claim this is a real
-  "Opus 4.6 is special" effect rather than seed-level variance at n=5 for the other two generations.
-  As the tracker fills in more seeds the picture may change.
-  <strong>For now: Centaur's lift is real for the configuration we tested in the paper; whether it
-  generalizes across LLMs is an open question.</strong>
+  mean is actually <em>above</em> TPE). At n=5 for the Opus 4.7 and Sonnet 4.6 runs we cannot
+  distinguish a real model effect from seed-level variance.
+  <strong>For now: Centaur's lift is observed for the configuration we tested in the paper; whether
+  it generalizes across LLMs is an open question.</strong>
 </p>
 
 <h3>2. KA Code [Opus 4.6] closes the "code-editing" gap the paper said it couldn't</h3>
@@ -253,7 +252,6 @@
   <strong>0.9753</strong>, TPE mean = <strong>0.9755</strong>. The mean is now <em>below</em> TPE by
   0.0002. Statistical test: paired Wilcoxon p=0.41, well inside noise. So <strong>"doesn't significantly
   close" is still defensible; "doesn't close" was overstated</strong> at the paper's n=3.
-  With more seeds we may see the gap stay closed or re-open.
 </p>
 
 <h3>3. Part of the closing is TPE getting better data</h3>
@@ -276,9 +274,9 @@
 <h2>What we cannot claim yet</h2>
 <ul>
   <li><strong>No GPT-5 in the comparison.</strong> OpenAI's flagship is conspicuously absent. Adding GPT-5 is the next item on the queue; results will land in the live tracker as they complete.</li>
-  <li><strong>One task.</strong> Climbmix-400B language modeling is one downstream. The Centaur-Opus-4.6 effect may be task-specific. We have no evidence either way.</li>
-  <li><strong>n=8 is still small.</strong> With n=16 the Wilcoxon p-value could move &plusmn;0.03 in either direction. The qualitative story is unlikely to flip but the exact significance level could.</li>
-  <li><strong>We do not understand <em>why</em> Opus 4.6 + Centaur works.</strong> Candidate hypotheses (prompt-sensitivity, reasoning-budget differences, training-data exposure to HPO content) are all speculation right now.</li>
+  <li><strong>One task.</strong> Climbmix-400B language modeling is one downstream. We have not tested whether the Centaur-Opus-4.6 effect carries to other tasks.</li>
+  <li><strong>n=8 is still small.</strong> The Wilcoxon p-value at n=8 sits at 0.055; with additional seeds it will move and we cannot predict the direction.</li>
+  <li><strong>We do not have a mechanistic explanation for why Opus 4.6 + Centaur outperforms the other configurations.</strong></li>
 </ul>
 
 <h2>The live tracker</h2>
