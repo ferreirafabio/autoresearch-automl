@@ -72,6 +72,14 @@ GENERATIONS: list[dict] = [
         "ka_code": "karpathy_agent_claude_sonnet_4_6",
         "ka_hps":  "karpathy_agent_hps_claude_sonnet_4_6",
     },
+    {
+        "tag":     "Opus 4.8",
+        "tag_id":  "opus_4_8",
+        "base":    RESULTS / "opus48_benchmark",
+        "centaur": "centaur_claude_opus_4_8",
+        "ka_code": "karpathy_agent_claude_opus_4_8",
+        "ka_hps":  "karpathy_agent_hps_claude_opus_4_8",
+    },
 ]
 
 INTERP_HOURS = np.linspace(0, 24, 1000)
