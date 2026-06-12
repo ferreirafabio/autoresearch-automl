@@ -708,30 +708,32 @@ def build_cards_html() -> tuple[str, list[str]]:
 
     cards_html: list[str] = []
     for gen in GENERATIONS:
-        rows_html: list[str] = []
+        # Collect per-method stats first, then sort by mean ascending (best
+        # first) before rendering rows. Rows without data sink to the bottom.
+        per_method: list[dict] = []
         last_mtime: float = 0.0
         any_data = False
         for method_key in ("centaur", "ka_code", "ka_hps"):
             sub = gen.get(method_key)
             if not sub:
-                rows_html.append(_card_row(METHOD_DISPLAY[method_key], None, None, None, None, METHOD_COLOR[method_key]))
+                per_method.append({"method_key": method_key, "n": None, "mean": None,
+                                   "std": None, "p_str": None, "rank": float("inf")})
                 continue
             method_dir = gen["base"] / sub
             m_finals = _seed_finals(method_dir)
             if not m_finals:
-                rows_html.append(_card_row(METHOD_DISPLAY[method_key], 0, None, None, None, METHOD_COLOR[method_key]))
+                per_method.append({"method_key": method_key, "n": 0, "mean": None,
+                                   "std": None, "p_str": None, "rank": float("inf")})
                 continue
             any_data = True
             vals = np.array(list(m_finals.values()))
             mean = float(vals.mean())
             std = float(vals.std()) if vals.size > 1 else 0.0
             n = vals.size
-            # mtime tracker
             for sdir in method_dir.glob("seed_*"):
                 p = sdir / "trials.jsonl"
                 if p.is_file():
                     last_mtime = max(last_mtime, p.stat().st_mtime)
-            # paired Wilcoxon vs TPE
             common = sorted(set(tpe_finals) & set(m_finals))
             if len(common) >= 2:
                 a = np.array([m_finals[s] for s in common])
@@ -743,7 +745,15 @@ def build_cards_html() -> tuple[str, list[str]]:
                     p_str = "-"
             else:
                 p_str = f"n={len(common)}"
-            rows_html.append(_card_row(METHOD_DISPLAY[method_key], n, mean, std, p_str, METHOD_COLOR[method_key]))
+            per_method.append({"method_key": method_key, "n": n, "mean": mean,
+                               "std": std, "p_str": p_str, "rank": mean})
+
+        per_method.sort(key=lambda r: r["rank"])
+        rows_html: list[str] = []
+        for r in per_method:
+            rows_html.append(_card_row(METHOD_DISPLAY[r["method_key"]], r["n"],
+                                       r["mean"], r["std"], r["p_str"],
+                                       METHOD_COLOR[r["method_key"]]))
 
         if last_mtime > 0:
             updated = datetime.fromtimestamp(last_mtime, tz=timezone.utc).strftime("%Y-%m-%d")
