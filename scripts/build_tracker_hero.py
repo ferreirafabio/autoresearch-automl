@@ -532,18 +532,28 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
                 "n":    int(vals.size),
                 "finals": finals,
             })
-    # Always include TPE as a candidate so a strong classical can hold the crown
-    if len(tpe_finals) >= min_seeds:
-        vals = np.array(list(tpe_finals.values()))
+    # Always include classical baselines so a strong classical can hold the crown
+    # and so readers see how LLM-driven methods stack against the prior art.
+    classical = [
+        ("TPE (classical baseline)",    "tpe",     "optuna", "#2196F3"),
+        ("CMA-ES (classical baseline)", "cma_es",  "cma_es", "#2E7D32"),
+        ("SMAC (classical baseline)",   "smac",    "smac",   "#7E57C2"),
+        ("Random (classical baseline)", "random",  "random", "#9E9E9E"),
+    ]
+    for label, key, dirname, color in classical:
+        finals = _seed_finals(EXP2_BENCH / dirname)
+        if len(finals) < min_seeds:
+            continue
+        vals = np.array(list(finals.values()))
         candidates.append({
-            "label": "TPE (classical baseline)",
-            "method_key": "tpe",
+            "label": label,
+            "method_key": key,
             "gen_tag": "classical",
-            "color": "#2196F3",
+            "color": color,
             "mean": float(vals.mean()),
             "std":  float(vals.std()),
             "n":    int(vals.size),
-            "finals": tpe_finals,
+            "finals": finals,
         })
 
     if not candidates:
