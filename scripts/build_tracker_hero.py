@@ -587,8 +587,9 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
                 pass
 
     eyebrow = "Current leader" if winner["method_key"] != "tpe" else "TPE still on top"
-    note = (f"Best across {len(candidates)} method &times; generation combinations with "
-            f"&ge;{min_seeds} completed seeds.")
+    actual_min_n = min(c["n"] for c in candidates)
+    note = (f"Best across {len(candidates)} method &times; generation combinations "
+            f"(n={actual_min_n}-8 seeds per row).")
     banner = (
         f'<div class="tracker-leader">\n'
         f'  <div class="leader-eyebrow">{eyebrow}</div>\n'
