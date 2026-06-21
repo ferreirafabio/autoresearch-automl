@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classical HPO vs frontier LLMs: an update (2026-05-19)</title>
-<meta name="description" content="An update to 'Can LLMs Beat Classical Hyperparameter Optimization Algorithms?' with doubled seed counts, Claude Opus 4.7 + Sonnet 4.6 added, and a live tracker.">
+<title>Classical HPO vs frontier LLMs: an update (2026-05-19, revised 2026-06-20)</title>
+<meta name="description" content="An update to 'Can LLMs Beat Classical Hyperparameter Optimization Algorithms?' with full n=8 seed campaigns, Claude Opus 4.7 / Sonnet 4.6 / Opus 4.8 added, and a mechanistic finding for the Centaur 4.7 regression.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Classical HPO vs frontier LLMs: an update">
-<meta property="og:description" content="Centaur (CMA-ES + LLM) with Claude Opus 4.6 now beats TPE at p=0.055 (n=8). Updated numbers, two new Anthropic generations, and an honest caveat about n=3 in the original paper.">
+<meta property="og:description" content="Centaur (CMA-ES + LLM) with Claude Opus 4.6 still beats TPE at p=0.055 (n=8). Karpathy Agent (14 HPs) with Opus 4.7 is the runner-up at p=0.098. We diagnose why Centaur with Opus 4.7 underperforms (interaction effect, not LLM quality).">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
@@ -140,23 +140,24 @@
 <p class="back-link"><a href="../">&larr; Back to demo</a></p>
 
 <header>
-  <p class="date">2026-05-19 &middot; ~10 min read</p>
+  <p class="date">2026-05-19 &middot; revised 2026-06-20 &middot; ~10 min read</p>
   <h1>Classical HPO vs frontier LLMs: an update</h1>
   <p class="author">
     Companion post to
     <a href="https://arxiv.org/abs/2603.24647">Can LLMs Beat Classical Hyperparameter Optimization Algorithms? A Study on autoresearch</a>
-    (Ferreira, Wobbe, Krishnakumar, Hutter, Zela &mdash; 2026)
+    (Ferreira, Wobbe, Krishnakumar, Hutter, Zela, 2026)
   </p>
 </header>
 
 <article>
 
 <div class="tldr">
-  <strong>TL;DR.</strong>
+  <strong>TL;DR (updated 2026-06-20).</strong>
   <ul>
-    <li>The paper's headline holds and is now <em>stronger</em>: <strong>Centaur (CMA-ES + LLM) with Claude Opus 4.6</strong> beats TPE at <strong>p=0.055 (n=8)</strong>, up from p=0.06 (n=5) in the paper.</li>
-    <li>Two pure-LLM agent methods (<strong>KA Code [Opus 4.6]</strong> and <strong>KA HPs [Opus 4.7]</strong>) now <em>numerically</em> beat TPE. Differences are within noise (p&asymp;0.41) but the means inverted vs the paper.</li>
-    <li>Two new Anthropic generations tested. Opus 4.7 and Sonnet 4.6 do not reproduce the Opus 4.6 advantage in our setup at n=5. We do not have enough seeds to conclude whether this is a model difference or sampling variance.</li>
+    <li>The paper's headline still holds at n=8: <strong>Centaur (CMA-ES + LLM) with Claude Opus 4.6</strong> beats TPE at <strong>p=0.055</strong>. Same point estimate as in the original update (0.9738 mean), now with the full 8-seed campaign closed.</li>
+    <li><strong>Karpathy Agent (14 HPs) with Opus 4.7</strong> is the runner-up across all 12 method &times; generation cells at <strong>p=0.098 marginal-sig vs TPE (n=8)</strong>, mean 0.9741. Pure-LLM, no CMA scaffold, second-best row in the table.</li>
+    <li><strong>Three Anthropic generations now in the comparison</strong> (Opus 4.7, Sonnet 4.6, Opus 4.8). Opus 4.8 reproduces Centaur's direction (mean 0.9748, beats TPE numerically, p=0.32) but not its significance. Sonnet 4.6 lands above TPE in every method.</li>
+    <li><strong>Centaur with Opus 4.7 is the only Centaur variant that loses to TPE</strong> (p=0.84). We diagnose this as a CMA+LLM <em>composition pathology</em>, not an Opus 4.7 quality issue: Karpathy Agent (14 HPs) with the same Opus 4.7 is the runner-up. Details below.</li>
     <li>TPE's mean shifted ~0.0004 lower when we extended its seeds from n=3 to n=8. <strong>Part of the apparent "closing gap" is the classical baseline being measured more accurately, not LLMs improving.</strong></li>
     <li>We keep a <a href="../#tab=tracker">live tracker</a>. Each new Claude release runs here.</li>
   </ul>
@@ -172,7 +173,7 @@
 </p>
 <ul>
   <li><strong>Karpathy Agent (14 HPs)</strong>: the LLM suggests the next config inside a fixed 14-HP search space (DEPTH, head dim, batch sizes, learning rates, etc.).</li>
-  <li><strong>Karpathy Agent (Code)</strong>: the LLM edits <code>train.py</code> directly &mdash; no fixed search space, so OOM and "off-spec" trials are possible.</li>
+  <li><strong>Karpathy Agent (Code)</strong>: the LLM edits <code>train.py</code> directly. No fixed search space, so OOM and "off-spec" trials are possible.</li>
 </ul>
 <p>
   We also introduced <strong>Centaur (CMA-ES + LLM)</strong>: a CMA-ES inner loop where, on a fraction of
@@ -188,12 +189,13 @@
 
 <h2>What changed</h2>
 
-<p>Three things shifted since publication:</p>
+<p>Three things shifted since publication; one further thing shifted between the original 2026-05-19 update and this 2026-06-20 revision:</p>
 <ol>
-  <li><strong>More seeds on the headline methods.</strong> TPE: n=3 &rarr; <strong>n=8</strong>.
-    Centaur (CMA-ES + LLM) [Opus 4.6]: n=3 &rarr; <strong>n=8</strong>. The other methods went from n=3 to n=5 (with extras still in flight).</li>
-  <li><strong>Two new Anthropic generations.</strong> Claude Opus 4.7 (April 2026) and Claude Sonnet 4.6 (May 2026), both tested via the Claude Code SDK with <code>thinking=False</code>, identical SUGGEST_PROMPT to the paper's Opus 4.6 runs, identical VRAM cap.</li>
+  <li><strong>Full n=8 campaigns on every method now.</strong> TPE: n=3 &rarr; <strong>n=8</strong>.
+    Centaur (CMA-ES + LLM) for every Anthropic generation: <strong>n=8</strong>. Karpathy Agent (14 HPs) for every Opus generation: <strong>n=8</strong>. Karpathy Agent (Code) is at n=8 for Opus 4.6/4.7, still n=5 for Opus 4.8 and Sonnet 4.6.</li>
+  <li><strong>Three new Anthropic generations.</strong> Claude Opus 4.7 (April 2026), Claude Sonnet 4.6 (May 2026), and Claude Opus 4.8 (June 2026). All tested via the Claude Code SDK with <code>thinking=False</code>, identical SUGGEST_PROMPT to the paper's Opus 4.6 runs, identical VRAM cap.</li>
   <li><strong>A live tracker.</strong> Auto-updates the comparison and the paired Wilcoxon p-values whenever new seeds clear the 95% training-budget threshold.</li>
+  <li><strong>A mechanistic finding for the Centaur Opus 4.7 underperformance</strong> (added 2026-06-20). It's an interaction effect between Centaur's <code>_override_trial_params</code> + <code>FAILURE_PENALTY</code> bookkeeping and a small uptick in Opus 4.7's willingness to suggest OOM-prone configs. See <em>Why Centaur with Opus 4.7 underperforms</em> below.</li>
 </ol>
 
 <div class="caveat">
@@ -205,78 +207,146 @@
 
 <h2>Updated results</h2>
 
-<p>The current state of the 11 method &times; generation cells in the tracker:</p>
+<p>The current state of the 12 LLM &times; generation cells plus 4 classical baselines (all n=8 unless noted):</p>
 
 <table class="results">
   <thead>
-    <tr><th>Method</th><th class="num">Mean &plusmn; std</th><th class="num">n vs TPE</th><th class="num">p (one-sided)</th></tr>
+    <tr><th>Method</th><th class="num">Mean &plusmn; std</th><th class="num">n</th><th class="num">p vs TPE (one-sided)</th></tr>
   </thead>
   <tbody>
-    <tr class="winner-row"><td><strong>Centaur (CMA-ES + LLM) [Opus 4.6]</strong></td><td class="num"><strong>0.9738 &plusmn; 0.0013</strong></td><td class="num">8</td><td class="num sig-strong">0.055 **</td></tr>
-    <tr><td>Karpathy Agent (14 HPs) [Opus 4.7]</td><td class="num">0.9752 &plusmn; 0.0029</td><td class="num">5</td><td class="num">0.406</td></tr>
-    <tr><td>Karpathy Agent (Code) [Opus 4.6]</td><td class="num">0.9753 &plusmn; 0.0032</td><td class="num">5</td><td class="num">0.406</td></tr>
-    <tr class="baseline-row"><td>TPE (classical, baseline)</td><td class="num">0.9755 &plusmn; 0.0019</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
-    <tr><td>Karpathy Agent (14 HPs) [Opus 4.6]</td><td class="num">0.9757 &plusmn; 0.0029</td><td class="num">5</td><td class="num">0.500</td></tr>
-    <tr><td>Centaur (CMA-ES + LLM) [Opus 4.7]</td><td class="num">0.9764 &plusmn; 0.0006</td><td class="num">5</td><td class="num">0.781</td></tr>
-    <tr><td>Karpathy Agent (14 HPs) [Sonnet 4.6]</td><td class="num">0.9764 &plusmn; 0.0016</td><td class="num">5</td><td class="num">0.594</td></tr>
-    <tr class="baseline-row"><td>CMA-ES (classical)</td><td class="num">0.9774 &plusmn; 0.0024</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
-    <tr><td>Centaur (CMA-ES + LLM) [Sonnet 4.6]</td><td class="num">0.9780 &plusmn; 0.0028</td><td class="num">5</td><td class="num">0.969</td></tr>
-    <tr><td>Karpathy Agent (Code) [Opus 4.7]</td><td class="num">0.9790 &plusmn; 0.0021</td><td class="num">5</td><td class="num">0.906</td></tr>
+    <tr class="winner-row"><td><strong>Centaur (CMA-ES + LLM) [Opus 4.6]</strong></td><td class="num"><strong>0.9738 &plusmn; 0.0013</strong></td><td class="num">8</td><td class="num sig-strong">0.055 *</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Opus 4.7]</td><td class="num">0.9741 &plusmn; 0.0027</td><td class="num">8</td><td class="num sig-strong">0.098 *</td></tr>
+    <tr><td>Centaur (CMA-ES + LLM) [Opus 4.8]</td><td class="num">0.9748 &plusmn; 0.0015</td><td class="num">8</td><td class="num">0.320</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Opus 4.6]</td><td class="num">0.9749 &plusmn; 0.0025</td><td class="num">8</td><td class="num">0.320</td></tr>
+    <tr><td>Karpathy Agent (Code) [Opus 4.8]</td><td class="num">0.9752 &plusmn; 0.0035</td><td class="num">5</td><td class="num">0.406</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Opus 4.8]</td><td class="num">0.9752 &plusmn; 0.0023</td><td class="num">8</td><td class="num">0.527</td></tr>
+    <tr><td>Karpathy Agent (Code) [Opus 4.6]</td><td class="num">0.9755 &plusmn; 0.0035</td><td class="num">8</td><td class="num">0.527</td></tr>
+    <tr class="baseline-row"><td>TPE (classical, baseline)</td><td class="num">0.9755 &plusmn; 0.0018</td><td class="num">8</td><td class="num">-</td></tr>
+    <tr><td>Centaur (CMA-ES + LLM) [Opus 4.7]</td><td class="num">0.9760 &plusmn; 0.0012</td><td class="num">8</td><td class="num">0.844</td></tr>
+    <tr><td>Karpathy Agent (14 HPs) [Sonnet 4.6]</td><td class="num">0.9763 &plusmn; 0.0015</td><td class="num">8</td><td class="num">0.770</td></tr>
+    <tr><td>Centaur (CMA-ES + LLM) [Sonnet 4.6]</td><td class="num">0.9773 &plusmn; 0.0021</td><td class="num">8</td><td class="num">0.973</td></tr>
+    <tr class="baseline-row"><td>CMA-ES (classical)</td><td class="num">0.9776 &plusmn; 0.0028</td><td class="num">8</td><td class="num">-</td></tr>
+    <tr><td>Karpathy Agent (Code) [Opus 4.7]</td><td class="num">0.9786 &plusmn; 0.0024</td><td class="num">8</td><td class="num">0.973</td></tr>
     <tr><td>Karpathy Agent (Code) [Sonnet 4.6]</td><td class="num">0.9800 &plusmn; 0.0047</td><td class="num">5</td><td class="num">0.969</td></tr>
+    <tr class="baseline-row"><td>SMAC (classical)</td><td class="num">0.9816 &plusmn; 0.0047</td><td class="num">8</td><td class="num">-</td></tr>
+    <tr class="baseline-row"><td>Random (classical)</td><td class="num">0.9869 &plusmn; 0.0030</td><td class="num">8</td><td class="num">-</td></tr>
   </tbody>
 </table>
 
 <p>Reading the table:</p>
 <ul>
-  <li><strong>Three of nine</strong> LLM &times; generation variants numerically beat TPE (Centaur Opus 4.6, KA HPs Opus 4.7, KA Code Opus 4.6).</li>
-  <li><strong>One of nine</strong> does so with statistical significance: Centaur (CMA-ES + LLM) [Opus 4.6], with p=0.055 at n=8 paired observations.</li>
-  <li>Sonnet 4.6 variants cluster near the bottom across all three method families. CMA-ES alone (no LLM) is mid-pack.</li>
+  <li><strong>Two of twelve</strong> LLM &times; generation variants beat TPE with marginal statistical significance (p &lt; 0.10): Centaur (CMA-ES + LLM) [Opus 4.6] at p=0.055, and Karpathy Agent (14 HPs) [Opus 4.7] at p=0.098. Both are 8-seed paired comparisons.</li>
+  <li><strong>Five more</strong> LLM cells beat TPE numerically without significance (Centaur Opus 4.8, Karpathy Agent (14 HPs) Opus 4.6 / Opus 4.8, Karpathy Agent (Code) Opus 4.6 / Opus 4.8).</li>
+  <li><strong>One Centaur generation loses to TPE</strong>: Opus 4.7 at p=0.844 (only Centaur row above TPE). We diagnose it below as a composition pathology, not an Opus 4.7 LLM-quality problem.</li>
+  <li>Sonnet 4.6 variants cluster above TPE in every method. Same prompt, same VRAM, weaker model.</li>
+  <li>Of the four classical methods, TPE is by far the strongest. CMA-ES alone (0.9776) sits 12th overall, ahead of only the worst three rows. SMAC and Random are not competitive at this budget.</li>
 </ul>
 
 <h2>Surprises worth a paragraph</h2>
 
-<h3>1. Centaur with Opus 4.6 holds up; the picture across models is mixed</h3>
+<h3>1. Centaur with Opus 4.6 holds up; Opus 4.8 reproduces the direction</h3>
 <p>
-  The same recipe (same prompt, same CMA-ES state hand-off, same VRAM cap, same 30% LLM-override ratio)
-  gives p=0.055 with Opus 4.6 but lands in the noise for Opus 4.7 (p=0.78) and Sonnet 4.6 (p=0.97,
-  mean is actually <em>above</em> TPE). At n=5 for the Opus 4.7 and Sonnet 4.6 runs we cannot
-  distinguish a real model effect from seed-level variance.
-  <strong>For now: Centaur's lift is observed for the configuration we tested in the paper; whether
-  it generalizes across LLMs is an open question.</strong>
+  The same recipe (same prompt, same CMA-ES state hand-off, same VRAM cap, same 30% LLM-override
+  ratio) gives p=0.055 with Opus 4.6 at n=8. It reproduces the direction with the newer Opus 4.8
+  (mean 0.9748, beats TPE numerically, p=0.32 at n=8) but not the significance. Sonnet 4.6 lands
+  above TPE (p=0.97). And Opus 4.7 falls all the way to p=0.84, by a wide margin the worst Centaur
+  generation. We chased that down: it's an interaction effect, see below.
 </p>
 
-<h3>2. KA Code [Opus 4.6] closes the "code-editing" gap the paper said it couldn't</h3>
+<h3>2. Why Centaur with Opus 4.7 underperforms: a composition pathology</h3>
+<p>
+  Centaur 4.7 is the only Centaur cell that loses to TPE (mean 0.9760, paired Wilcoxon vs Centaur 4.6
+  is p=0.027, 7/8 seeds worse than 4.6). The puzzle: <strong>Karpathy Agent (14 HPs) with the very
+  same Opus 4.7</strong> is the runner-up across the whole table at p=0.098. Same LLM, same prompt,
+  same search space, but one wins and the other loses. The difference is the CMA-ES scaffolding.
+</p>
+<p>
+  We reconstructed which trials were LLM-suggested vs CMA-suggested per seed and split the
+  failure rates:
+</p>
+<ul>
+  <li><strong>Opus 4.6</strong> LLM-suggested trials fail (OOM) at <strong>1.8%</strong>; pure-CMA trials at 25%.</li>
+  <li><strong>Opus 4.7</strong> LLM-suggested trials fail at <strong>41%</strong> overall and <strong>66-68% in seeds 5-7</strong>; pure-CMA trials at 52% overall, climbing to <strong>74-77%</strong> in the same seeds.</li>
+  <li><strong>Opus 4.8</strong> LLM-suggested trials fail at <strong>0.2%</strong>; pure-CMA trials at 16%.</li>
+</ul>
+<p>
+  Opus 4.7 is roughly 5&times; more willing than 4.6 to suggest OOM-prone configs in the pure-LLM
+  setting (10.8% fail vs 2.3% in Karpathy Agent (14 HPs)). In a Centaur shell that's amplified
+  catastrophically. Here is the loop:
+</p>
+<ol>
+  <li>CMA-ES asks the Optuna sampler for trial T; gets config X.</li>
+  <li>Centaur calls the LLM, which returns config Y (an OOM-prone Opus 4.7 suggestion). Centaur calls <code>_override_trial_params(trial, Y)</code> so Optuna's bookkeeping treats Y as if its Gaussian sampler had emitted it.</li>
+  <li>Y is evaluated, fails. Centaur reports <code>FAILURE_PENALTY=100.0</code> to the sampler.</li>
+  <li>CMA-ES updates its mean and covariance using Y (an off-distribution point) with a 100.0-loss penalty. Its Gaussian's parameters drift toward the LLM's distribution; the FAILURE_PENALTY tells it that region is bad, so it tries to back away.</li>
+  <li>But the LLM keeps re-injecting overrides in the same OOM-prone region. CMA can't escape faster than the LLM injects.</li>
+  <li>CMA-ES's pure-CMA suggestions on subsequent trials end up adjacent to the OOM region (because the Gaussian's parameters got dragged there) and themselves OOM at a 74-77% rate.</li>
+</ol>
+<p>
+  Karpathy Agent (14 HPs) doesn't have step 4: there's no sampler covariance for the LLM to poison.
+  A 10.8% LLM fail rate there just costs 10% of trial efficiency. Karpathy Agent (Code) doesn't
+  hit it either because the LLM tends to write conservative Python code rather than push numerical
+  bounds (its fail rate is 2.5% for Opus 4.7, the lowest of any 4.7 cell).
+</p>
+<p>
+  None of these 4.7 failures are infrastructure problems. The SLURM logs show every failed trial
+  is a <code>torch.OutOfMemoryError</code> from training a model that doesn't fit in 76 GB of VRAM.
+  The 24h training-time budget is fully consumed. The 0.9760 mean is a real measurement of
+  "Centaur composed with Opus 4.7" on this benchmark, not a corrupted run.
+</p>
+<p>
+  Possible mitigations (out of scope for the current paper): replace the hard-coded
+  <code>FAILURE_PENALTY=100.0</code> with a running 90th-percentile of successful val_bpb; or skip
+  <code>study.tell</code> entirely on LLM-overridden failed trials, so CMA-ES's covariance never sees
+  off-distribution samples. Both should make Centaur more robust to an LLM that explores OOM edges.
+</p>
+
+<h3>3. Karpathy Agent (Code) [Opus 4.6] is now tied with TPE, not below it</h3>
 <p>
   The paper wrote: <em>"Allowing the LLM to directly edit source code narrows the gap but does not close
-  it, even with frontier models such as Claude Opus 4.6."</em> Updated data: KA Code [Opus 4.6] mean =
-  <strong>0.9753</strong>, TPE mean = <strong>0.9755</strong>. The mean is now <em>below</em> TPE by
-  0.0002. Statistical test: paired Wilcoxon p=0.41, well inside noise. So <strong>"doesn't significantly
-  close" is still defensible; "doesn't close" was overstated</strong> at the paper's n=3.
+  it, even with frontier models such as Claude Opus 4.6."</em> Updated data at n=8: Karpathy Agent (Code)
+  [Opus 4.6] mean = <strong>0.9755</strong>, TPE mean = <strong>0.9755</strong>. The two means are
+  identical to 4 decimal places. Paired Wilcoxon p=0.53, fully inside noise. So <strong>"doesn't
+  significantly close" is still defensible; "doesn't close" was overstated</strong> at the paper's n=3.
 </p>
 
-<h3>3. Part of the closing is TPE getting better data</h3>
+<h3>4. Part of the closing is TPE getting better data</h3>
 <p>
   TPE n=3 &rarr; n=8 moved its mean from approximately 0.9760 to 0.9755. That is roughly the same
-  magnitude as the KA Code [Opus 4.6] gap closure. At n=3, paired tests on a 0.001 effect at this
-  noise level have very wide confidence intervals; the paper's headline numbers were on thin
-  statistical ice and we should have noted that more clearly. This is the most important
+  magnitude as the Karpathy Agent (Code) [Opus 4.6] gap closure. At n=3, paired tests on a 0.001
+  effect at this noise level have very wide confidence intervals; the paper's headline numbers were
+  on thin statistical ice and we should have noted that more clearly. This is the most important
   methodological lesson from the update.
 </p>
 
-<h3>4. CMA-ES alone is the worst classical method on this benchmark</h3>
+<h3>5. Karpathy Agent (14 HPs) [Opus 4.7] is the second-best row overall</h3>
 <p>
-  CMA-ES standalone: 0.9774. TPE: 0.9755. But hand CMA-ES's internal state to an LLM (Centaur with
-  Opus 4.6) and the combined system is the best of everything tested. The hybrid's lift is not
-  "the LLM rescues a bad classical method" &mdash; it's that exposing the CMA-ES internal state to
-  the LLM gives the LLM a foothold that pure-LLM agents and pure-CMA-ES alone do not have.
+  Pure LLM-driven, no CMA scaffolding, no code-editing freedom. Mean 0.9741 with std 0.0027 at n=8,
+  paired Wilcoxon vs TPE one-sided p=0.098. This is the strongest pure-LLM result we have so far
+  on this benchmark, and it comes from the very model that gets crushed inside Centaur. The
+  contrast strongly suggests Opus 4.7 is a capable HP-proposal model, and the Centaur shell is
+  what holds it back.
+</p>
+
+<h3>6. CMA-ES alone is not the worst classical method (SMAC and Random are worse)</h3>
+<p>
+  Pure CMA-ES: 0.9776. TPE: 0.9755. SMAC: 0.9816. Random: 0.9869. Among the classical baselines,
+  TPE is by far the strongest at this budget; CMA-ES is mid-pack; SMAC and Random are not
+  competitive. But hand CMA-ES's internal state to a frontier LLM (Centaur with Opus 4.6) and the
+  combined system is the best of everything tested. The hybrid's lift is not "the LLM rescues a
+  bad classical method": it's that exposing the CMA-ES internal state to the LLM gives the LLM a
+  foothold that pure-LLM agents (Karpathy Agent 14 HPs) and pure CMA-ES alone do not have. When
+  that foothold goes wrong (Centaur 4.7), the same scaffolding becomes a liability.
 </p>
 
 <h2>What we cannot claim yet</h2>
 <ul>
-  <li><strong>No GPT-5 in the comparison.</strong> OpenAI's flagship is conspicuously absent. Adding GPT-5 is the next item on the queue; results will land in the live tracker as they complete.</li>
+  <li><strong>No GPT-5 in the comparison.</strong> OpenAI's flagship is still absent. Adding GPT-5 is on the queue; results will land in the live tracker as they complete.</li>
+  <li><strong>No Claude Fable 5.</strong> Released 2026-06-09. We have not run it yet on cost grounds (~2&times; Opus 4.8 list price). Expect it in the tracker eventually.</li>
   <li><strong>One task.</strong> Climbmix-400B language modeling is one downstream. We have not tested whether the Centaur-Opus-4.6 effect carries to other tasks.</li>
   <li><strong>n=8 is still small.</strong> The Wilcoxon p-value at n=8 sits at 0.055; with additional seeds it will move and we cannot predict the direction.</li>
-  <li><strong>We do not have a mechanistic explanation for why Opus 4.6 + Centaur outperforms the other configurations.</strong></li>
+  <li><strong>Karpathy Agent (Code) at Opus 4.8 and Sonnet 4.6 are at n=5</strong>, not n=8. Those rows have wider confidence intervals than the others.</li>
+  <li><strong>We do not know what triggers the Opus 4.7 mode collapse only on seeds 5-7.</strong> The CMA-ES sampler is seeded; seeds 5-7 happen to land Opus 4.7's first LLM prompts in a region of the search space where the model latches onto OOM-edge configs. The same seeds with Opus 4.6 / 4.8 produce normal trajectories. We do not have an explanation for the seed sensitivity, only the downstream loop.</li>
 </ul>
 
 <h2>The live tracker</h2>
@@ -285,18 +355,19 @@
 </p>
 <p>Four sections:</p>
 <ul>
-  <li><strong>A. Convergence.</strong> All method &times; generation cells, val_bpb vs cumulative wall-time, mean &plusmn; std band. Filter by Claude generation.</li>
-  <li><strong>B. Slopegraph.</strong> Per-method progression across the Claude generations we've tested.</li>
-  <li><strong>C. Wilcoxon forest.</strong> &Delta; vs TPE with paired p-values.</li>
-  <li><strong>D. Per-generation summary cards.</strong> One card per Anthropic release; last-updated timestamp; current leader.</li>
+  <li><strong>1. Convergence.</strong> All method &times; generation cells, val_bpb vs cumulative wall-time, mean &plusmn; std band. Filter by Claude generation.</li>
+  <li><strong>2. Slopegraph.</strong> Per-method progression across the Claude generations we've tested.</li>
+  <li><strong>3. Wilcoxon forest.</strong> &Delta; vs TPE with paired p-values.</li>
+  <li><strong>4. Per-generation summary cards.</strong> One card per Anthropic release; last-updated timestamp; current leader.</li>
 </ul>
-<p>Each new Anthropic release lands here automatically once the 5-seed campaign for that release clears the 95% training-budget threshold.</p>
+<p>The overview table at the top of the tracker now includes the four classical baselines (TPE, CMA-ES, SMAC, Random) alongside the 12 LLM-driven rows. Each new Anthropic release lands automatically once its 8-seed campaign clears the 95% training-budget threshold.</p>
 
 <h2>What's next</h2>
 <ul>
   <li><strong>GPT-5.</strong> Backend scaffolding in progress; will fold into the live tracker once seed runs complete.</li>
-  <li><strong>More seeds on the lagging methods</strong> to settle the "is it Opus 4.6 specifically or just noise?" question.</li>
-  <li><strong>arXiv v2</strong> after the NeurIPS 2026 review window closes, with the updated numbers and a more cautious framing of the n=3 results in the original.</li>
+  <li><strong>Finish the n=5 cells</strong>: Karpathy Agent (Code) [Opus 4.8] and Karpathy Agent (Code) [Sonnet 4.6] both currently at n=5; seeds 5-7 are running.</li>
+  <li><strong>Mitigation patch for Centaur</strong>: change <code>FAILURE_PENALTY</code> to be less destructive to the CMA-ES covariance (running p90, or skip-tell on LLM-overridden failures). Out of scope for this paper but a likely follow-up artifact.</li>
+  <li><strong>arXiv v2</strong> with the updated numbers, the Opus 4.7 composition finding, and a more cautious framing of the n=3 results in the original.</li>
 </ul>
 
 <footer class="post-footer">
