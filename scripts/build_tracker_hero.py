@@ -561,7 +561,10 @@ def build_leader_html(min_seeds: int = 3) -> tuple[str, list[str]]:
         return ('<p class="tracker-leader" style="text-align:center;color:#888;font-style:italic">'
                 f'No method has &ge;{min_seeds} completed seeds yet.</p>'), info
 
-    candidates.sort(key=lambda c: c["mean"])
+    # Sort by mean ascending; break ties by std ascending (tighter row wins).
+    # Real case: KA Code [Opus 4.6] and TPE both round to 0.9755 but TPE has
+    # std 0.0018 vs KA Code's 0.0035, so TPE should rank ahead at the tie.
+    candidates.sort(key=lambda c: (c["mean"], c["std"]))
     winner = candidates[0]
     info.append(f"  winner: {winner['label']} @ {winner['mean']:.4f} (n={winner['n']})")
 
@@ -759,7 +762,9 @@ def build_cards_html() -> tuple[str, list[str]]:
             per_method.append({"method_key": method_key, "n": n, "mean": mean,
                                "std": std, "p_str": p_str, "rank": mean})
 
-        per_method.sort(key=lambda r: r["rank"])
+        # Sort by mean ascending; break ties by std ascending (tighter wins).
+        # std=None rows (no data) sink to the bottom alongside rank=inf.
+        per_method.sort(key=lambda r: (r["rank"], r.get("std") or float("inf")))
         rows_html: list[str] = []
         for r in per_method:
             rows_html.append(_card_row(METHOD_DISPLAY[r["method_key"]], r["n"],
